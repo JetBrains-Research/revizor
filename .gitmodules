@@ -1,0 +1,3 @@
+[submodule "code-change-miner"]
+	path = code-change-miner
+	url = https://github.com/JetBrains-Research/code-change-miner.git
