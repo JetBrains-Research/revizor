@@ -1,9 +1,9 @@
 from changegraph.models import ChangeGraph, ChangeNode
-from research.loaders import ChangeGraphLoader, PatternLoader, RepositoryLoader
+from .loaders import ChangeGraphLoader, PatternLoader, RepositoryLoader
 
-PATTERNS_OUTPUT_ROOT = '../data/output_django/patterns_django'
-CHANGE_GRAPHS_ROOT = '../data/cgs_django'
-REPOSITORIES_ROOT = '../data/repos'
+PATTERNS_OUTPUT_ROOT = '../../data/output_django/patterns_django'
+CHANGE_GRAPHS_ROOT = '../../data/cgs_django'
+REPOSITORIES_ROOT = '../../data/repos'
 
 if __name__ == '__main__':
     pattern_loader = PatternLoader(PATTERNS_OUTPUT_ROOT)
