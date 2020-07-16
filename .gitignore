@@ -1,2 +1,17 @@
+__pycache__/
+*.py[cod]
+venv/
+images/
+examples/
 .idea/
+conf/settings.json
+progress.txt
+.DS_Store
+.pytest_cache/
+storage*/
+output/patterns*/
+research/data
+*.log
+*.png
+*.dot
 *.pyc
