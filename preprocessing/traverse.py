@@ -4,8 +4,8 @@ from collections import OrderedDict
 
 import typing
 
-from changegraph.models import ChangeNode
-from pyflowgraph.models import Node
+from code_change_miner.changegraph.models import ChangeNode
+from code_change_miner.pyflowgraph.models import Node
 
 Subtree = typing.OrderedDict[AST, List[AST]]
 

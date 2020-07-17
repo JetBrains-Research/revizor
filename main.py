@@ -3,10 +3,12 @@ import pickle
 import asttokens
 
 from preprocessing.traverse import PatternSubtreesExtractor
+from preprocessing.loaders import load_pattern_by_pattern_id
 
 if __name__ == '__main__':
     with open('../data/fragments-9-32.pickle', 'rb') as f:
         pattern = pickle.load(f)
+    # pattern = load_pattern_by_pattern_id(pattern_id=32)
 
     # Load pattern's data and about certain fragment
     fragment_id = 1039447
