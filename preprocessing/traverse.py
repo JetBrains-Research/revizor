@@ -1,15 +1,13 @@
 from ast import AST, iter_child_nodes
-from typing import List, Dict
-from dataclasses import dataclass
+from typing import List
+from collections import OrderedDict
+
+import typing
 
 from changegraph.models import ChangeNode
 from pyflowgraph.models import Node
 
-
-@dataclass
-class SubtreeWithContext:
-    parent_label: AST
-    subtree: Dict[AST, List[AST]]
+Subtree = typing.OrderedDict[AST, List[AST]]
 
 
 class PatternSubtreesExtractor:
@@ -20,7 +18,7 @@ class PatternSubtreesExtractor:
                                      if node.version == Node.Version.AFTER_CHANGES]
         self._pattern_nodes_by_tokens = {(node.ast.first_token, node.ast.last_token): node
                                          for node in self._pattern_nodes_before}
-        self._pattern_subtrees: List[SubtreeWithContext] = []
+        self._pattern_subtrees: List[Subtree] = []
 
     def get_subtrees(self, root):
         self._collect_subtrees(root)
@@ -29,12 +27,12 @@ class PatternSubtreesExtractor:
     def get_changed_subtrees(self, root):
         self._collect_subtrees(root)
         changed_subtrees_with_ctx = []
-        for subtree_with_ctx in self._pattern_subtrees:
-            cg_nodes = [self._get_corresponding_cg_node(ast_node) for ast_node in subtree_with_ctx.subtree.keys()]
+        for subtree in self._pattern_subtrees:
+            cg_nodes = [self._get_corresponding_cg_node(ast_node) for ast_node in subtree.keys()]
             all_changed = all(cg_node.mapped is None or cg_node.mapped.original_label != cg_node.original_label
                               for cg_node in cg_nodes)
             if all_changed:
-                changed_subtrees_with_ctx.append(subtree_with_ctx)
+                changed_subtrees_with_ctx.append(subtree)
         return changed_subtrees_with_ctx
 
     def _get_corresponding_cg_node(self, ast_node):
@@ -47,11 +45,12 @@ class PatternSubtreesExtractor:
             cg_child_node = self._get_corresponding_cg_node(ast_child_node)
             if cg_child_node is not None:
                 if current_subtree is None:
-                    current_subtree = {ast_child_node: []}
-                    self._pattern_subtrees.append(SubtreeWithContext(parent_label=ast_current_node,
-                                                                     subtree=current_subtree))
+                    current_subtree = OrderedDict({ast_child_node: []})
+                    self._pattern_subtrees.append(current_subtree)
+                    self._collect_subtrees(ast_child_node, current_subtree)
+                    current_subtree = None
                 else:
                     current_subtree.setdefault(ast_current_node, []).append(ast_child_node)
-                self._collect_subtrees(ast_child_node, current_subtree)
+                    self._collect_subtrees(ast_child_node, current_subtree)
             else:
                 self._collect_subtrees(ast_child_node)

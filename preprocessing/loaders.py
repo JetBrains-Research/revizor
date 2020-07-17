@@ -24,6 +24,7 @@ class PatternLoader:
 
     def load_pattern_fragments_details(self, pattern_id: int):
         current_pattern_path = self.patterns_path_by_id[pattern_id]
+        print(current_pattern_path)
         details = {}
         for filename in os.listdir(current_pattern_path):
             if filename.endswith('.json'):
