@@ -1,10 +1,7 @@
-import ast
-import asttokens
 import pickle
 
 import config
 from preprocessing.loaders import PatternLoader, ChangeGraphLoader, RepositoryLoader, load_pattern_by_pattern_id
-from preprocessing.traverse import PatternSubtreesExtractor
 
 if __name__ == '__main__':
     pattern_loader = PatternLoader(config.PATTERNS_OUTPUT_ROOT)

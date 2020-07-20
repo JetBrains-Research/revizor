@@ -4,14 +4,13 @@ import asttokens
 
 from localization.run import locate_pattern
 from preprocessing.traverse import PatternSubtreesExtractor
-from localization.subtrees import SubtreeSeeker
 
 if __name__ == '__main__':
-    with open('../data/fragments-10-103.pickle', 'rb') as f:
+    with open('../data/fragments-9-32.pickle', 'rb') as f:
         pattern = pickle.load(f)
 
     # Load pattern's data and about certain fragment
-    fragment_id = 1280954
+    fragment_id = 1039447
     graphs = pattern['fragments_graphs'][fragment_id]
     old_method, new_method = pattern['old_methods'][fragment_id], pattern['new_methods'][fragment_id]
     cg = pattern['change_graphs'][fragment_id]
@@ -33,7 +32,7 @@ if __name__ == '__main__':
     subtree = extractor.get_changed_subtrees(old_method_tokenized_ast.tree)[0]
 
     # Locate in target method
-    with open('examples/103.py', 'rb') as f:
+    with open('examples/32.py', 'rb') as f:
         target_method_src = f.read()
 
     found = locate_pattern(subtree, target_method_src)

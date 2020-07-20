@@ -12,8 +12,8 @@ class PatternSubtreesExtractor:
                                       if node.version == Node.Version.BEFORE_CHANGES]
         self._pattern_nodes_after = [node for node in pattern_nodes
                                      if node.version == Node.Version.AFTER_CHANGES]
-        self._pattern_nodes_by_tokens = {(node.ast.first_token, node.ast.last_token): node
-                                         for node in self._pattern_nodes_before}
+        self._pattern_nodes_before_by_tokens = {(node.ast.first_token, node.ast.last_token): node
+                                                for node in self._pattern_nodes_before}
         self._pattern_subtrees: List[Subtree] = []
 
     def get_subtrees(self, root):
@@ -34,7 +34,7 @@ class PatternSubtreesExtractor:
     def _get_corresponding_cg_node(self, ast_node):
         if not hasattr(ast_node, 'first_token') or not hasattr(ast_node, 'last_token'):
             return None
-        return self._pattern_nodes_by_tokens.get((ast_node.first_token, ast_node.last_token))
+        return self._pattern_nodes_before_by_tokens.get((ast_node.first_token, ast_node.last_token))
 
     def _collect_subtrees(self, ast_current_node, current_subtree=None):
         for ast_child_node in iter_child_nodes(ast_current_node):
