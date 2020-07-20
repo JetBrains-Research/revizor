@@ -47,20 +47,18 @@ class PatternLoader:
 class ChangeGraphLoader:
     def __init__(self, cgs_root):
         self.cgs_root = cgs_root
-        self.cgs = []
+
+    def load_change_graph(self, repo_url, commit_hash, old_file_path, old_method_full_name):
         for file in os.listdir(self.cgs_root):
             with open(os.path.join(self.cgs_root, file), "rb") as pickle_file:
                 graphs = pickle.load(pickle_file)
             for graph in graphs:
-                self.cgs.append(pickle.loads(graph))
-
-    def load_change_graph(self, repo_url, commit_hash, old_file_path, old_method_full_name):
-        for cg in self.cgs:
-            if (cg.repo_info.repo_url == repo_url
-                    and cg.repo_info.commit_hash == commit_hash
-                    and cg.repo_info.old_file_path == old_file_path
-                    and cg.repo_info.old_method.full_name == old_method_full_name):
-                return cg
+                cg = pickle.loads(graph)
+                if (cg.repo_info.repo_url == repo_url
+                        and cg.repo_info.commit_hash == commit_hash
+                        and cg.repo_info.old_file_path == old_file_path
+                        and cg.repo_info.old_method.full_name == old_method_full_name):
+                    return cg
         raise FileNotFoundError
 
 

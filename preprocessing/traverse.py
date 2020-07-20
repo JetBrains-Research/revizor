@@ -1,13 +1,9 @@
-from ast import AST, iter_child_nodes
+from ast import iter_child_nodes
 from typing import List
-from collections import OrderedDict
-
-import typing
 
 from code_change_miner.changegraph.models import ChangeNode
 from code_change_miner.pyflowgraph.models import Node
-
-Subtree = typing.OrderedDict[AST, List[AST]]
+from models import Subtree
 
 
 class PatternSubtreesExtractor:
@@ -45,7 +41,7 @@ class PatternSubtreesExtractor:
             cg_child_node = self._get_corresponding_cg_node(ast_child_node)
             if cg_child_node is not None:
                 if current_subtree is None:
-                    current_subtree = OrderedDict({ast_child_node: []})
+                    current_subtree = Subtree({ast_child_node: []})
                     self._pattern_subtrees.append(current_subtree)
                     self._collect_subtrees(ast_child_node, current_subtree)
                     current_subtree = None
