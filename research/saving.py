@@ -1,0 +1,25 @@
+import ast
+import asttokens
+import pickle
+
+import config
+from preprocessing.loaders import PatternLoader, ChangeGraphLoader, RepositoryLoader, load_pattern_by_pattern_id
+from preprocessing.traverse import PatternSubtreesExtractor
+
+if __name__ == '__main__':
+    pattern_loader = PatternLoader(config.PATTERNS_OUTPUT_ROOT)
+    cg_loader = ChangeGraphLoader(config.CHANGE_GRAPHS_ROOT)
+    repo_loader = RepositoryLoader(config.REPOSITORIES_ROOT)
+
+    for pattern_id in range(1, 549):
+        try:
+            print(f'Start pattern {pattern_id}')
+            pattern = load_pattern_by_pattern_id(pattern_id)
+            with open(f'../data/patterns_django/full_pattern_{pattern_id}.pickle', 'wb') as file:
+                pickle.dump(pattern, file)
+            print(f'Saved pattern {pattern_id}')
+        except Exception as e:
+            print(f'Failed pattern {pattern_id}')
+            print(e)
+            continue
+

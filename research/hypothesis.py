@@ -55,6 +55,7 @@ if __name__ == '__main__':
 
             print(f'Checked pattern {pattern_id}, found {len(subtrees)} subtrees')
             print(res)
-        except:
+        except Exception as e:
             print(f'Failed pattern {pattern_id}')
+            print(e)
             continue
