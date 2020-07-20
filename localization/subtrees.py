@@ -1,22 +1,32 @@
+import ast
 from _ast import AST
 from ast import iter_child_nodes
 from typing import Dict, List, Tuple, Optional, TypeVar
+
+import asttokens
 
 from models import Subtree
 
 
 class SubtreeSeeker:
-    def __init__(self, subtree: Subtree):
-        self.subtree = subtree
+    def __init__(self, target_method_path):
+        with open(target_method_path, 'rb') as file:
+            target_method_src = file.read()
+        target_method_ast = ast.parse(target_method_src, mode='exec')
+        self.target_method_tokenized_ast = asttokens.ASTTokens(target_method_src, tree=target_method_ast)
 
-    def find_ast_subtree(self, target_node: AST, pattern_node: AST) -> Optional[Dict[AST, AST]]:
+    def find_isomorphic_subtree(self, pattern_tree: Subtree) -> Optional[Dict[AST, AST]]:
+        self.subtree = pattern_tree
+        return self._find_ast_subtree(self.target_method_tokenized_ast.tree, pattern_tree.root)
+
+    def _find_ast_subtree(self, target_node: AST, pattern_node: AST) -> Optional[Dict[AST, AST]]:
         matched_subtree_nodes = self._match_subtree_from_root(pattern_tree_root=pattern_node,
                                                               target_tree_root=target_node)
         if matched_subtree_nodes is not None:
             return matched_subtree_nodes
         else:
             for child_node in iter_child_nodes(target_node):
-                found_subtree_nodes = self.find_ast_subtree(child_node, pattern_node)
+                found_subtree_nodes = self._find_ast_subtree(child_node, pattern_node)
                 if found_subtree_nodes is not None:
                     return found_subtree_nodes
             return None

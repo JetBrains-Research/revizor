@@ -1,16 +1,19 @@
 import ast
+import os
 import pickle
 import asttokens
 
-from localization.run import locate_pattern
+import config
+from localization.run import locate_pattern_by_subtree, locate_pattern_by_subgraph
+from preprocessing.loaders import PatternLoader
 from preprocessing.traverse import PatternSubtreesExtractor
 
 if __name__ == '__main__':
-    with open('../data/fragments-9-32.pickle', 'rb') as f:
+    with open('../data/fragments-10-103.pickle', 'rb') as f:
         pattern = pickle.load(f)
 
     # Load pattern's data and about certain fragment
-    fragment_id = 1039447
+    fragment_id = 1280953
     graphs = pattern['fragments_graphs'][fragment_id]
     old_method, new_method = pattern['old_methods'][fragment_id], pattern['new_methods'][fragment_id]
     cg = pattern['change_graphs'][fragment_id]
@@ -32,9 +35,20 @@ if __name__ == '__main__':
     subtree = extractor.get_changed_subtrees(old_method_tokenized_ast.tree)[0]
 
     # Locate in target method
-    with open('examples/32.py', 'rb') as f:
-        target_method_src = f.read()
+    locate_pattern_by_subtree([subtree], 'examples/103.py')
 
-    found = locate_pattern(subtree, target_method_src)
+    # Locate using subgraphs
+    pattern_loader = PatternLoader(config.PATTERNS_OUTPUT_ROOT)
+    patterns_graphs_paths = []
+    for pattern_id in range(1, 549):
+        current_pattern_path = pattern_loader.patterns_path_by_id.get(pattern_id, None)
+        if current_pattern_path is None:
+            continue
+        for filename in os.listdir(current_pattern_path):
+            if filename.startswith('fragment') and filename.endswith('.dot'):
+                dot_graph_path = os.path.join(current_pattern_path, filename)
+                patterns_graphs_paths.append(dot_graph_path)
+                break
+    locate_pattern_by_subgraph(patterns_graphs_paths, 'examples/103.py')
 
     print('Done')
