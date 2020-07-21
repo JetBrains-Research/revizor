@@ -6,14 +6,13 @@ from preprocessing.loaders import PatternLoader, ChangeGraphLoader, RepositoryLo
 from preprocessing.traverse import PatternSubtreesExtractor
 
 if __name__ == '__main__':
-    """
-    Check, how many changed disjoint AST subtrees pattern graph contains in Django repo
+    """Checking how many changed disjoint AST subtrees are 
+    usually stored in the graph of each pattern in Django repo
     """
     pattern_loader = PatternLoader(config.PATTERNS_OUTPUT_ROOT)
     cg_loader = ChangeGraphLoader(config.CHANGE_GRAPHS_ROOT)
     repo_loader = RepositoryLoader(config.REPOSITORIES_ROOT)
-    res = {}
-
+    result = {}
     for pattern_id in range(1, 549):
         try:
             print(f'Start pattern {pattern_id}')
@@ -50,11 +49,12 @@ if __name__ == '__main__':
             # Extract only changed AST subtrees from pattern
             extractor = PatternSubtreesExtractor(pattern_nodes)
             subtrees = extractor.get_changed_subtrees(old_method_tokenized_ast.tree)
-            res.setdefault(len(subtrees), 0)
-            res[len(subtrees)] += 1
+            result.setdefault(len(subtrees), 0)
+            result[len(subtrees)] += 1
 
             print(f'Checked pattern {pattern_id}, found {len(subtrees)} subtrees')
-            print(res)
+            print(result)
+
         except Exception as e:
             print(f'Failed pattern {pattern_id}')
             print(e)
