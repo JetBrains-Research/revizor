@@ -2,10 +2,10 @@ import os
 
 DATA_ROOT = '/home/oleg/prog/jbr/data'
 
-MINER_OUTPUT_ROOT = os.path.join(DATA_ROOT, '/output_django/patterns_django')
+MINER_OUTPUT_ROOT = os.path.join(DATA_ROOT, 'output_django', 'patterns_django')
 CHANGE_GRAPHS_ROOT = os.path.join(DATA_ROOT, 'cgs_django')
 REPOSITORIES_ROOT = os.path.join(DATA_ROOT, 'repos')
-FULL_PATTERNS_ROOT = os.path.join(DATA_ROOT, 'patterns_django')
+FULL_PATTERNS_ROOT = os.path.join(DATA_ROOT, 'full_patterns_django')
 
 # DATA_ROOT = '/home/ubuntu/BugFinder/data'
 # GUMTREE_PYTHON_BIN = 'python'

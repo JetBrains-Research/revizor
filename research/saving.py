@@ -1,12 +1,12 @@
 import pickle
 
 import config
-from preprocessing.loaders import PatternLoader, ChangeGraphLoader, RepositoryLoader, load_full_pattern_by_pattern_id
+from preprocessing.loaders import MinerOutputLoader, ChangeGraphLoader, RepositoryLoader, load_full_pattern_by_pattern_id
 
 if __name__ == '__main__':
     """Extracting <pattern, change-graph> pairs for each pattern in Django repo
     """
-    pattern_loader = PatternLoader(config.MINER_OUTPUT_ROOT)
+    pattern_loader = MinerOutputLoader(config.MINER_OUTPUT_ROOT)
     cg_loader = ChangeGraphLoader(config.CHANGE_GRAPHS_ROOT)
     repo_loader = RepositoryLoader(config.REPOSITORIES_ROOT)
     for pattern_id in range(1, 549):

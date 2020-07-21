@@ -5,12 +5,11 @@ import asttokens
 
 import config
 from localization.run import locate_pattern_by_subtree, locate_pattern_by_subgraph
-from preprocessing.loaders import PatternLoader
+from preprocessing.loaders import load_full_pattern_by_pattern_id, MinerOutputLoader
 from preprocessing.subtrees import PatternSubtreesExtractor
 
 if __name__ == '__main__':
-    with open('../data/fragments-10-103.pickle', 'rb') as f:
-        pattern = pickle.load(f)
+    pattern = load_full_pattern_by_pattern_id(pattern_id=103)
 
     # Load pattern's data and about certain fragment
     fragment_id = 1280953
@@ -38,7 +37,7 @@ if __name__ == '__main__':
     locate_pattern_by_subtree([subtree], 'examples/103.py')
 
     # Locate using subgraphs
-    pattern_loader = PatternLoader(config.MINER_OUTPUT_ROOT)
+    pattern_loader = MinerOutputLoader(config.MINER_OUTPUT_ROOT)
     patterns_graphs_paths = pattern_loader.get_only_patterns_graphs_paths()
     locate_pattern_by_subgraph(patterns_graphs_paths, 'examples/103.py')
 

@@ -2,14 +2,14 @@ import ast
 import asttokens
 
 import config
-from preprocessing.loaders import PatternLoader, ChangeGraphLoader, RepositoryLoader
+from preprocessing.loaders import MinerOutputLoader, ChangeGraphLoader, RepositoryLoader
 from preprocessing.traverse import PatternSubtreesExtractor
 
 if __name__ == '__main__':
     """Checking how many changed disjoint AST subtrees are 
     usually stored in the graph of each pattern in Django repo
     """
-    pattern_loader = PatternLoader(config.MINER_OUTPUT_ROOT)
+    pattern_loader = MinerOutputLoader(config.MINER_OUTPUT_ROOT)
     cg_loader = ChangeGraphLoader(config.CHANGE_GRAPHS_ROOT)
     repo_loader = RepositoryLoader(config.REPOSITORIES_ROOT)
     result = {}
