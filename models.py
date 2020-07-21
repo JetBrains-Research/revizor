@@ -1,6 +1,8 @@
+from _ast import AST
 from collections import OrderedDict
 from dataclasses import dataclass
-from typing import Dict, List, Union, Mapping
+from itertools import chain
+from typing import Dict, List, Union, Mapping, Generator, Tuple
 
 import pydot
 
@@ -31,16 +33,29 @@ class Pattern:
     change_graphs: Dict[FragmentId, ChangeGraph]
     old_methods: Dict[FragmentId, Method]
     new_methods: Dict[FragmentId, Method]
-    
+
     @property
     def fragment_ids(self):
         return list(self.fragments_details.keys())
 
 
-class Subtree(OrderedDict):
+class AdjacencyList(OrderedDict):
     def __init__(self, *args, **kwargs):
-        super(Subtree, self).__init__(*args, **kwargs)
+        super(AdjacencyList, self).__init__(*args, **kwargs)
+
+    def __setitem__(self, node_from: AST, nodes_to: List[AST]):
+        super(AdjacencyList, self).__setitem__(node_from, nodes_to)
 
     @property
-    def root(self):
+    def root(self) -> AST:
         return next(iter(self.items()))[0]
+
+    @property
+    def nodes(self) -> List[AST]:
+        return list(set(self.keys()).union(set(chain(*self.values()))))
+
+    @property
+    def edges(self) -> Generator[Tuple[AST, AST], None, None]:
+        for node_from, nodes_to in self.items():
+            for node_to in nodes_to:
+                yield node_from, node_to

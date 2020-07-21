@@ -10,7 +10,7 @@ import asttokens
 import config
 from code_change_miner.changegraph.models import ChangeNode
 from code_change_miner.pyflowgraph.models import Node
-from models import Subtree
+from models import AdjacencyList
 from preprocessing.loaders import MinerOutputLoader, load_full_pattern_by_pattern_id
 
 
@@ -22,13 +22,13 @@ class PatternSubtreesExtractor:
                                      if node.version == Node.Version.AFTER_CHANGES]
         self._pattern_nodes_before_by_tokens = {(node.ast.first_token, node.ast.last_token): node
                                                 for node in self._pattern_nodes_before}
-        self._pattern_subtrees: List[Subtree] = []
+        self._pattern_subtrees: List[AdjacencyList] = []
 
-    def get_subtrees(self, ast_root: AST) -> List[Subtree]:
+    def get_subtrees(self, ast_root: AST) -> List[AdjacencyList]:
         self._collect_subtrees(ast_root)
         return self._pattern_subtrees
 
-    def get_changed_subtrees(self, ast_root: AST) -> List[Subtree]:
+    def get_changed_subtrees(self, ast_root: AST) -> List[AdjacencyList]:
         self._collect_subtrees(ast_root)
         changed_subtrees = []
         for subtree in self._pattern_subtrees:
@@ -44,12 +44,12 @@ class PatternSubtreesExtractor:
             return None
         return self._pattern_nodes_before_by_tokens.get((ast_node.first_token, ast_node.last_token))
 
-    def _collect_subtrees(self, ast_current_node: AST, current_subtree: Subtree = None):
+    def _collect_subtrees(self, ast_current_node: AST, current_subtree: AdjacencyList = None):
         for ast_child_node in iter_child_nodes(ast_current_node):
             cg_child_node = self._get_corresponding_cg_node(ast_child_node)
             if cg_child_node is not None:
                 if current_subtree is None:
-                    current_subtree = Subtree({ast_child_node: []})
+                    current_subtree = AdjacencyList({ast_child_node: []})
                     self._pattern_subtrees.append(current_subtree)
                     self._collect_subtrees(ast_child_node, current_subtree)
                     current_subtree = None
@@ -84,7 +84,14 @@ def extract_and_save_pattern_subtrees():
         extractor = PatternSubtreesExtractor(pattern_nodes)
         subtrees = extractor.get_changed_subtrees(old_method_tokenized_ast.tree)
 
-        path_to_subtrees = os.path.join(config.PATTERNS_SUBTREES_ROOT, f'subtrees_{pattern_id}_{fragment_id}.pickle')
+        pattern_size = loader.patterns_path_by_id[pattern_id].split('/')[-2]
+        path_to_subtrees = os.path.join(config.PATTERNS_SUBTREES_ROOT, str(pattern_size))
+        if not os.path.exists(path_to_subtrees):
+            os.makedirs(path_to_subtrees)
+        path_to_subtrees = os.path.join(path_to_subtrees, str(pattern_id))
+        if not os.path.exists(path_to_subtrees):
+            os.makedirs(path_to_subtrees)
+        path_to_subtrees = os.path.join(path_to_subtrees, f'fragment_{fragment_id}_subtrees.pickle')
         with open(path_to_subtrees, 'wb') as file:
             pickle.dump(subtrees, file)
         print(f'Saved subtrees for pattern {pattern_id}, fragment {fragment_id}')

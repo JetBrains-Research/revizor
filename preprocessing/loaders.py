@@ -97,6 +97,22 @@ class RepositoryLoader:
         raise FileNotFoundError
 
 
+class SubtreesLoader:
+    def __init__(self, subtrees_root):
+        self.subtrees_root = subtrees_root
+
+    def get_patterns_subtrees_paths(self) -> List[str]:
+        paths = []
+        pattern_sizes = os.listdir(self.subtrees_root)
+        for size in pattern_sizes:
+            pattern_size_root = os.path.join(self.subtrees_root, str(size))
+            for pattern_id in os.listdir(pattern_size_root):
+                pattern_id_root = os.path.join(pattern_size_root, str(pattern_id))
+                for filename in os.listdir(pattern_id_root):
+                    paths.append(os.path.join(pattern_id_root, filename))
+        return paths
+
+
 def load_full_pattern_by_pattern_id(pattern_id):
     try:
         with open(os.path.join(config.FULL_PATTERNS_ROOT, f'full_pattern_{pattern_id}.pickle'), 'rb') as file:

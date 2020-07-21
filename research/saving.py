@@ -1,7 +1,8 @@
 import pickle
 
 import config
-from preprocessing.loaders import MinerOutputLoader, ChangeGraphLoader, RepositoryLoader, load_full_pattern_by_pattern_id
+from preprocessing.loaders import MinerOutputLoader, ChangeGraphLoader, RepositoryLoader, \
+    load_full_pattern_by_pattern_id
 
 if __name__ == '__main__':
     """Extracting <pattern, change-graph> pairs for each pattern in Django repo
@@ -20,4 +21,3 @@ if __name__ == '__main__':
             print(f'Failed pattern {pattern_id}')
             print(e)
             continue
-
