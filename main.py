@@ -5,8 +5,8 @@ from preprocessing.loaders import MinerOutputLoader, SubtreesLoader
 if __name__ == '__main__':
     pattern_loader = MinerOutputLoader(config.MINER_OUTPUT_ROOT)
     patterns_graphs_paths = pattern_loader.get_only_patterns_graphs_paths()
-    locate_pattern_by_subgraph(patterns_graphs_paths, 'examples/103.py')
+    locate_pattern_by_subgraph(patterns_graphs_paths, 'tests/pattern_10_103.py')
 
-    # pattern_loader = SubtreesLoader(config.PATTERNS_SUBTREES_ROOT)
-    # patterns_subtrees_paths = pattern_loader.get_patterns_subtrees_paths()
-    # locate_pattern_by_subtree(patterns_subtrees_paths, 'examples/32.py')
+    pattern_loader = SubtreesLoader(config.PATTERNS_SUBTREES_ROOT)
+    patterns_subtrees_paths = pattern_loader.get_patterns_subtrees_paths()
+    locate_pattern_by_subtree(patterns_subtrees_paths, 'tests/pattern_10_103.py')
