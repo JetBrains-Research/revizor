@@ -1,11 +1,10 @@
 import ast
+import pickle
 from _ast import AST
 from ast import iter_child_nodes
 from typing import Dict, List, Tuple, Optional, TypeVar
 
 import asttokens
-
-from models import Subtree
 
 
 class SubtreeSeeker:
@@ -13,11 +12,13 @@ class SubtreeSeeker:
         with open(target_method_path, 'rb') as file:
             target_method_src = file.read()
         target_method_ast = ast.parse(target_method_src, mode='exec')
-        self.target_method_tokenized_ast = asttokens.ASTTokens(target_method_src, tree=target_method_ast)
+        self._target_method_tokenized_ast = asttokens.ASTTokens(target_method_src, tree=target_method_ast)
+        self.__subtree = None
 
-    def find_isomorphic_subtree(self, pattern_tree: Subtree) -> Optional[Dict[AST, AST]]:
-        self.subtree = pattern_tree
-        return self._find_ast_subtree(self.target_method_tokenized_ast.tree, pattern_tree.root)
+    def find_isomorphic_subtree(self, pattern_subtree_path: str) -> Optional[Dict[AST, AST]]:
+        with open(pattern_subtree_path, 'rb') as file:
+            self.__subtree = pickle.load(file)
+        return self._find_ast_subtree(self._target_method_tokenized_ast.tree, self.__subtree.root)
 
     def _find_ast_subtree(self, target_node: AST, pattern_node: AST) -> Optional[Dict[AST, AST]]:
         matched_subtree_nodes = self._match_subtree_from_root(pattern_tree_root=pattern_node,
@@ -48,8 +49,8 @@ class SubtreeSeeker:
             node_properties.append(node.attr)
         return tuple(node_properties)
 
-    def _are_nodes_equal(self, node_1: AST, node_2: AST) -> bool:
-        return self._get_node_properties(node_1) == self._get_node_properties(node_2)
+    def _are_nodes_equal(self, u: AST, v: AST) -> bool:
+        return self._get_node_properties(u) == self._get_node_properties(v)
 
     def _get_satisfiable_combination(self, match_constraints: Dict[AST, List[AST]]) -> Optional[List[AST]]:
         return self.__sat_helper(match_constraints=list(match_constraints.items()), combination=[], depth=0)
@@ -72,7 +73,7 @@ class SubtreeSeeker:
         if self._are_nodes_equal(pattern_tree_root, target_tree_root):
             matched_children: Dict[SubtreeSeeker.NodePropertyType, Dict[AST, List[AST]]] = {}
             matched_children_subtrees: Dict[AST, Dict[AST, AST]] = {}
-            for pattern_node_child in self.subtree.get(pattern_tree_root, []):
+            for pattern_node_child in self.__subtree.get(pattern_tree_root, []):
                 at_least_one_child_matched = False
                 for target_node_child in iter_child_nodes(target_tree_root):
                     child_matched_subtree_nodes = self._match_subtree_from_root(pattern_node_child,
