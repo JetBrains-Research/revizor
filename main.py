@@ -6,7 +6,7 @@ import asttokens
 import config
 from localization.run import locate_pattern_by_subtree, locate_pattern_by_subgraph
 from preprocessing.loaders import PatternLoader
-from preprocessing.traverse import PatternSubtreesExtractor
+from preprocessing.subtrees import PatternSubtreesExtractor
 
 if __name__ == '__main__':
     with open('../data/fragments-10-103.pickle', 'rb') as f:
@@ -38,17 +38,8 @@ if __name__ == '__main__':
     locate_pattern_by_subtree([subtree], 'examples/103.py')
 
     # Locate using subgraphs
-    pattern_loader = PatternLoader(config.PATTERNS_OUTPUT_ROOT)
-    patterns_graphs_paths = []
-    for pattern_id in range(1, 549):
-        current_pattern_path = pattern_loader.patterns_path_by_id.get(pattern_id, None)
-        if current_pattern_path is None:
-            continue
-        for filename in os.listdir(current_pattern_path):
-            if filename.startswith('fragment') and filename.endswith('.dot'):
-                dot_graph_path = os.path.join(current_pattern_path, filename)
-                patterns_graphs_paths.append(dot_graph_path)
-                break
+    pattern_loader = PatternLoader(config.MINER_OUTPUT_ROOT)
+    patterns_graphs_paths = pattern_loader.get_only_patterns_graphs_paths()
     locate_pattern_by_subgraph(patterns_graphs_paths, 'examples/103.py')
 
     print('Done')

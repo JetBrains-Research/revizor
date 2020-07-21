@@ -9,7 +9,7 @@ if __name__ == '__main__':
     """Checking how many changed disjoint AST subtrees are 
     usually stored in the graph of each pattern in Django repo
     """
-    pattern_loader = PatternLoader(config.PATTERNS_OUTPUT_ROOT)
+    pattern_loader = PatternLoader(config.MINER_OUTPUT_ROOT)
     cg_loader = ChangeGraphLoader(config.CHANGE_GRAPHS_ROOT)
     repo_loader = RepositoryLoader(config.REPOSITORIES_ROOT)
     result = {}

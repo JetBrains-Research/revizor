@@ -43,6 +43,16 @@ class PatternLoader:
                 fragment_graphs[fragment_id] = graph
         return fragment_graphs
 
+    def get_only_patterns_graphs_paths(self):
+        patterns_graphs_paths = []
+        for pattern_id, current_pattern_path in self.patterns_path_by_id.items():
+            for filename in os.listdir(current_pattern_path):
+                if filename.startswith('fragment') and filename.endswith('.dot'):
+                    dot_graph_path = os.path.join(current_pattern_path, filename)
+                    patterns_graphs_paths.append(dot_graph_path)
+                    break
+        return patterns_graphs_paths
+
 
 class ChangeGraphLoader:
     def __init__(self, cgs_root):
@@ -90,25 +100,25 @@ class RepositoryLoader:
         raise FileNotFoundError
 
 
-def load_pattern_by_pattern_id(pattern_id):
-    pattern_loader = PatternLoader(config.PATTERNS_OUTPUT_ROOT)
-    cg_loader = ChangeGraphLoader(config.CHANGE_GRAPHS_ROOT)
-    repo_loader = RepositoryLoader(config.REPOSITORIES_ROOT)
-
-    pattern = {'fragments_details': pattern_loader.load_pattern_fragments_details(pattern_id),
-               'fragments_graphs': pattern_loader.load_pattern_fragments_graphs(pattern_id),
-               'change_graphs': {},
-               'old_methods': {},
-               'new_methods': {}
-               }
-    for fragment_id, fragment_repo_info in pattern['fragments_details'].items():
-        pattern['change_graphs'][fragment_id] = cg_loader.load_change_graph(
-            repo_url=fragment_repo_info['repo']['url'],
-            commit_hash=fragment_repo_info['commit']['hash'],
-            old_file_path=fragment_repo_info['files']['old']['path'],
-            old_method_full_name=fragment_repo_info['methods']['old']['full_name'])
-        old_method, new_method = repo_loader.load_methods_mapping(fragment_repo_info)
-        pattern['old_methods'][fragment_id], pattern['new_methods'][fragment_id] = old_method, new_method
-        print(f'Loaded fragment {fragment_id} from pattern {pattern_id}')
+def load_full_pattern_by_pattern_id(pattern_id):
+    try:
+        with open(os.path.join(config.FULL_PATTERNS_ROOT, f'full_pattern_{pattern_id}'), 'rb') as file:
+            pattern = pickle.load(file)
+    except FileNotFoundError:
+        pattern_loader = PatternLoader(config.MINER_OUTPUT_ROOT)
+        cg_loader = ChangeGraphLoader(config.CHANGE_GRAPHS_ROOT)
+        repo_loader = RepositoryLoader(config.REPOSITORIES_ROOT)
+        pattern = {'fragments_details': pattern_loader.load_pattern_fragments_details(pattern_id),
+                   'fragments_graphs': pattern_loader.load_pattern_fragments_graphs(pattern_id),
+                   'change_graphs': {}, 'old_methods': {}, 'new_methods': {}}
+        for fragment_id, fragment_repo_info in pattern['fragments_details'].items():
+            pattern['change_graphs'][fragment_id] = cg_loader.load_change_graph(
+                repo_url=fragment_repo_info['repo']['url'],
+                commit_hash=fragment_repo_info['commit']['hash'],
+                old_file_path=fragment_repo_info['files']['old']['path'],
+                old_method_full_name=fragment_repo_info['methods']['old']['full_name'])
+            old_method, new_method = repo_loader.load_methods_mapping(fragment_repo_info)
+            pattern['old_methods'][fragment_id], pattern['new_methods'][fragment_id] = old_method, new_method
+            print(f'Loaded fragment {fragment_id} from pattern {pattern_id}')
 
     return pattern
