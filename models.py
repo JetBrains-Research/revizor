@@ -31,6 +31,10 @@ class Pattern:
     change_graphs: Dict[FragmentId, ChangeGraph]
     old_methods: Dict[FragmentId, Method]
     new_methods: Dict[FragmentId, Method]
+    
+    @property
+    def fragment_ids(self):
+        return list(self.fragments_details.keys())
 
 
 class Subtree(OrderedDict):

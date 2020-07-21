@@ -1,44 +1,8 @@
-import ast
-import os
-import pickle
-import asttokens
-
 import config
-from localization.run import locate_pattern_by_subtree, locate_pattern_by_subgraph
-from preprocessing.loaders import load_full_pattern_by_pattern_id, MinerOutputLoader
-from preprocessing.subtrees import PatternSubtreesExtractor
+from localization.run import locate_pattern_by_subgraph
+from preprocessing.loaders import MinerOutputLoader
 
 if __name__ == '__main__':
-    pattern = load_full_pattern_by_pattern_id(pattern_id=103)
-
-    # Load pattern's data and about certain fragment
-    fragment_id = 1280953
-    graphs = pattern['fragments_graphs'][fragment_id]
-    old_method, new_method = pattern['old_methods'][fragment_id], pattern['new_methods'][fragment_id]
-    cg = pattern['change_graphs'][fragment_id]
-
-    # Extract node_ids corresponding to pattern
-    pattern_edges = graphs[0].get_edges()
-    pattern_nodes_ids = set()
-    for e in pattern_edges:
-        pattern_nodes_ids.add(int(e.get_source()))
-        pattern_nodes_ids.add(int(e.get_destination()))
-    pattern_nodes = [node for node in cg.nodes if node.id in pattern_nodes_ids]
-
-    # Build AST of method before changes
-    old_method_ast = ast.parse(old_method.get_source(), mode='exec')
-    old_method_tokenized_ast = asttokens.ASTTokens(old_method.get_source(), tree=old_method_ast)
-
-    # Extract only changed AST subtrees from pattern
-    extractor = PatternSubtreesExtractor(pattern_nodes)
-    subtree = extractor.get_changed_subtrees(old_method_tokenized_ast.tree)[0]
-
-    # Locate in target method
-    locate_pattern_by_subtree([subtree], 'examples/103.py')
-
-    # Locate using subgraphs
     pattern_loader = MinerOutputLoader(config.MINER_OUTPUT_ROOT)
     patterns_graphs_paths = pattern_loader.get_only_patterns_graphs_paths()
     locate_pattern_by_subgraph(patterns_graphs_paths, 'examples/103.py')
-
-    print('Done')

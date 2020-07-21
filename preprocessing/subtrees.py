@@ -1,9 +1,16 @@
+import ast
+import os
+import pickle
 from ast import iter_child_nodes
 from typing import List
 
+import asttokens
+
+import config
 from code_change_miner.changegraph.models import ChangeNode
 from code_change_miner.pyflowgraph.models import Node
 from models import Subtree
+from preprocessing.loaders import MinerOutputLoader, load_full_pattern_by_pattern_id
 
 
 class PatternSubtreesExtractor:
@@ -50,3 +57,37 @@ class PatternSubtreesExtractor:
                     self._collect_subtrees(ast_child_node, current_subtree)
             else:
                 self._collect_subtrees(ast_child_node)
+
+
+def extract_and_save_pattern_subtrees():
+    loader = MinerOutputLoader(config.MINER_OUTPUT_ROOT)
+    for pattern_id in sorted(loader.patterns_path_by_id.keys()):
+        print(f'Start pattern {pattern_id}')
+        pattern = load_full_pattern_by_pattern_id(pattern_id)
+        fragment_id = pattern.fragment_ids[0]  # it doesn't matter for a pattern which fragment to choose
+        graph = pattern.fragments_graphs[fragment_id][0]  # there is only one graph for each fragment by default
+        old_method, new_method = pattern.old_methods[fragment_id], pattern.new_methods[fragment_id]
+        cg = pattern.change_graphs[fragment_id]
+
+        # Extract nodes corresponding to pattern (it helps to drop out useless dependencies)
+        pattern_edges = graph.get_edges()
+        pattern_nodes_ids = set()
+        for e in pattern_edges:
+            pattern_nodes_ids.add(int(e.get_source()))
+            pattern_nodes_ids.add(int(e.get_destination()))
+        pattern_nodes = [node for node in cg.nodes if node.id in pattern_nodes_ids]
+
+        # Extract only changed AST subtrees from pattern
+        old_method_ast = ast.parse(old_method.get_source(), mode='exec')
+        old_method_tokenized_ast = asttokens.ASTTokens(old_method.get_source(), tree=old_method_ast)
+        extractor = PatternSubtreesExtractor(pattern_nodes)
+        subtrees = extractor.get_changed_subtrees(old_method_tokenized_ast.tree)
+
+        path_to_subtrees = os.path.join(config.PATTERNS_SUBTREES_ROOT, f'subtrees_{pattern_id}_{fragment_id}.pickle')
+        with open(path_to_subtrees, 'wb') as file:
+            pickle.dump(subtrees, file)
+        print(f'Saved subtrees for pattern {pattern_id}, fragment {fragment_id}')
+
+
+if __name__ == '__main__':
+    extract_and_save_pattern_subtrees()
