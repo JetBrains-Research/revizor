@@ -57,6 +57,11 @@ class MinerOutputLoader:
                     break
         return patterns_graphs_paths
 
+    def get_pattern_graphs_paths(self, pattern_id) -> List[str]:
+        pattern_path = self.patterns_path_by_id[pattern_id]
+        return [path for path in self.get_only_patterns_graphs_paths()
+                if path.startswith(pattern_path + '/')]
+
 
 class ChangeGraphLoader:
     def __init__(self, cgs_root):

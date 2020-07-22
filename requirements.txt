@@ -2,11 +2,11 @@ pydot==1.4.1
 asttokens==2.0.3
 objgraph==3.4.1
 networkx==2.4
-graphviz==0.13.2
+graphviz~=2.40.1
 matplotlib==3.2.0
 requests==2.23.0
 stackimpact==1.2.7
 PyDriller==1.12
 dataclasses==0.7
 tqdm==4.48.0
-
+astunparse~=1.6.3
