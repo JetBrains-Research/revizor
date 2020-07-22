@@ -8,3 +8,5 @@ requests==2.23.0
 stackimpact==1.2.7
 PyDriller==1.12
 dataclasses==0.7
+tqdm==4.48.0
+

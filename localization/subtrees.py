@@ -1,5 +1,3 @@
-import ast
-import pickle
 from _ast import AST
 from ast import iter_child_nodes
 from typing import Dict, List, Tuple, Optional, TypeVar
@@ -10,28 +8,12 @@ from models import AdjacencyList
 
 
 class SubtreeSeeker:
-    def __init__(self, target_method_path):
-        with open(target_method_path, 'rb') as file:
-            target_method_src = file.read()
-        target_method_ast = ast.parse(target_method_src, mode='exec')
-        self._target_method_tokenized_ast = asttokens.ASTTokens(target_method_src, tree=target_method_ast)
+    def __init__(self, target_method__tokenized_ast: asttokens.ASTTokens):
+        self._target_method_tokenized_ast = target_method__tokenized_ast
         self.__subtree: Optional[AdjacencyList] = None
 
-    @staticmethod
-    def get_maximal_subtree(pattern_subtrees_path: str) -> AdjacencyList:
-        with open(pattern_subtrees_path, 'rb') as file:
-            subtrees: List[AdjacencyList] = pickle.load(file)
-            max_subtree_size = 0
-            max_subtree = None
-            for subtree in subtrees:
-                current_subtree_size = len(subtree.nodes)
-                if current_subtree_size > max_subtree_size:
-                    max_subtree_size = current_subtree_size
-                    max_subtree = subtree
-        return max_subtree
-
-    def find_isomorphic_subtree(self, pattern_subtrees_path: str) -> Optional[Dict[AST, AST]]:
-        self.__subtree = self.get_maximal_subtree(pattern_subtrees_path)
+    def find_isomorphic_subtree(self, pattern_subtree: AdjacencyList) -> Optional[Dict[AST, AST]]:
+        self.__subtree = pattern_subtree
         return self._find_ast_subtree(self._target_method_tokenized_ast.tree,
                                       self.__subtree.root) if self.__subtree is not None else None
 

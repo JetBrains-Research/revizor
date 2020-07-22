@@ -1,9 +1,23 @@
+from typing import List
+
 import networkx as nx
 import pydot
 
 import changegraph
 from changegraph.models import ChangeNode
+from models import AdjacencyList
 from pyflowgraph.models import ExtControlFlowGraph
+
+
+def get_maximal_subtree(subtrees: List[AdjacencyList]) -> AdjacencyList:
+    max_subtree_size = 0
+    max_subtree = None
+    for subtree in subtrees:
+        current_subtree_size = len(subtree.nodes)
+        if current_subtree_size > max_subtree_size:
+            max_subtree_size = current_subtree_size
+            max_subtree = subtree
+    return max_subtree
 
 
 def load_nx_graph_from_dot_file(dot_graph_path: str) -> nx.MultiDiGraph:
