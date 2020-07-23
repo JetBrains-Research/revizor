@@ -27,6 +27,10 @@ class MinerOutputLoader:
                     pattern_id_root = os.path.join(pattern_size_root, str(pattern_id))
                     self.patterns_path_by_id[int(pattern_id)] = pattern_id_root
 
+    @property
+    def pattern_ids(self):
+        return list(sorted(self.patterns_path_by_id.keys()))
+
     def load_pattern_fragments_details(self, pattern_id: PatternId) -> Dict[FragmentId, FragmentRepoDetails]:
         current_pattern_path = self.patterns_path_by_id[pattern_id]
         details_by_fragment_id = {}

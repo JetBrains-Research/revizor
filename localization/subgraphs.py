@@ -20,6 +20,8 @@ class SubgraphSeeker:
 
     @staticmethod
     def _are_nodes_equal(u, v):
+        if u.get('label', None) is None or v.get('label', None) is None:
+            return False
         if u['label'].startswith('var') and v['label'].startswith('var'):
             return True
         return u['label'] == v['label']
