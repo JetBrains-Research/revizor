@@ -19,9 +19,10 @@ class SubgraphSeeker:
         return matcher.subgraph_isomorphisms_iter()
 
     @staticmethod
-    def _are_nodes_equal(u, v):
-        if u.get('label', None) is None or v.get('label', None) is None:
+    def _are_nodes_equal(pattern_node, target_node):
+        if pattern_node.get('label', None) is None or target_node.get('label', None) is None:
             return False
-        if u['label'].startswith('var') and v['label'].startswith('var'):
-            return True
-        return u['label'] == v['label']
+        if pattern_node['label'].startswith('var') and target_node['label'].startswith('var'):
+            lcs = pattern_node['longest_common_var_name_suffix']
+            return lcs is not None and target_node['label'].endswith(lcs) or lcs is None
+        return pattern_node['label'] == target_node['label']

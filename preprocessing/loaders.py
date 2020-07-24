@@ -58,7 +58,6 @@ class MinerOutputLoader:
                 if filename.startswith('fragment') and filename.endswith('.dot'):
                     dot_graph_path = os.path.join(current_pattern_path, filename)
                     patterns_graphs_paths.append(dot_graph_path)
-                    break
         return patterns_graphs_paths
 
     def get_pattern_graphs_paths(self, pattern_id) -> List[str]:

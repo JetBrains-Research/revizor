@@ -1,15 +1,16 @@
 import json
 import logging
 import os
-from typing import List
+from typing import List, Dict
 
+import networkx as nx
 import pandas as pd
 from tqdm import tqdm
 
 import config
 import pyflowgraph
 from localization.subgraphs import SubgraphSeeker
-from localization.utils import load_nx_graph_from_dot_file, load_nx_graph_from_pyflowgraph
+from localization.utils import load_nx_graph_from_pyflowgraph, create_nx_graph_from_pattern
 from preprocessing.loaders import MinerOutputLoader
 from vcs.traverse import GitAnalyzer, Method
 
@@ -37,10 +38,11 @@ if __name__ == '__main__':
 
     loader = MinerOutputLoader(config.MINER_OUTPUT_ROOT)
     interesting_df = pd.read_csv(os.path.join(config.MINER_OUTPUT_ROOT, 'interesting_patterns.csv'))
-    pattern_graph_by_path = {}
+    pattern_graph_by_path: Dict[str, nx.MultiDiGraph] = {}
     for interesting_pattern_id in tqdm(interesting_df['Pattern ID'].values):
-        pattern_graph_path = loader.get_pattern_graphs_paths(interesting_pattern_id)[0]
-        pattern_graph_by_path[pattern_graph_path] = load_nx_graph_from_dot_file(pattern_graph_path)
+        path_to_pattern = loader.patterns_path_by_id[interesting_pattern_id]
+        path_to_pattern_fragments_graphs = loader.get_pattern_graphs_paths(interesting_pattern_id)
+        pattern_graph_by_path[path_to_pattern] = create_nx_graph_from_pattern(path_to_pattern_fragments_graphs)
 
     results = {}
     all_methods = get_all_python_methods(os.path.join(config.REPOSITORIES_ROOT, 'django'))
@@ -63,7 +65,7 @@ if __name__ == '__main__':
             logger.info(f'There are {len(found_subgraph_mappings)} suitable patterns:')
             for subgraph_generator, path in found_subgraph_mappings:
                 subgraph = next(subgraph_generator, None)
-                logger.info(f"  Path to pattern's graph: {path}")
+                logger.info(f"  Path to pattern: {path}")
                 logger.info(f'  Subgraph node ids mapping: {subgraph}')
                 current_result = results.setdefault(method.file_path, {}).setdefault(method.full_name, {})
                 current_result['Pattern path'] = path

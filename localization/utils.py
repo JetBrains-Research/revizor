@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import networkx as nx
 import pydot
@@ -18,6 +18,41 @@ def get_maximal_subtree(subtrees: List[AdjacencyList]) -> AdjacencyList:
             max_subtree_size = current_subtree_size
             max_subtree = subtree
     return max_subtree
+
+
+def get_longest_common_suffix(strings: List[str]) -> Optional[str]:
+    if strings is None or len(strings) == 0:
+        return None
+    minimal_len = min([len(string) for string in strings])
+    result_suffix = ''
+    for pos in range(1, minimal_len + 1):
+        current_elem = strings[0][-pos]
+        if all([string[-pos] == current_elem for string in strings]):
+            result_suffix += current_elem
+        else:
+            break
+    return None if result_suffix == '' else result_suffix[::-1]
+
+
+def create_nx_graph_from_pattern(path_to_pattern_fragments_graphs: List[str]) -> nx.MultiDiGraph:
+    var_names = {}
+    for path_to_dot_graph in path_to_pattern_fragments_graphs:
+        graph = load_nx_graph_from_dot_file(path_to_dot_graph)
+        var_node_num = 0
+        for node_id in graph.nodes:
+            label = graph.nodes[node_id]['label']
+            if label.startswith('var'):
+                var_names.setdefault(var_node_num, []).append(label)
+                var_node_num += 1
+    final_pattern_graph = load_nx_graph_from_dot_file(path_to_pattern_fragments_graphs[0])
+    var_node_num = 0
+    for node_id in final_pattern_graph.nodes:
+        label = final_pattern_graph.nodes[node_id]['label']
+        if label.startswith('var'):
+            lcs = get_longest_common_suffix(var_names[var_node_num])
+            final_pattern_graph.nodes[node_id]['longest_common_var_name_suffix'] = lcs
+            var_node_num += 1
+    return final_pattern_graph
 
 
 def load_nx_graph_from_dot_file(dot_graph_path: str) -> nx.MultiDiGraph:
