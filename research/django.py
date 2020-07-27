@@ -22,7 +22,7 @@ def get_all_python_methods(repository_root: str) -> List[Method]:
                 path_to_python_file = os.path.join(root, file)
                 with open(path_to_python_file, 'r') as f:
                     src = f.read()
-                current_methods: List[Method] = GitAnalyzer._extract_methods(path_to_python_file, src)
+                current_methods: List[Method] = GitAnalyzer._extract_methods(path_to_python_file, src.strip())
                 methods.extend(current_methods)
     return methods
 
@@ -47,29 +47,39 @@ if __name__ == '__main__':
     results = {}
     all_methods = get_all_python_methods(os.path.join(config.REPOSITORIES_ROOT, 'django'))
     for method in tqdm(all_methods):
-        pfg = pyflowgraph.build_from_source(method.get_source())
-        method_graph = NxGraphCreator.create_from_pyflowgraph(pfg)
-        seeker = SubgraphSeeker(method_graph)
-        found_subgraph_mappings = []
+        try:
+            pfg = pyflowgraph.build_from_source(method.get_source())
+            method_graph = NxGraphCreator.create_from_pyflowgraph(pfg)
+            seeker = SubgraphSeeker(method_graph)
+            found_subgraph_mappings = []
 
-        for path, pattern_graph in pattern_graph_by_path.items():
-            found = seeker.find_isomorphic_subgraphs(pattern_graph)
-            if found is not None:
-                pattern_size = len(pattern_graph.nodes)
-                found_subgraph_mappings.append((found, path))
+            for path, pattern_graph in pattern_graph_by_path.items():
+                found = seeker.find_isomorphic_subgraphs(pattern_graph)
+                if found is not None:
+                    pattern_size = len(pattern_graph.nodes)
+                    found_subgraph_mappings.append((found, path))
 
-        if found_subgraph_mappings:
+            if found_subgraph_mappings:
+                logger.info('')
+                logger.info(f'Success! For method <{method.full_name}> from file:')
+                logger.info(f'{method.file_path}')
+                logger.info(f'There are {len(found_subgraph_mappings)} suitable patterns:')
+                for subgraph_generator, pattern_path in found_subgraph_mappings:
+                    subgraph = next(subgraph_generator, None)
+                    logger.info(f"  Path to pattern: {pattern_path}")
+                    logger.info(f'  Subgraph node ids mapping: {subgraph}')
+                    current_result = {}
+                    current_result['File path'] = method.file_path
+                    current_result['Method full name'] = method.full_name
+                    current_result['Subgraphs mapped nodes'] = subgraph
+                    results.setdefault(pattern_path, []).append(current_result)
+                logger.info('')
+        except Exception as e:
             logger.info('')
-            logger.info(f'Success! For method <{method.full_name}> from file:')
+            logger.info(f'Failed method <{method.full_name}> from file:')
             logger.info(f'{method.file_path}')
-            logger.info(f'There are {len(found_subgraph_mappings)} suitable patterns:')
-            for subgraph_generator, path in found_subgraph_mappings:
-                subgraph = next(subgraph_generator, None)
-                logger.info(f"  Path to pattern: {path}")
-                logger.info(f'  Subgraph node ids mapping: {subgraph}')
-                current_result = results.setdefault(method.file_path, {}).setdefault(method.full_name, {})
-                current_result['Pattern path'] = path
-                current_result['Subgraphs mapped nodes'] = subgraph
+            logger.info(f'{method.get_source()}')
+            logger.info(str(e))
             logger.info('')
 
     with open('results.json', 'w') as f:
