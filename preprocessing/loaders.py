@@ -204,3 +204,17 @@ def load_full_pattern_by_pattern_id(pattern_id):
         pattern = Pattern(fragments_details, fragments_graphs, change_graphs, old_methods, new_methods)
 
     return pattern
+
+
+def save_full_patterns(pattern_ids: List[int]):
+    for pattern_id in pattern_ids:
+        try:
+            print(f'Start pattern {pattern_id}')
+            pattern = load_full_pattern_by_pattern_id(pattern_id)
+            with open(os.path.join(config.FULL_PATTERNS_ROOT, f'full_pattern_{pattern_id}.pickle'), 'wb') as file:
+                pickle.dump(pattern, file)
+            print(f'Saved pattern {pattern_id}')
+        except Exception as e:
+            print(f'Failed pattern {pattern_id}')
+            print(e)
+            continue
