@@ -3,14 +3,19 @@ import pickle
 import json
 from typing import Dict, List, Tuple
 
+import networkx as nx
 import pydot
+
+import changegraph
 import config
 
 from pydriller import RepositoryMining
 
-from changegraph.models import ChangeGraph
+from changegraph.models import ChangeGraph, ChangeNode
 from code_change_miner.vcs.traverse import GitAnalyzer, Method
-from models import PatternId, FragmentId, FragmentRepoDetails, Pattern
+from common.models import PatternId, FragmentId, FragmentRepoDetails, Pattern
+from common.utils import get_longest_common_suffix
+from pyflowgraph.models import ExtControlFlowGraph
 
 
 class MinerOutputLoader:
@@ -51,7 +56,7 @@ class MinerOutputLoader:
                 fragment_graphs[fragment_id] = graphs
         return fragment_graphs
 
-    def get_only_patterns_graphs_paths(self) -> List[str]:
+    def get_all_pattern_fragments_graphs_paths(self) -> List[str]:
         patterns_graphs_paths = []
         for pattern_id, current_pattern_path in self.patterns_path_by_id.items():
             for filename in os.listdir(current_pattern_path):
@@ -60,9 +65,9 @@ class MinerOutputLoader:
                     patterns_graphs_paths.append(dot_graph_path)
         return patterns_graphs_paths
 
-    def get_pattern_graphs_paths(self, pattern_id) -> List[str]:
+    def get_pattern_fragments_graphs_paths(self, pattern_id) -> List[str]:
         pattern_path = self.patterns_path_by_id[pattern_id]
-        return [path for path in self.get_only_patterns_graphs_paths()
+        return [path for path in self.get_all_pattern_fragments_graphs_paths()
                 if path.startswith(pattern_path + '/')]
 
 
@@ -119,6 +124,55 @@ class SubtreesLoader:
                 for filename in os.listdir(pattern_id_root):
                     paths.append(os.path.join(pattern_id_root, filename))
         return paths
+
+
+class NxGraphCreator:
+    @staticmethod
+    def create_from_pattern_fragments(path_to_pattern_fragments_graphs: List[str]) -> nx.MultiDiGraph:
+        var_names = {}
+        for path_to_dot_graph in path_to_pattern_fragments_graphs:
+            graph = NxGraphCreator.create_from_dot_file(path_to_dot_graph)
+            var_node_num = 0
+            for node_id in graph.nodes:
+                label = graph.nodes[node_id]['label']
+                if label.startswith('var'):
+                    var_names.setdefault(var_node_num, []).append(label)
+                    var_node_num += 1
+        final_pattern_graph = NxGraphCreator.create_from_dot_file(path_to_pattern_fragments_graphs[0])
+        var_node_num = 0
+        for node_id in final_pattern_graph.nodes:
+            label = final_pattern_graph.nodes[node_id]['label']
+            if label.startswith('var'):
+                lcs = get_longest_common_suffix(var_names[var_node_num])
+                final_pattern_graph.nodes[node_id]['longest_common_var_name_suffix'] = lcs
+                var_node_num += 1
+        return final_pattern_graph
+
+    @staticmethod
+    def create_from_dot_file(dot_graph_path: str) -> nx.MultiDiGraph:
+        dot_pattern_graph = pydot.graph_from_dot_file(dot_graph_path)[0]
+        for subgraph in dot_pattern_graph.get_subgraphs():
+            for subgraph_node in subgraph.get_nodes():
+                if subgraph_node.get_name() == 'graph':
+                    continue
+                dot_pattern_graph.add_node(subgraph_node)
+        for node in dot_pattern_graph.get_nodes():
+            label = node.get_attributes()['label'].strip('\"')
+            label_without_id = label.split('[')[0]
+            node.get_attributes()['label'] = label_without_id
+        return nx.drawing.nx_pydot.from_pydot(dot_pattern_graph)
+
+    @staticmethod
+    def create_from_pyflowgraph(target_flow_graph: ExtControlFlowGraph) -> nx.MultiDiGraph:
+        target_graph = nx.MultiDiGraph()
+        for node_from in target_flow_graph.nodes:
+            cg_node_from = ChangeNode.create_from_fg_node(node_from)
+            cg_label, _ = changegraph.visual._get_label_and_attrs(cg_node_from)
+            cg_label_without_id = cg_label.split('[')[0]
+            target_graph.add_node(node_from.statement_num, label=cg_label_without_id)
+            for out_edge in node_from.out_edges:
+                target_graph.add_edge(node_from.statement_num, out_edge.node_to.statement_num)
+        return target_graph
 
 
 def load_full_pattern_by_pattern_id(pattern_id):

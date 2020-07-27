@@ -1,19 +1,22 @@
 import ast
+from typing import List
 
 from astunparse import unparse
 
 import pyflowgraph
 from localization.subgraphs import SubgraphSeeker
-from localization.utils import load_nx_graph_from_pyflowgraph, load_nx_graph_from_dot_file
+from preprocessing.loaders import NxGraphCreator
 from transforming import PatternBasedTransformer
 
 
-def transform_method_using_pattern(target_method_path: str, fixed_method_path: str, target_pattern_graph_path: str):
+def transform_method_using_pattern(target_method_path: str,
+                                   fixed_method_path: str,
+                                   target_pattern_fragments_graphs_paths: List[str]):
     # Create and load graphs
     pfg = pyflowgraph.build_from_file(target_method_path)
     # pyflowgraph.visual.export_graph_image(pfg, 'temp_pfg.dot')
-    target_method_graph = load_nx_graph_from_pyflowgraph(pfg)
-    pattern_graph = load_nx_graph_from_dot_file(target_pattern_graph_path)
+    target_method_graph = NxGraphCreator.create_from_pyflowgraph(pfg)
+    pattern_graph = NxGraphCreator.create_from_pattern_fragments(target_pattern_fragments_graphs_paths)
 
     # Extract isomorphic subgraph
     seeker = SubgraphSeeker(target_method_graph)
@@ -41,10 +44,9 @@ def transform_method_using_pattern(target_method_path: str, fixed_method_path: s
                         break
 
         # Change mapped nodes using NodeTransformer
-        changed_ast = ast.fix_missing_locations(
-            PatternBasedTransformer(target_label_by_node).visit(pfg.entry_node.ast))
+        changed_ast = PatternBasedTransformer(target_label_by_node).visit(pfg.entry_node.ast)
 
         # Save changed AST
-        target_src = unparse(changed_ast)[2:]
+        target_src = unparse(ast.fix_missing_locations(changed_ast))[2:]
         with open(fixed_method_path, 'w') as file:
             file.write(target_src)

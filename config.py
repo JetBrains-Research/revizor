@@ -8,7 +8,6 @@ REPOSITORIES_ROOT = os.path.join(DATA_ROOT, 'repos')
 FULL_PATTERNS_ROOT = os.path.join(DATA_ROOT, 'full_patterns_django')
 PATTERNS_SUBTREES_ROOT = os.path.join(DATA_ROOT, 'subtrees_django')
 
-# DATA_ROOT = '/home/ubuntu/BugFinder/data'
 # GUMTREE_PYTHON_BIN = 'python'
 # GUMTREE_PYPARSER_PATH = '/home/oleg/prog/jbr/bug-fix-suggestion/code-change-miner/external/pyparser.py'
 # JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64'

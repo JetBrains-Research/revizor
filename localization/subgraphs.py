@@ -19,7 +19,7 @@ class SubgraphSeeker:
         return matcher.subgraph_isomorphisms_iter()
 
     @staticmethod
-    def _are_nodes_equal(pattern_node, target_node):
+    def _are_nodes_equal(target_node, pattern_node):
         if pattern_node.get('label', None) is None or target_node.get('label', None) is None:
             return False
         if pattern_node['label'].startswith('var') and target_node['label'].startswith('var'):

@@ -10,8 +10,7 @@ from tqdm import tqdm
 import config
 import pyflowgraph
 from localization.subgraphs import SubgraphSeeker
-from localization.utils import load_nx_graph_from_pyflowgraph, create_nx_graph_from_pattern
-from preprocessing.loaders import MinerOutputLoader
+from preprocessing.loaders import MinerOutputLoader, NxGraphCreator
 from vcs.traverse import GitAnalyzer, Method
 
 
@@ -41,14 +40,15 @@ if __name__ == '__main__':
     pattern_graph_by_path: Dict[str, nx.MultiDiGraph] = {}
     for interesting_pattern_id in tqdm(interesting_df['Pattern ID'].values):
         path_to_pattern = loader.patterns_path_by_id[interesting_pattern_id]
-        path_to_pattern_fragments_graphs = loader.get_pattern_graphs_paths(interesting_pattern_id)
-        pattern_graph_by_path[path_to_pattern] = create_nx_graph_from_pattern(path_to_pattern_fragments_graphs)
+        path_to_pattern_fragments_graphs = loader.get_pattern_fragments_graphs_paths(interesting_pattern_id)
+        pattern_graph_by_path[path_to_pattern] = \
+            NxGraphCreator.create_from_pattern_fragments(path_to_pattern_fragments_graphs)
 
     results = {}
     all_methods = get_all_python_methods(os.path.join(config.REPOSITORIES_ROOT, 'django'))
     for method in tqdm(all_methods):
         pfg = pyflowgraph.build_from_source(method.get_source())
-        method_graph = load_nx_graph_from_pyflowgraph(pfg)
+        method_graph = NxGraphCreator.create_from_pyflowgraph(pfg)
         seeker = SubgraphSeeker(method_graph)
         found_subgraph_mappings = []
 

@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple, Optional, TypeVar
 
 import asttokens
 
-from models import AdjacencyList
+from common.models import AdjacencyList
 
 
 class SubtreeSeeker:

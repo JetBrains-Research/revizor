@@ -7,10 +7,11 @@ import asttokens
 from tqdm import tqdm
 
 import pyflowgraph
+from common.utils import get_maximal_subtree
 from localization.subgraphs import SubgraphSeeker
 from localization.subtrees import SubtreeSeeker
-from localization.utils import load_nx_graph_from_pyflowgraph, load_nx_graph_from_dot_file, get_maximal_subtree
-from models import AdjacencyList
+from common.models import AdjacencyList
+from preprocessing.loaders import NxGraphCreator
 
 
 def locate_pattern_by_subtree(patterns_subtrees_paths: List[str], target_method_path):
@@ -56,12 +57,12 @@ def locate_pattern_by_subtree(patterns_subtrees_paths: List[str], target_method_
 def locate_pattern_by_subgraph(patterns_graphs_paths: List[str], target_method_path):
     # Create and load corresponding graphs
     pfg = pyflowgraph.build_from_file(target_method_path)
-    target_method_graph = load_nx_graph_from_pyflowgraph(pfg)
+    target_method_graph = NxGraphCreator.create_from_pyflowgraph(pfg)
     seeker = SubgraphSeeker(target_method_graph)
     pattern_graph_by_path = {}
     print(f'Start loading patterns')
     for pattern_graph_path in tqdm(patterns_graphs_paths):
-        pattern_graph_by_path[pattern_graph_path] = load_nx_graph_from_dot_file(pattern_graph_path)
+        pattern_graph_by_path[pattern_graph_path] = NxGraphCreator.create_from_dot_file(pattern_graph_path)
     print(f'All {len(patterns_graphs_paths)} patterns are loaded\n')
 
     # Locate pattern subgraph
