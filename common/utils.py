@@ -14,9 +14,9 @@ def get_maximal_subtree(subtrees: List[AdjacencyList]) -> AdjacencyList:
     return max_subtree
 
 
-def get_longest_common_suffix(strings: List[str]) -> Optional[str]:
+def get_longest_common_suffix(strings: List[str]) -> str:
     if strings is None or len(strings) == 0:
-        return None
+        return ''
     minimal_len = min([len(string) for string in strings])
     result_suffix = ''
     for pos in range(1, minimal_len + 1):
@@ -25,4 +25,4 @@ def get_longest_common_suffix(strings: List[str]) -> Optional[str]:
             result_suffix += current_elem
         else:
             break
-    return None if result_suffix == '' else result_suffix[::-1]
+    return result_suffix[::-1]

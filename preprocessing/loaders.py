@@ -135,8 +135,9 @@ class NxGraphCreator:
             var_node_num = 0
             for node_id in graph.nodes:
                 label = graph.nodes[node_id]['label']
+                original_label = graph.nodes[node_id]['original_label']
                 if label.startswith('var'):
-                    var_names.setdefault(var_node_num, []).append(label)
+                    var_names.setdefault(var_node_num, []).append(original_label)
                     var_node_num += 1
         final_pattern_graph = NxGraphCreator.create_from_dot_file(path_to_pattern_fragments_graphs[0])
         var_node_num = 0
@@ -157,9 +158,12 @@ class NxGraphCreator:
                     continue
                 dot_pattern_graph.add_node(subgraph_node)
         for node in dot_pattern_graph.get_nodes():
-            label = node.get_attributes()['label'].strip('\"')
-            label_without_id = label.split('[')[0]
-            node.get_attributes()['label'] = label_without_id
+            cg_label = node.get_attributes()['label'].strip('\"')  # "label (original_label) [id]"
+            cg_label_without_id = cg_label.split('[')[0]
+            tmp = cg_label_without_id.split('(')
+            label, original_label = tmp[0].strip(), tmp[1].strip()[:-1]
+            node.get_attributes()['label'] = label
+            node.get_attributes()['original_label'] = original_label
         return nx.drawing.nx_pydot.from_pydot(dot_pattern_graph)
 
     @staticmethod
@@ -167,9 +171,11 @@ class NxGraphCreator:
         target_graph = nx.MultiDiGraph()
         for node_from in target_flow_graph.nodes:
             cg_node_from = ChangeNode.create_from_fg_node(node_from)
-            cg_label, _ = changegraph.visual._get_label_and_attrs(cg_node_from)
-            cg_label_without_id = cg_label.split('[')[0]
-            target_graph.add_node(node_from.statement_num, label=cg_label_without_id)
+            cg_label, _ = changegraph.visual._get_label_and_attrs(cg_node_from)  # "label (original_label) [id]"
+            cg_label_without_id = cg_label.split('[')[0].strip()
+            tmp = cg_label_without_id.split('(')
+            label, original_label = tmp[0].strip(), tmp[1].strip()[:-1]
+            target_graph.add_node(node_from.statement_num, label=label, original_label=original_label)
             for out_edge in node_from.out_edges:
                 target_graph.add_edge(node_from.statement_num, out_edge.node_to.statement_num)
         return target_graph

@@ -20,7 +20,10 @@ class SubgraphSeeker:
 
     @staticmethod
     def _are_nodes_equal(target_node, pattern_node):
-        if pattern_node.get('label', None) is None or target_node.get('label', None) is None:
+        if ('label' not in target_node
+                or 'original_label' not in target_node
+                or 'label' not in pattern_node
+                or 'original_label' not in pattern_node):
             return False
         if pattern_node['label'].startswith('var') and target_node['label'].startswith('var'):
             lcs = pattern_node.get('longest_common_var_name_suffix', None)
@@ -28,5 +31,6 @@ class SubgraphSeeker:
                 raise KeyError(
                     """Pattern's node doesn't contain 'longest_common_var_name_suffix' field. To overcome this,
                     patterns graphs should be built by NxGraphCreator.create_from_pattern_fragments() method.""")
-            return lcs is not None and target_node['label'].endswith(lcs) or lcs is None
-        return pattern_node['label'] == target_node['label']
+            return lcs is not None and target_node['original_label'].endswith(lcs) or lcs is None
+        return (pattern_node['label'] == target_node['label']
+                and pattern_node['original_label'] == target_node['original_label'])

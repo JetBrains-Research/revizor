@@ -33,9 +33,7 @@ def transform_method_using_pattern(target_method_path: str,
                     mapped_node_id = succ_node_id
                     break
             if mapped_node_id is not None:
-                # Extract target original label
-                label = pattern_graph.nodes[mapped_node_id]['label']
-                original_label = label[label.find("(") + 1:label.find(")")]
+                original_label = pattern_graph.nodes[mapped_node_id]['original_label']
 
                 # Extract AST node to change from target method
                 for fg_node in pfg.nodes:
