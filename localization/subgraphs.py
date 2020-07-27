@@ -23,6 +23,10 @@ class SubgraphSeeker:
         if pattern_node.get('label', None) is None or target_node.get('label', None) is None:
             return False
         if pattern_node['label'].startswith('var') and target_node['label'].startswith('var'):
-            lcs = pattern_node['longest_common_var_name_suffix']
+            lcs = pattern_node.get('longest_common_var_name_suffix', None)
+            if lcs is None:
+                raise KeyError(
+                    """Pattern's node doesn't contain 'longest_common_var_name_suffix' field. To overcome this,
+                    patterns graphs should be built by NxGraphCreator.create_from_pattern_fragments() method.""")
             return lcs is not None and target_node['label'].endswith(lcs) or lcs is None
         return pattern_node['label'] == target_node['label']

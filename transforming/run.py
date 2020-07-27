@@ -47,6 +47,6 @@ def transform_method_using_pattern(target_method_path: str,
         changed_ast = PatternBasedTransformer(target_label_by_node).visit(pfg.entry_node.ast)
 
         # Save changed AST
-        target_src = unparse(ast.fix_missing_locations(changed_ast))[2:]
+        target_src = unparse(ast.fix_missing_locations(changed_ast)).strip()
         with open(fixed_method_path, 'w') as file:
             file.write(target_src)
