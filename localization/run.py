@@ -1,9 +1,10 @@
 import ast
 import pickle
 from datetime import datetime
-from typing import List
+from typing import List, Dict
 
 import asttokens
+import networkx as nx
 from tqdm import tqdm
 
 import pyflowgraph
@@ -54,18 +55,9 @@ def locate_pattern_by_subtree(patterns_subtrees_paths: List[str], target_method_
     print()
 
 
-def locate_pattern_by_subgraph(patterns_graphs_paths: List[str], target_method_path):
-    # Create and load corresponding graphs
-    pfg = pyflowgraph.build_from_file(target_method_path)
-    target_method_graph = NxGraphCreator.create_from_pyflowgraph(pfg)
+def locate_pattern_by_subgraph_from_source(pattern_graph_by_path: Dict[str, nx.MultiDiGraph],
+                                           target_method_graph: nx.MultiDiGraph):
     seeker = SubgraphSeeker(target_method_graph)
-    pattern_graph_by_path = {}
-    print(f'Start loading patterns')
-    for pattern_graph_path in tqdm(patterns_graphs_paths):
-        pattern_graph_by_path[pattern_graph_path] = NxGraphCreator.create_from_dot_file(pattern_graph_path)
-    print(f'All {len(patterns_graphs_paths)} patterns are loaded\n')
-
-    # Locate pattern subgraph
     max_size = 0
     result_mappings = {}
     start_time = datetime.now()
@@ -77,8 +69,6 @@ def locate_pattern_by_subgraph(patterns_graphs_paths: List[str], target_method_p
                 max_size = pattern_size
                 result_mappings.setdefault(max_size, []).append((found, path))
     end_time = datetime.now()
-
-    # Print results
     print(f'Total time for pattern search: {end_time - start_time}')
     if result_mappings.get(max_size, None) is not None:
         print(f'There are {len(result_mappings[max_size])} suitable patterns, with maximal pattern size {max_size}:')
@@ -88,3 +78,14 @@ def locate_pattern_by_subgraph(patterns_graphs_paths: List[str], target_method_p
     else:
         print('Nothing suitable found')
     print()
+
+
+def locate_pattern_by_subgraph_from_files(patterns_graphs_paths: List[str], target_method_path):
+    pfg = pyflowgraph.build_from_file(target_method_path)
+    target_method_graph = NxGraphCreator.create_from_pyflowgraph(pfg)
+    pattern_graph_by_path = {}
+    print(f'Start loading patterns')
+    for pattern_graph_path in tqdm(patterns_graphs_paths):
+        pattern_graph_by_path[pattern_graph_path] = NxGraphCreator.create_from_dot_file(pattern_graph_path)
+    print(f'All {len(patterns_graphs_paths)} patterns are loaded\n')
+    locate_pattern_by_subgraph_from_source(pattern_graph_by_path, target_method_graph)

@@ -68,7 +68,7 @@ class MinerOutputLoader:
     def get_pattern_fragments_graphs_paths(self, pattern_id) -> List[str]:
         pattern_path = self.patterns_path_by_id[pattern_id]
         return [path for path in self.get_all_pattern_fragments_graphs_paths()
-                if path.startswith(pattern_path + '/')]
+                if path.startswith(os.path.abspath(pattern_path) + os.sep)]
 
 
 class ChangeGraphLoader:
@@ -159,7 +159,7 @@ class NxGraphCreator:
                 dot_pattern_graph.add_node(subgraph_node)
         for node in dot_pattern_graph.get_nodes():
             cg_label = node.get_attributes()['label'].strip('\"')  # "label (original_label) [id]"
-            cg_label_without_id = cg_label.split('[')[0]
+            cg_label_without_id = cg_label[:cg_label.rfind('[')].strip()
             tmp = cg_label_without_id.split('(')
             label, original_label = tmp[0].strip(), tmp[1].strip()[:-1]
             node.get_attributes()['label'] = label
@@ -172,7 +172,7 @@ class NxGraphCreator:
         for node_from in target_flow_graph.nodes:
             cg_node_from = ChangeNode.create_from_fg_node(node_from)
             cg_label, _ = changegraph.visual._get_label_and_attrs(cg_node_from)  # "label (original_label) [id]"
-            cg_label_without_id = cg_label.split('[')[0].strip()
+            cg_label_without_id = cg_label[:cg_label.rfind('[')].strip()
             tmp = cg_label_without_id.split('(')
             label, original_label = tmp[0].strip(), tmp[1].strip()[:-1]
             target_graph.add_node(node_from.statement_num, label=label, original_label=original_label)
