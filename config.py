@@ -2,7 +2,7 @@ import os
 
 DATA_ROOT = '/home/oleg/prog/jbr/data'
 
-MINER_OUTPUT_ROOT = os.path.join(DATA_ROOT, 'output_django', 'patterns_django')
+MINER_OUTPUT_ROOT = os.path.join(DATA_ROOT, 'output_all', 'patterns')
 CHANGE_GRAPHS_ROOT = os.path.join(DATA_ROOT, 'cgs_django')
 REPOSITORIES_ROOT = os.path.join(DATA_ROOT, 'repos')
 FULL_PATTERNS_ROOT = os.path.join(DATA_ROOT, 'full_patterns_django')
