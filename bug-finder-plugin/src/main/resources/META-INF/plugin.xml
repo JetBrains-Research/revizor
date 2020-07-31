@@ -16,7 +16,7 @@
                          groupBundle="BugFinderPythonBundle"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="org.jetbrains.research.BugFinderInspection"
+                         implementationClass="org.jetbrains.research.ide.BugFinderInspection"
                          displayName="BugFinder: found similar pattern"
                          shortName="BugFinder"/>
     </extensions>

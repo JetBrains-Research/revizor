@@ -1,11 +1,12 @@
-package org.jetbrains.research
+package org.jetbrains.research.ide
 
 import com.intellij.codeInspection.LocalInspectionTool
+import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.ui.DocumentAdapter
-import com.jetbrains.python.psi.PyBinaryExpression
-import com.jetbrains.python.psi.PyElementVisitor
+import org.jetbrains.research.BugFinderConfig
+import org.jetbrains.research.preprocessing.PyMethodExtractor
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.swing.*
@@ -13,10 +14,9 @@ import javax.swing.event.DocumentEvent
 import kotlin.reflect.KMutableProperty0
 
 class BugFinderInspection : LocalInspectionTool() {
-    companion object {
-        var patternsOutputPath: Path = Paths.get("/home/oleg/prog/jetbrains/data/relaunch_output")
-        var codeChangeMinerPath: Path = Paths.get("/home/oleg/prog/jetbrains/bug-finder/code_change-miner")
-        var pythonExecutablePath: Path = Paths.get("/home/oleg/miniconda3/envs/bug-finder/bin/python")
+    override fun inspectionStarted(session: LocalInspectionToolSession, isOnTheFly: Boolean) {
+        BugFinderConfig.tempDirectory.mkdirs()
+        super.inspectionStarted(session, isOnTheFly)
     }
 
     override fun createOptionsPanel(): JComponent? {
@@ -36,13 +36,16 @@ class BugFinderInspection : LocalInspectionTool() {
         }
 
         val labelEnterPatternsOutputPath = JLabel("Enter path to code-change-miner output directory:")
-        val textFieldPatternsOutputPath = createTextFieldBoundToPathProperty(Companion::patternsOutputPath)
+        val textFieldPatternsOutputPath =
+            createTextFieldBoundToPathProperty(BugFinderConfig.Companion::patternsOutputPath)
 
         val labelCodeChangeMinerPath = JLabel("Enter path to code-change-miner package:")
-        val textFieldCodeChangeMinerPath = createTextFieldBoundToPathProperty(Companion::codeChangeMinerPath)
+        val textFieldCodeChangeMinerPath =
+            createTextFieldBoundToPathProperty(BugFinderConfig.Companion::codeChangeMinerPath)
 
         val labelPythonExecutablePath = JLabel("Enter path to python executable:")
-        val textFieldPythonExecutablePath = createTextFieldBoundToPathProperty(Companion::pythonExecutablePath)
+        val textFieldPythonExecutablePath =
+            createTextFieldBoundToPathProperty(BugFinderConfig.Companion::pythonExecutablePath)
 
         with(panel) {
             add(labelEnterPatternsOutputPath)
@@ -56,13 +59,10 @@ class BugFinderInspection : LocalInspectionTool() {
     }
 
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
-        return object : PyElementVisitor() {
-            override fun visitPyBinaryExpression(node: PyBinaryExpression?) {
-                super.visitPyBinaryExpression(node)
-                if (node != null) {
-                    holder.registerProblem(node.originalElement, "ALERT")
-                }
-            }
+        return if (!isOnTheFly) {
+            PyMethodExtractor(holder)
+        } else {
+            super.buildVisitor(holder, isOnTheFly)
         }
     }
 
