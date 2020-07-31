@@ -1,19 +1,24 @@
 <idea-plugin>
     <id>org.jetbrains.research.bug-finder-plugin</id>
-    <name>Plugin display name here</name>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <name>Bug Finder</name>
+    <vendor>JetBrains Research</vendor>
 
     <description><![CDATA[
-    Enter short description for your plugin here.<br>
-    <em>most HTML tags may be used</em>
+        Data driven bug fix suggestion based on popular Python code change patterns
     ]]></description>
 
-    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-         on how to target different products -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.python</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
+        <localInspection language="Python"
+                         groupPath="Python"
+                         groupBundle="BugFinderPythonBundle"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="org.jetbrains.research.BugFinderInspection"
+                         displayName="BugFinder: found similar pattern"
+                         shortName="BugFinder"/>
     </extensions>
 
     <actions>
