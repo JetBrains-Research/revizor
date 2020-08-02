@@ -5,7 +5,7 @@ import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.ui.DocumentAdapter
-import org.jetbrains.research.BugFinderConfig
+import org.jetbrains.research.common.Config
 import org.jetbrains.research.preprocessing.PyMethodExtractor
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -14,11 +14,6 @@ import javax.swing.event.DocumentEvent
 import kotlin.reflect.KMutableProperty0
 
 class BugFinderInspection : LocalInspectionTool() {
-    override fun inspectionStarted(session: LocalInspectionToolSession, isOnTheFly: Boolean) {
-        BugFinderConfig.tempDirectory.mkdirs()
-        super.inspectionStarted(session, isOnTheFly)
-    }
-
     override fun createOptionsPanel(): JComponent? {
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
@@ -37,15 +32,15 @@ class BugFinderInspection : LocalInspectionTool() {
 
         val labelEnterPatternsOutputPath = JLabel("Enter path to code-change-miner output directory:")
         val textFieldPatternsOutputPath =
-            createTextFieldBoundToPathProperty(BugFinderConfig.Companion::patternsOutputPath)
+            createTextFieldBoundToPathProperty(Config.Companion::patternsOutputPath)
 
         val labelCodeChangeMinerPath = JLabel("Enter path to code-change-miner package:")
         val textFieldCodeChangeMinerPath =
-            createTextFieldBoundToPathProperty(BugFinderConfig.Companion::codeChangeMinerPath)
+            createTextFieldBoundToPathProperty(Config.Companion::codeChangeMinerPath)
 
         val labelPythonExecutablePath = JLabel("Enter path to python executable:")
         val textFieldPythonExecutablePath =
-            createTextFieldBoundToPathProperty(BugFinderConfig.Companion::pythonExecutablePath)
+            createTextFieldBoundToPathProperty(Config.Companion::pythonExecutablePath)
 
         with(panel) {
             add(labelEnterPatternsOutputPath)

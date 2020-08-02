@@ -1,10 +1,10 @@
-package org.jetbrains.research
+package org.jetbrains.research.common
 
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class BugFinderConfig {
+class Config {
     companion object {
         var patternsOutputPath: Path = Paths.get("/home/oleg/prog/jetbrains/data/relaunch_output")
         var codeChangeMinerPath: Path = Paths.get("/home/oleg/prog/jetbrains/bug-finder/code_change_miner")

@@ -13,6 +13,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
+    implementation(group="org.jgrapht", name="jgrapht-core", version="1.5.0")
+    implementation(group="org.jgrapht", name="jgrapht-io", version="1.5.0")
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
