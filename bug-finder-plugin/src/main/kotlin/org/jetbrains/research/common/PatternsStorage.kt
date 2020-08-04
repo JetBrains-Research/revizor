@@ -1,5 +1,7 @@
 package org.jetbrains.research.common
 
+import com.intellij.openapi.components.service
+import org.jetbrains.research.ide.BugFinderConfigService
 import org.jetbrains.research.localization.loadDAGFromDotFile
 import org.jgrapht.Graph
 import org.jgrapht.alg.isomorphism.VF2SubgraphIsomorphismInspector
@@ -7,12 +9,13 @@ import org.jgrapht.graph.AsSubgraph
 import org.jgrapht.graph.DirectedAcyclicGraph
 import java.nio.file.Path
 
-object PatternsState {
+object PatternsStorage {
     private val patternGraphByPath = HashMap<Path, Graph<Vertex, MultipleEdge>>()
 
     init {
         val patternsGlobalDirs = HashSet<String>()
-        BugFinderConfig.patternsOutputPath.toFile().walk().forEach {
+        val configState = service<BugFinderConfigService>().state
+        configState.patternsOutputPath.toFile().walk().forEach {
             if (it.isFile.and(it.extension == "dot").and(it.name.startsWith("fragment"))) {
                 if (!patternsGlobalDirs.contains(it.parent)) {
                     patternsGlobalDirs.add(it.parent)

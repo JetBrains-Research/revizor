@@ -13,8 +13,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation(group="org.jgrapht", name="jgrapht-core", version="1.5.0")
-    implementation(group="org.jgrapht", name="jgrapht-io", version="1.5.0")
+    implementation(group = "org.jgrapht", name = "jgrapht-core", version = "1.5.0")
+    implementation(group = "org.jgrapht", name = "jgrapht-io", version = "1.5.0")
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
@@ -22,4 +22,8 @@ intellij {
     setPlugins("Pythonid")
     version = "2020.2"
     type = "PY"
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
 }

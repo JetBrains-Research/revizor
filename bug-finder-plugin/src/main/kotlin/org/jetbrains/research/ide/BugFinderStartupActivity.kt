@@ -1,13 +1,13 @@
 package org.jetbrains.research.ide
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.StartupActivity
-import org.jetbrains.research.common.BugFinderConfig
-import org.jetbrains.research.common.PatternsState
+import org.jetbrains.research.common.PatternsStorage
 
 class BugFinderStartupActivity : StartupActivity {
     override fun runActivity(project: Project) {
-        BugFinderConfig.tempDirectory.mkdirs()
-        PatternsState
+        service<BugFinderConfigService>().state.tempDirectory.toFile().mkdirs()
+        PatternsStorage
     }
 }

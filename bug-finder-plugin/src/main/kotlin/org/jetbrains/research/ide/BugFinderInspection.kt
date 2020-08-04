@@ -2,9 +2,9 @@ package org.jetbrains.research.ide
 
 import com.intellij.codeInspection.LocalInspectionTool
 import com.intellij.codeInspection.ProblemsHolder
+import com.intellij.openapi.components.service
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.ui.DocumentAdapter
-import org.jetbrains.research.common.BugFinderConfig
 import org.jetbrains.research.localization.PyMethodsAnalyzer
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -29,17 +29,16 @@ class BugFinderInspection : LocalInspectionTool() {
             return textField
         }
 
+        val configState = service<BugFinderConfigService>().state
         val labelEnterPatternsOutputPath = JLabel("Enter path to code-change-miner output directory:")
         val textFieldPatternsOutputPath =
-            createTextFieldBoundToPathProperty(BugFinderConfig::patternsOutputPath)
-
+            createTextFieldBoundToPathProperty(configState::patternsOutputPath)
         val labelCodeChangeMinerPath = JLabel("Enter path to code-change-miner package:")
         val textFieldCodeChangeMinerPath =
-            createTextFieldBoundToPathProperty(BugFinderConfig::codeChangeMinerPath)
-
+            createTextFieldBoundToPathProperty(configState::codeChangeMinerPath)
         val labelPythonExecutablePath = JLabel("Enter path to python executable:")
         val textFieldPythonExecutablePath =
-            createTextFieldBoundToPathProperty(BugFinderConfig::pythonExecutablePath)
+            createTextFieldBoundToPathProperty(configState::pythonExecutablePath)
 
         with(panel) {
             add(labelEnterPatternsOutputPath)
@@ -53,11 +52,7 @@ class BugFinderInspection : LocalInspectionTool() {
     }
 
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
-        return if (!isOnTheFly) {
-            PyMethodsAnalyzer(holder)
-        } else {
+        return if (!isOnTheFly) PyMethodsAnalyzer(holder) else
             super.buildVisitor(holder, isOnTheFly)
-        }
     }
-
 }

@@ -1,9 +1,10 @@
 package org.jetbrains.research.localization
 
-import org.jetbrains.research.common.BugFinderConfig
+import com.intellij.openapi.components.service
 import org.jetbrains.research.common.Edge
 import org.jetbrains.research.common.MultipleEdge
 import org.jetbrains.research.common.Vertex
+import org.jetbrains.research.ide.BugFinderConfigService
 import org.jgrapht.graph.DefaultEdge
 import org.jgrapht.graph.DirectedAcyclicGraph
 import org.jgrapht.graph.DirectedMultigraph
@@ -13,10 +14,11 @@ import java.io.File
 
 
 fun buildPyFlowGraph(inputFile: File): File {
-    val pythonExecPath = BugFinderConfig.pythonExecutablePath.toString()
-    val mainScriptPath = BugFinderConfig.codeChangeMinerPath.resolve("main.py").toString()
+    val configState = service<BugFinderConfigService>().state
+    val pythonExecPath = configState.pythonExecutablePath.toString()
+    val mainScriptPath = configState.codeChangeMinerPath.resolve("main.py").toString()
     val inputFilePath = inputFile.absolutePath
-    val outputFilePath = BugFinderConfig.tempDirectory.toPath()
+    val outputFilePath = configState.tempDirectory
         .resolve("pfg_${inputFile.nameWithoutExtension}.dot")
         .toString()
     val builder = ProcessBuilder().also {

@@ -12,17 +12,15 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="org.jetbrains.research.ide.BugFinderStartupActivity"/>
+        <applicationService serviceImplementation="org.jetbrains.research.ide.BugFinderConfigService"/>
         <localInspection language="Python"
                          groupPath="Python"
                          groupBundle="BugFinderPythonBundle"
                          enabledByDefault="true"
                          level="WARNING"
                          implementationClass="org.jetbrains.research.ide.BugFinderInspection"
-                         displayName="BugFinder: found similar pattern"
+                         displayName="BugFinder"
                          shortName="BugFinder"/>
     </extensions>
 
-    <actions>
-        <!-- Add your actions here -->
-    </actions>
 </idea-plugin>
