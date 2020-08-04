@@ -1,12 +1,11 @@
 package org.jetbrains.research.ide
 
 import com.intellij.codeInspection.LocalInspectionTool
-import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.ui.DocumentAdapter
-import org.jetbrains.research.common.Config
-import org.jetbrains.research.preprocessing.PyMethodExtractor
+import org.jetbrains.research.common.BugFinderConfig
+import org.jetbrains.research.localization.PyMethodsAnalyzer
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.swing.*
@@ -32,15 +31,15 @@ class BugFinderInspection : LocalInspectionTool() {
 
         val labelEnterPatternsOutputPath = JLabel("Enter path to code-change-miner output directory:")
         val textFieldPatternsOutputPath =
-            createTextFieldBoundToPathProperty(Config.Companion::patternsOutputPath)
+            createTextFieldBoundToPathProperty(BugFinderConfig::patternsOutputPath)
 
         val labelCodeChangeMinerPath = JLabel("Enter path to code-change-miner package:")
         val textFieldCodeChangeMinerPath =
-            createTextFieldBoundToPathProperty(Config.Companion::codeChangeMinerPath)
+            createTextFieldBoundToPathProperty(BugFinderConfig::codeChangeMinerPath)
 
         val labelPythonExecutablePath = JLabel("Enter path to python executable:")
         val textFieldPythonExecutablePath =
-            createTextFieldBoundToPathProperty(Config.Companion::pythonExecutablePath)
+            createTextFieldBoundToPathProperty(BugFinderConfig::pythonExecutablePath)
 
         with(panel) {
             add(labelEnterPatternsOutputPath)
@@ -55,7 +54,7 @@ class BugFinderInspection : LocalInspectionTool() {
 
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
         return if (!isOnTheFly) {
-            PyMethodExtractor(holder)
+            PyMethodsAnalyzer(holder)
         } else {
             super.buildVisitor(holder, isOnTheFly)
         }

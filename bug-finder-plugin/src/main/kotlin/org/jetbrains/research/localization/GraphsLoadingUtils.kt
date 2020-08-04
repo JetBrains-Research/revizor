@@ -1,5 +1,9 @@
-package org.jetbrains.research.common
+package org.jetbrains.research.localization
 
+import org.jetbrains.research.common.BugFinderConfig
+import org.jetbrains.research.common.Edge
+import org.jetbrains.research.common.MultipleEdge
+import org.jetbrains.research.common.Vertex
 import org.jgrapht.graph.DefaultEdge
 import org.jgrapht.graph.DirectedAcyclicGraph
 import org.jgrapht.graph.DirectedMultigraph
@@ -8,11 +12,11 @@ import org.jgrapht.nio.dot.DOTImporter
 import java.io.File
 
 
-fun createAndSavePyFlowGraph(inputFile: File): File {
-    val pythonExecPath = Config.pythonExecutablePath.toString()
-    val mainScriptPath = Config.codeChangeMinerPath.resolve("main.py").toString()
+fun buildPyFlowGraph(inputFile: File): File {
+    val pythonExecPath = BugFinderConfig.pythonExecutablePath.toString()
+    val mainScriptPath = BugFinderConfig.codeChangeMinerPath.resolve("main.py").toString()
     val inputFilePath = inputFile.absolutePath
-    val outputFilePath = Config.tempDirectory.toPath()
+    val outputFilePath = BugFinderConfig.tempDirectory.toPath()
         .resolve("pfg_${inputFile.nameWithoutExtension}.dot")
         .toString()
     val builder = ProcessBuilder().also {
@@ -26,7 +30,7 @@ fun createAndSavePyFlowGraph(inputFile: File): File {
     return dotFile
 }
 
-fun loadGraphFromDotFile(dotFile: File): DirectedAcyclicGraph<Vertex, MultipleEdge> {
+fun loadDAGFromDotFile(dotFile: File): DirectedAcyclicGraph<Vertex, MultipleEdge> {
     val importer = DOTImporter<String, DefaultEdge>()
     importer.setVertexFactory { id -> id }
     val vertexAttributes = HashMap<String, HashMap<String, Attribute>>()
@@ -45,11 +49,11 @@ fun loadGraphFromDotFile(dotFile: File): DirectedAcyclicGraph<Vertex, MultipleEd
         id = id,
         label = vertexAttributes[id]?.get("label")?.toString()
             ?.substringBefore('(')
-            ?.strip(),
+            ?.trim(),
         originalLabel = vertexAttributes[id]?.get("label")?.toString()
             ?.substringAfter('(')
             ?.substringBefore(')')
-            ?.strip(),
+            ?.trim(),
         color = vertexAttributes[id]?.get("color")?.toString(),
         shape = vertexAttributes[id]?.get("shape")?.toString()
     )
@@ -58,12 +62,10 @@ fun loadGraphFromDotFile(dotFile: File): DirectedAcyclicGraph<Vertex, MultipleEd
         pfg.addVertex(sourceVertex)
     }
     for (sourceVertexId in temp.vertexSet()) {
-        val childrenGroups = temp.outgoingEdgesOf(sourceVertexId)
+        val children = temp.outgoingEdgesOf(sourceVertexId)
             .map { temp.getEdgeTarget(it) }
-            .groupBy { it }
-        for (entry in childrenGroups) {
-            val targetVertexId = entry.key
-            val group = entry.value
+            .toSet()
+        for (targetVertexId in children) {
             val multipleEdge = MultipleEdge(
                 id = temp.getEdge(sourceVertexId, targetVertexId),
                 embeddedEdgeByXlabel = HashMap()
