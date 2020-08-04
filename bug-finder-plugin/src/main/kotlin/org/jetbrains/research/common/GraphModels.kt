@@ -2,13 +2,13 @@ package org.jetbrains.research.common
 
 import org.jgrapht.graph.DefaultEdge
 
-
 data class Vertex(
     val id: String,
     val label: String?,
     val originalLabel: String?,
     val color: String?,
-    val shape: String?
+    val shape: String?,
+    var longestCommonSuffix: String? = null
 )
 
 data class MultipleEdge(
@@ -25,8 +25,10 @@ data class Edge(
 
 class VertexComparator : Comparator<Vertex> {
     override fun compare(u: Vertex?, v: Vertex?): Int {
-        if (u?.label?.startsWith("var") == true && v?.label?.startsWith("var") == true)
-            return 0
+        if (u?.label?.startsWith("var") == true && v?.label?.startsWith("var") == true) {
+            val lcs = v.longestCommonSuffix ?: ""
+            return if (u.originalLabel?.endsWith(lcs) == true) 0 else 1
+        }
         if (u?.originalLabel == v?.originalLabel && u?.label == v?.label)
             return 0
         return 1

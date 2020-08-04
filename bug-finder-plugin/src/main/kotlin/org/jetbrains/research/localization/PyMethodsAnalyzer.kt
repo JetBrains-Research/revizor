@@ -4,7 +4,7 @@ import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.components.service
 import com.jetbrains.python.psi.PyElementVisitor
 import com.jetbrains.python.psi.PyFunction
-import org.jetbrains.research.common.PatternsStorage
+import org.jetbrains.research.PatternsStorage
 import org.jetbrains.research.ide.BugFinderConfigService
 
 class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor() {
