@@ -15,7 +15,7 @@
         <applicationService serviceImplementation="org.jetbrains.research.ide.BugFinderConfigService"/>
         <localInspection language="Python"
                          groupPath="Python"
-                         groupBundle="BugFinderPythonBundle"
+                         groupName="BugFinder plugin"
                          enabledByDefault="true"
                          level="WARNING"
                          implementationClass="org.jetbrains.research.ide.BugFinderInspection"
