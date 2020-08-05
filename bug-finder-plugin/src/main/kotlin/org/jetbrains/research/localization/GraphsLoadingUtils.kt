@@ -24,7 +24,11 @@ fun buildPyFlowGraph(inputFile: File): File {
     val builder = ProcessBuilder().also {
         it.command(pythonExecPath, mainScriptPath, "pfg", "-i", inputFilePath, "-o", outputFilePath)
     }
-    builder.start().also { it.waitFor() }
+    val process = builder.start()
+    val exitCode = process.waitFor()
+    if (exitCode != 0) {
+        throw UnableToBuildPyFlowGraphException
+    }
     val dotFile = File(outputFilePath)
     val dotPdfFile = File(dotFile.absolutePath.plus(".pdf"))
     dotFile.deleteOnExit()
@@ -90,3 +94,5 @@ fun loadDAGFromDotFile(dotFile: File): DirectedAcyclicGraph<Vertex, MultipleEdge
     }
     return pfg
 }
+
+object UnableToBuildPyFlowGraphException : Throwable()

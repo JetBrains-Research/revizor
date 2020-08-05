@@ -18,13 +18,17 @@ class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor()
             )
             tempFile.writeText(currentMethodSrc)
             tempFile.deleteOnExit()
-            val dotGraphFile = buildPyFlowGraph(tempFile)
-            val pfg = loadDAGFromDotFile(dotGraphFile)
-            for (foundEntry in PatternsStorage.getIsomorphicPatterns(targetGraph = pfg)) {
-                holder.registerProblem(
-                    node.originalElement,
-                    "Found relevant pattern: ${foundEntry.key}"
-                )
+            try {
+                val dotGraphFile = buildPyFlowGraph(tempFile)
+                val pfg = loadDAGFromDotFile(dotGraphFile)
+                for (foundEntry in PatternsStorage.getIsomorphicPatterns(targetGraph = pfg)) {
+                    holder.registerProblem(
+                        node.originalElement,
+                        "Found relevant pattern: ${foundEntry.key}"
+                    )
+                }
+            } catch (exception: UnableToBuildPyFlowGraphException) {
+                println("Unable to build PyFlowGraph for method <${node.name}>")
             }
         }
     }
