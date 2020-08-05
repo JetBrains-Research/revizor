@@ -52,7 +52,6 @@ class BugFinderInspection : LocalInspectionTool() {
     }
 
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
-        return if (!isOnTheFly) PyMethodsAnalyzer(holder) else
-            super.buildVisitor(holder, isOnTheFly)
+        return PyMethodsAnalyzer(holder)
     }
 }

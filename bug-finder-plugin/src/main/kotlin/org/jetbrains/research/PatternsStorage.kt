@@ -8,6 +8,7 @@ import org.jgrapht.Graph
 import org.jgrapht.alg.isomorphism.VF2SubgraphIsomorphismInspector
 import org.jgrapht.graph.AsSubgraph
 import org.jgrapht.graph.DirectedAcyclicGraph
+import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -73,6 +74,15 @@ object PatternsStorage {
                 )
             }
             unifiedPatternGraphByPatternDirPath[pathToPatternDir] = unifiedGraph
+        }
+    }
+
+    fun getDescription(pathToPatternDir: Path): String? {
+        val descriptionFile = pathToPatternDir.resolve("description.txt").toFile()
+        return if (descriptionFile.exists()) {
+            descriptionFile.readText()
+        } else {
+            null
         }
     }
 

@@ -1,5 +1,6 @@
 package org.jetbrains.research.localization
 
+import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.components.service
 import com.jetbrains.python.psi.PyElementVisitor
@@ -21,10 +22,13 @@ class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor()
             try {
                 val dotGraphFile = buildPyFlowGraph(tempFile)
                 val pfg = loadDAGFromDotFile(dotGraphFile)
-                for (foundEntry in PatternsStorage.getIsomorphicPatterns(targetGraph = pfg)) {
+                val suggestions = PatternsStorage.getIsomorphicPatterns(targetGraph = pfg).keys.toList()
+                if (suggestions.isNotEmpty()) {
                     holder.registerProblem(
-                        node.originalElement,
-                        "Found relevant pattern: ${foundEntry.key}"
+                        node.nameIdentifier ?: node,
+                        "Found relevant patterns in method <${node.name}>",
+                        ProblemHighlightType.WEAK_WARNING,
+                        PatternsSuggestions(suggestions)
                     )
                 }
             } catch (exception: UnableToBuildPyFlowGraphException) {
