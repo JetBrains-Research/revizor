@@ -8,7 +8,6 @@ import org.jgrapht.Graph
 import org.jgrapht.alg.isomorphism.VF2SubgraphIsomorphismInspector
 import org.jgrapht.graph.AsSubgraph
 import org.jgrapht.graph.DirectedAcyclicGraph
-import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -93,7 +92,7 @@ object PatternsStorage {
             val pathToPatternDir = entry.key
             val unifiedPatternGraph = entry.value
             val isomorphismInspector = VF2SubgraphIsomorphismInspector<Vertex, MultipleEdge>(
-                targetGraph, unifiedPatternGraph, VertexComparator(), MultipleEdgeComparator(), false
+                targetGraph, unifiedPatternGraph, PatternVertexComparator(), MultipleEdgeComparator(), false
             )
             if (isomorphismInspector.isomorphismExists()) {
                 suitablePatterns[pathToPatternDir] = unifiedPatternGraph

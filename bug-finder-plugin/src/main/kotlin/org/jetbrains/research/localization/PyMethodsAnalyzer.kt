@@ -7,6 +7,7 @@ import com.jetbrains.python.psi.PyElementVisitor
 import com.jetbrains.python.psi.PyFunction
 import org.jetbrains.research.PatternsStorage
 import org.jetbrains.research.ide.BugFinderConfigService
+import org.jetbrains.research.ide.PatternsSuggestions
 
 class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor() {
     override fun visitPyFunction(node: PyFunction?) {

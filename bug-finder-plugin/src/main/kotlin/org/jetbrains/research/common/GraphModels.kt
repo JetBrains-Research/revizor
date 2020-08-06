@@ -23,13 +23,15 @@ data class Edge(
     val style: String?
 )
 
-class VertexComparator : Comparator<Vertex> {
-    override fun compare(u: Vertex?, v: Vertex?): Int {
-        if (u?.label?.startsWith("var") == true && v?.label?.startsWith("var") == true) {
-            val lcs = v.longestCommonSuffix ?: ""
-            return if (u.originalLabel?.endsWith(lcs) == true) 0 else 1
+class PatternVertexComparator : Comparator<Vertex> {
+    override fun compare(fromTarget: Vertex?, fromPattern: Vertex?): Int {
+        if (fromTarget?.label?.startsWith("var") == true
+            && fromPattern?.label?.startsWith("var") == true
+        ) {
+            val lcs = fromPattern.longestCommonSuffix ?: ""
+            return if (fromTarget.originalLabel?.endsWith(lcs) == true) 0 else 1
         }
-        if (u?.originalLabel == v?.originalLabel && u?.label == v?.label)
+        if (fromTarget?.originalLabel == fromPattern?.originalLabel && fromTarget?.label == fromPattern?.label)
             return 0
         return 1
     }

@@ -1,4 +1,4 @@
-package org.jetbrains.research.localization
+package org.jetbrains.research.ide
 
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemDescriptor
@@ -24,7 +24,5 @@ class PatternsSuggestions(private val suggestions: List<Path>) : LocalQuickFix {
         }
     }
 
-    override fun getFamilyName(): String {
-        return "BugFinder: show relevant patterns"
-    }
+    override fun getFamilyName(): String = "BugFinder: show relevant patterns"
 }
