@@ -20,6 +20,11 @@ abstract class Node(
         DEF_CONTROL_BRANCH_STACK("def-stack")
     }
 
+    var unmappable: Boolean? = null
+    var syntaxTokenIntervals: String? = null
+    val defFor: MutableList<Node> = mutableListOf()
+    val defBy: MutableList<Node> = mutableListOf()
+    val defControlBranchStack: ControlBranchStack = mutableListOf()
     val inEdges = HashSet<Edge>()
     val outEdges = HashSet<Edge>()
 
@@ -62,7 +67,7 @@ abstract class Node(
 class DataNode(
     override var label: String,
     override var psi: PsiElement?,
-    var key: String? = null,
+    val key: String? = null,
     var kind: Kind = Kind.UNDEFINED
 ) : Node(label, psi) {
 
