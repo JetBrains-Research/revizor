@@ -2,7 +2,6 @@ package org.jetbrains.research.pyflowgraph
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
-import com.jetbrains.rd.framework.base.deepClonePolymorphic
 
 typealias ControlBranchStack = List<Pair<StatementNode?, Boolean>>
 
@@ -219,6 +218,15 @@ class ExtControlFlowGraph(
     val node: Node? = null
 ) {
     var entryNode: EntryNode? = null
+        set(node) {
+            if (entryNode != null) {
+                throw DuplicateEntryNodeException
+            }
+            if (node != null) {
+                entryNode = node
+                nodes.add(node)
+            }
+        }
     val nodes: MutableSet<Node> = mutableSetOf()
     val operationNodes: MutableSet<OperationNode> = mutableSetOf()
     val variableReferences: MutableSet<Node> = mutableSetOf()
@@ -297,10 +305,50 @@ class ExtControlFlowGraph(
                 }
             }
             nodes.addAll(graph.nodes)
-            statementSinks.addAll(graph.statementSinks)
             operationNodes.addAll(graph.operationNodes)
             sinks.addAll(graph.sinks)
             variableReferences.addAll(unresolvedReferences)
+            statementSinks.addAll(graph.statementSinks)
         }
     }
+
+    fun addNode(node: Node, linkType: LinkType? = null, clearSinks: Boolean = false) {
+        if (linkType != null) {
+            sinks.forEach { it.createEdge(node, linkType) }
+        }
+        if (node.javaClass.kotlin.members.any { it.name == "key" } && linkType != LinkType.DEFINITION) {
+            variableReferences.add(node)
+        }
+        if (clearSinks) {
+            sinks.clear()
+        }
+        sinks.add(node)
+        nodes.add(node)
+        if (node is StatementNode) {
+            statementSinks.forEach { it.createEdge(node, LinkType.DEPENDENCE) }
+            statementSinks.clear()
+            statementSinks.add(node)
+            if (statementSources.isEmpty()) {
+                statementSources.add(node)
+            }
+        }
+        if (node is OperationNode) {
+            operationNodes.add(node)
+        }
+    }
+
+    fun removeNode(node: Node) {
+        node.inEdges.forEach { it.nodeFrom.outEdges.remove(it) }
+        node.outEdges.forEach { it.nodeTo.inEdges.remove(it) }
+        node.inEdges.clear()
+        node.outEdges.clear()
+        nodes.remove(node)
+        operationNodes.remove(node)
+        sinks.remove(node)
+        statementSinks.remove(node)
+    }
+
+    fun findFirstNodeByLabel(label: String) = nodes.find { it.label == label }
 }
+
+object DuplicateEntryNodeException : Throwable()
