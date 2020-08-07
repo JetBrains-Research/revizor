@@ -24,7 +24,7 @@ abstract class Node(
     var syntaxTokenIntervals: String? = null
     val defFor: MutableList<Node> = mutableListOf()
     val defBy: MutableList<Node> = mutableListOf()
-    val defControlBranchStack: ControlBranchStack = mutableListOf()
+    var defControlBranchStack: ControlBranchStack = mutableListOf()
     val inEdges = HashSet<Edge>()
     val outEdges = HashSet<Edge>()
 

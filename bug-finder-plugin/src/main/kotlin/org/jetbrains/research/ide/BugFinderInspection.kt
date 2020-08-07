@@ -6,6 +6,7 @@ import com.intellij.openapi.components.service
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.ui.DocumentAdapter
 import org.jetbrains.research.localization.PyMethodsAnalyzer
+import org.jetbrains.research.pyflowgraph.DebuggerVisitor
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.swing.*
@@ -52,6 +53,6 @@ class BugFinderInspection : LocalInspectionTool() {
     }
 
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
-        return PyMethodsAnalyzer(holder)
+        return if (!isOnTheFly) DebuggerVisitor() else super.buildVisitor(holder, isOnTheFly)
     }
 }
