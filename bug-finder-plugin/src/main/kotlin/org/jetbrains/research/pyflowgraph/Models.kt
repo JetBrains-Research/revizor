@@ -3,7 +3,7 @@ package org.jetbrains.research.pyflowgraph
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
 
-typealias ControlBranchStack = List<Pair<StatementNode?, Boolean>>
+typealias ControlBranchStack = MutableList<Pair<StatementNode?, Boolean>>
 
 var statementCounter: Int = 0
 
@@ -92,7 +92,7 @@ open class StatementNode(
     controlBranchStack: ControlBranchStack?
 ) : Node(label, psi) {
 
-    open val controlBranchStack: ControlBranchStack? = controlBranchStack?.map { it.copy() }
+    open val controlBranchStack: ControlBranchStack? = controlBranchStack?.map { it.copy() }?.toMutableList()
 
     init {
         if (!(this is EntryNode) && controlBranchStack != null) {
@@ -113,23 +113,23 @@ open class StatementNode(
         outEdges.add(controlEdge)
         nodeTo.inEdges.add(controlEdge)
         if (addToStack) {
-            nodeTo.controlBranchStack.add(Pair(this, branchKind))
+            nodeTo.controlBranchStack?.add(Pair(this, branchKind))
         }
     }
 
     fun resetControls() {
         inEdges.filterIsInstance<ControlEdge>().forEach { this.removeInEdge(it) }
-        controlBranchStack = mutableListOf()
+        controlBranchStack?.clear()
     }
 }
 
-class EmptyNode(override val controlBranchStack: ControlBranchStack) :
+class EmptyNode(override var controlBranchStack: ControlBranchStack) :
     StatementNode("empty", null, controlBranchStack)
 
 class OperationNode(
     override var label: String,
     override var psi: PsiElement?,
-    override val controlBranchStack: ControlBranchStack,
+    override var controlBranchStack: ControlBranchStack,
     var key: String? = null,
     var kind: Kind = Kind.UNCLASSIFIED
 ) : StatementNode(label, psi, controlBranchStack) {
@@ -184,7 +184,7 @@ open class ControlNode(
     }
 }
 
-class EntryNode(psi: PsiElement?) : ControlNode("START", psi, emptyList())
+class EntryNode(psi: PsiElement?) : ControlNode("START", psi, mutableListOf())
 
 open class Edge(
     var label: LinkType,
@@ -218,8 +218,9 @@ enum class LinkType(repr: String) {
     DEPENDENCE("dep")
 }
 
+@ExperimentalStdlibApi
 class ExtControlFlowGraph(
-    val visitor: PsiElementVisitor,
+    val visitor: PyFlowGraphBuilder,
     val node: Node? = null
 ) {
     var entryNode: EntryNode? = null
