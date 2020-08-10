@@ -1,7 +1,6 @@
 package org.jetbrains.research.pyflowgraph
 
 import com.jetbrains.python.psi.*
-import kotlinx.coroutines.flow.merge
 
 class BuildingContext {
     private val variableKeyToDefNodes: MutableMap<String, MutableSet<DataNode>> = mutableMapOf()
@@ -43,12 +42,183 @@ class BuildingContext {
 }
 
 @ExperimentalStdlibApi
+class PyFlowGraphBuilderHelper(private val builder: PyFlowGraphBuilder) {
+
+    private fun createGraph() = builder.createGraph()
+
+    fun visitAssign(node: PyAssignmentStatement): ExtControlFlowGraph {
+        val operationNode = OperationNode(
+            OperationNode.Label.ASSIGN.name,
+            node,
+            builder.controlBranchStack,
+            OperationNode.Kind.ASSIGN.name
+        )
+        val fgs = ArrayList<ExtControlFlowGraph>()
+        val assignedNodes = ArrayList<DataNode>()
+        for (mapping in node.targetsToValuesMapping) {
+            val target = mapping.first
+            val value = mapping.second
+            val valueGraphs = prepareAssignment(target, value)
+
+            var currentAssignmentFlowGraph = createGraph()
+            var variableNodes = ArrayList<DataNode>()
+            if (valueGraphs.size > 1 && target is PySequenceExpression) {
+                val fgs = ArrayList<ExtControlFlowGraph>()
+                for ((i, element) in target.elements.withIndex()) {
+                    val (fg, currentVars) = getAssignFlowGraphWithVars(operationNode, element, valueGraphs[i])
+                    fgs.add(fg)
+                    variableNodes.addAll(currentVars)
+                }
+                currentAssignmentFlowGraph.parallelMergeGraphs(fgs)
+            } else {
+                val tmp = getAssignFlowGraphWithVars(
+                    operationNode,
+                    target,
+                    valueGraphs.first()
+                )
+                currentAssignmentFlowGraph = tmp.first
+                variableNodes = tmp.second as ArrayList<DataNode>
+            }
+            assignedNodes.addAll(variableNodes)
+            fgs.add(currentAssignmentFlowGraph)
+        }
+        val assignmentFlowGraph = createGraph()
+        assignmentFlowGraph.parallelMergeGraphs(fgs)
+        assignedNodes.forEach { builder.context().addVariable(it) }
+        return assignmentFlowGraph
+    }
+
+    private fun getAssignFlowGraphWithVars(
+        operationNode: OperationNode,
+        target: PyExpression?,
+        valueGraph: ExtControlFlowGraph
+    ): Pair<ExtControlFlowGraph, List<DataNode>> {
+        when (target) {
+            is PyTargetExpression -> {
+                val name = getNodeFullName(target)
+                val key = getNodeKey(target)
+                val assignmentFlowGraph = valueGraph
+                val varNode = DataNode(name, target, key, DataNode.Kind.VARIABLE_DECLARATION)
+
+                val sinkNums = ArrayList<Int>()
+                for (sink in assignmentFlowGraph.sinks) {
+                    sink.defFor = mutableListOf(varNode.statementNum)
+                    sinkNums.add(sink.statementNum)
+                }
+                varNode.defBy = sinkNums
+
+                assignmentFlowGraph.addNode(operationNode, LinkType.PARAMETER)
+                assignmentFlowGraph.addNode(varNode, LinkType.DEFINITION)
+                varNode.defControlBranchStack = operationNode.controlBranchStack
+
+                return Pair(assignmentFlowGraph, listOf(varNode))
+            }
+            is PyTupleExpression, is PyListLiteralExpression -> {
+                val varNodes = ArrayList<DataNode>()
+                val assignGroup = getAssignGroup(target)
+                val fgs = ArrayList<ExtControlFlowGraph>()
+                for (element in assignGroup) {
+                    val (fg, currentVarNodes) = getAssignFlowGraphWithVars(operationNode, element, createGraph())
+                    fgs.add(fg)
+                    varNodes.addAll(currentVarNodes)
+                }
+                valueGraph.parallelMergeGraphs(fgs, operationLinkType = LinkType.PARAMETER)
+                return Pair(valueGraph, varNodes)
+            }
+            is PyStarExpression -> return getAssignFlowGraphWithVars(operationNode, target.expression, valueGraph)
+            else -> throw GraphBuildingException
+        }
+    }
+
+    private fun getAssignGroup(target: PyExpression): List<PyExpression> {
+        val group = ArrayList<PyExpression>()
+        when (target) {
+            is PyTargetExpression -> group.add(target)
+            is PyTupleExpression, is PyListLiteralExpression -> {
+                (target as PySequenceExpression).elements.forEach { group.addAll(getAssignGroup(it)) }
+            }
+            is PyStarExpression -> target.expression?.let { group.add(it) }
+            else -> throw GraphBuildingException
+        }
+        return group
+    }
+
+    private fun prepareAssignment(target: PyExpression?, value: PyExpression?): List<ExtControlFlowGraph> {
+        when (target) {
+            is PyTargetExpression, is PyNamedParameter -> return listOf(builder.visitPyElement(value))
+            is PyParenthesizedExpression -> return prepareAssignment(target.containedExpression, value)
+            is PyTupleExpression, is PyListLiteralExpression -> {
+                val preparedSubAssignments = ArrayList<ExtControlFlowGraph>()
+                when (value) {
+                    is PyCallExpression, is PyReferenceExpression -> return listOf(builder.visitPyElement(value))
+                    is PyDictLiteralExpression, is PyListLiteralExpression, is PyTupleExpression -> {
+                        val valueElements = (value as PySequenceExpression).elements.toList()
+                        var targetStarredIndex: Int? = null
+                        for ((i, subTarget) in (target as PySequenceExpression).elements.withIndex()) {
+                            if (subTarget is PyStarExpression) {
+                                targetStarredIndex = i
+                                break
+                            }
+                            preparedSubAssignments.addAll(
+                                prepareAssignment(target = subTarget, value = valueElements[i])
+                            )
+                        }
+                        if (targetStarredIndex != null) {
+                            val starredValueElementsCnt = valueElements.size - target.elements.size + 1
+                            var starredValueElementsList = valueElements.subList(
+                                fromIndex = targetStarredIndex,
+                                toIndex = targetStarredIndex + starredValueElementsCnt
+                            )
+                            if (starredValueElementsList.isNotEmpty()
+                                && starredValueElementsList.first() is PySequenceExpression
+                            ) {
+                                // TODO: wtf?
+                                starredValueElementsList =
+                                    (starredValueElementsList.first() as PySequenceExpression).elements.toList()
+                            }
+                            val operationNode = OperationNode(
+                                label = "List",
+                                psi = target,
+                                controlBranchStack = builder.controlBranchStack,
+                                kind = OperationNode.Kind.COLLECTION
+                            )
+                            val starredFlowGraph = createGraph()
+                            starredFlowGraph.parallelMergeGraphs(
+                                starredValueElementsList.map { builder.visitPyElement(it) }
+                            )
+                            starredFlowGraph.addNode(operationNode, LinkType.PARAMETER)
+                            preparedSubAssignments.add(starredFlowGraph)
+                            val restValueElements =
+                                valueElements.subList(targetStarredIndex + starredValueElementsCnt, valueElements.size)
+                            for ((i, value) in restValueElements.withIndex()) {
+                                preparedSubAssignments.addAll(
+                                    prepareAssignment(
+                                        target = target.elements[targetStarredIndex + i + 1],
+                                        value = value
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    else -> throw GraphBuildingException
+                }
+                return preparedSubAssignments
+            }
+            else -> throw GraphBuildingException
+        }
+    }
+}
+
+object GraphBuildingException : Throwable()
+
+@ExperimentalStdlibApi
 class PyFlowGraphBuilder {
     val flowGraph: ExtControlFlowGraph = createGraph()
     var currentControlNode: Node? = null
     var currentBranchKind: Boolean = true
     val controlBranchStack: ControlBranchStack = mutableListOf()
     val contextStack: MutableList<BuildingContext> = mutableListOf(BuildingContext())
+    val helper = PyFlowGraphBuilderHelper(this)
 
     fun createGraph(node: Node? = null) = ExtControlFlowGraph(this, node)
 

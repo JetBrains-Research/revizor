@@ -5,8 +5,8 @@ import com.jetbrains.python.psi.*
 fun getNodeFullName(node: PyElement): String =
     when (node) {
         is PyFunction, is PyNamedParameter -> node.name ?: ""
-        is PyReferenceExpression -> {
-            var fullName = node.referencedName
+        is PyReferenceExpression, is PyTargetExpression -> {
+            var fullName = (node as PyQualifiedExpression).referencedName
             var currentNode = node.qualifier
             while (currentNode is PyReferenceExpression
                 || currentNode is PyCallExpression && currentNode.callee is PyReferenceExpression
@@ -36,21 +36,20 @@ fun getNodeFullName(node: PyElement): String =
             "$operand[${sliceItems.joinToString(":")}]"
         }
         is PyLiteralExpression -> "."
-        else -> throw NodeNameValueException
+        else -> throw IllegalArgumentException()
     }
 
 fun getNodeKey(node: PyElement): String =
     when (node) {
         is PyFunction, is PyNamedParameter -> node.name ?: ""
-        is PyReferenceExpression -> node.asQualifiedName()?.toString() ?: ""
-        else -> throw NodeNameValueException
+        is PyReferenceExpression, is PyTargetExpression -> (node as PyQualifiedExpression).asQualifiedName()?.toString()
+            ?: ""
+        else -> throw IllegalArgumentException()
     }
 
 fun getNodeShortName(node: PyElement): String =
     when (node) {
         is PyNamedParameter, is PyFunction -> node.name ?: ""
-        is PyReferenceExpression -> node.referencedName ?: ""
-        else -> throw NodeNameValueException
+        is PyReferenceExpression, is PyTargetExpression -> (node as PyQualifiedExpression).referencedName ?: ""
+        else -> throw IllegalArgumentException()
     }
-
-object NodeNameValueException : Throwable()

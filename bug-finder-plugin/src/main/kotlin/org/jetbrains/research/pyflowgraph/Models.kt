@@ -1,7 +1,6 @@
 package org.jetbrains.research.pyflowgraph
 
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiElementVisitor
 
 typealias ControlBranchStack = MutableList<Pair<StatementNode?, Boolean>>
 
@@ -22,8 +21,8 @@ abstract class Node(
 
     var unmappable: Boolean? = null
     var syntaxTokenIntervals: String? = null
-    val defFor: MutableList<Node> = mutableListOf()
-    val defBy: MutableList<Node> = mutableListOf()
+    var defFor: MutableList<Int> = mutableListOf()
+    var defBy: MutableList<Int> = mutableListOf()
     var defControlBranchStack: ControlBranchStack = mutableListOf()
     val inEdges = HashSet<Edge>()
     val outEdges = HashSet<Edge>()
