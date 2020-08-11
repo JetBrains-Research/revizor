@@ -11,14 +11,6 @@ abstract class Node(
     open var psi: PsiElement?,
     var statementNum: Int = statementCounter++
 ) {
-    enum class Property(repr: String) {
-        UNMAPPABLE("unmappable"),
-        SYNTAX_TOKEN_INTERVALS("syntax-tokens"),
-        DEF_FOR("def-for"),
-        DEF_BY("def-by"),
-        DEF_CONTROL_BRANCH_STACK("def-stack")
-    }
-
     var unmappable: Boolean? = null
     var syntaxTokenIntervals: String? = null
     var defFor: MutableList<Int> = mutableListOf()
@@ -31,13 +23,13 @@ abstract class Node(
         .filter { it is DataEdge && it.label == LinkType.REFERENCE }
         .map { it.nodeFrom }
 
-    fun createEdge(nodeTo: Node, linkType: LinkType, fromClosure: Boolean = false) {
+    fun createEdge(nodeTo: Node, linkType: String, fromClosure: Boolean = false) {
         val edge = DataEdge(linkType, this, nodeTo, fromClosure)
         outEdges.add(edge)
         nodeTo.inEdges.add(edge)
     }
 
-    fun hasInEdge(nodeFrom: Node, label: LinkType) =
+    fun hasInEdge(nodeFrom: Node, label: String) =
         inEdges.any { it.nodeFrom == nodeFrom && it.label == label }
 
     fun removeInEdge(edge: Edge) {
@@ -50,11 +42,11 @@ abstract class Node(
         edge.nodeTo.inEdges.remove(edge)
     }
 
-    fun getIncomingNodes(label: LinkType? = null) = inEdges
+    fun getIncomingNodes(label: String? = null) = inEdges
         .filter { label == null || it.label == label }
         .toSet()
 
-    fun getOutgoingNodes(label: LinkType? = null) = outEdges
+    fun getOutgoingNodes(label: String? = null) = outEdges
         .filter { label == null || it.label == label }
         .toSet()
 
@@ -67,17 +59,17 @@ class DataNode(
     override var label: String,
     override var psi: PsiElement?,
     val key: String? = null,
-    var kind: Kind = Kind.UNDEFINED
+    var kind: String = Kind.UNDEFINED
 ) : Node(label, psi) {
 
-    enum class Kind(repr: String) {
-        VARIABLE_DECLARATION("variable-decl"),
-        VARIABLE_USAGE("variable-usage"),
-        SUBSCRIPT("subscript"),
-        SLICE("slice"),
-        LITERAL("literal"),
-        KEYWORD("keyword"),
-        UNDEFINED("undefined")
+    object Kind {
+        const val VARIABLE_DECLARATION = "variable-decl"
+        const val VARIABLE_USAGE = "variable-usage"
+        const val SUBSCRIPT = "subscript"
+        const val SLICE = "slice"
+        const val LITERAL = "literal"
+        const val KEYWORD = "keyword"
+        const val UNDEFINED = "undefined"
     }
 
     override fun toString(): String {
@@ -94,7 +86,7 @@ open class StatementNode(
     open val controlBranchStack: ControlBranchStack? = controlBranchStack?.map { it.copy() }?.toMutableList()
 
     init {
-        if (!(this is EntryNode) && controlBranchStack != null) {
+        if (this !is EntryNode && controlBranchStack != null) {
             val (control, branchKind) = controlBranchStack.last()
             control?.createControlEdge(this, branchKind, addToStack = false)
         }
@@ -104,7 +96,7 @@ open class StatementNode(
 
     fun branchKind() = controlBranchStack?.last()?.second
 
-    fun createControlEdge(
+    private fun createControlEdge(
         nodeTo: StatementNode, branchKind: Boolean,
         addToStack: Boolean = true, fromClosure: Boolean = false
     ) {
@@ -130,33 +122,33 @@ class OperationNode(
     override var psi: PsiElement?,
     override var controlBranchStack: ControlBranchStack,
     var key: String? = null,
-    var kind: Kind = Kind.UNCLASSIFIED
+    var kind: String = Kind.UNCLASSIFIED
 ) : StatementNode(label, psi, controlBranchStack) {
 
-    enum class Label(repr: String) {
-        RETURN("return"),
-        CONTINUE("continue"),
-        BREAK("break"),
-        RAISE("raise"),
-        PASS("pass"),
-        LAMBDA("lambda"),
-        ASSIGN("=")
+    object Label {
+        const val RETURN = "return"
+        const val CONTINUE = "continue"
+        const val BREAK = "break"
+        const val RAISE = "raise"
+        const val PASS = "pass"
+        const val LAMBDA = "lambda"
+        const val ASSIGN = "="
     }
 
-    enum class Kind(repr: String) {
-        COLLECTION("collection"),
-        FUNC_CALL("func-call"),
-        ASSIGN("assignment"),
-        AUG_ASSIGN("aug-assignment"),
-        COMPARE("comparison"),
-        RETURN("return"),
-        RAISE("raise"),
-        BREAK("break"),
-        CONTINUE("continue"),
-        UNARY("unary"),
-        BOOL("bool"),
-        BINARY("binary"),
-        UNCLASSIFIED("unclassified")
+    object Kind {
+        const val COLLECTION = "collection"
+        const val FUNC_CALL = "func-call"
+        const val ASSIGN = "assignment"
+        const val AUG_ASSIGN = "aug-assignment"
+        const val COMPARE = "comparison"
+        const val RETURN = "return"
+        const val RAISE = "raise"
+        const val BREAK = "break"
+        const val CONTINUE = "continue"
+        const val UNARY = "unary"
+        const val BOOL = "bool"
+        const val BINARY = "binary"
+        const val UNCLASSIFIED = "unclassified"
     }
 
     override fun toString(): String {
@@ -170,12 +162,12 @@ open class ControlNode(
     override val controlBranchStack: ControlBranchStack
 ) : StatementNode(label, psi, controlBranchStack) {
 
-    enum class Label(repr: String) {
-        IF("if"),
-        FOR("for"),
-        WHILE("while"),
-        TRY("try"),
-        EXCEPT("except")
+    object Label {
+        const val IF = "if"
+        const val FOR = "for"
+        const val WHILE = "while"
+        const val TRY = "try"
+        const val EXCEPT = "except"
     }
 
     override fun toString(): String {
@@ -186,7 +178,7 @@ open class ControlNode(
 class EntryNode(psi: PsiElement?) : ControlNode("START", psi, mutableListOf())
 
 open class Edge(
-    var label: LinkType,
+    var label: String,
     var nodeFrom: Node,
     var nodeTo: Node,
     var fromClosure: Boolean = false
@@ -203,18 +195,18 @@ class ControlEdge(nodeFrom: Node, nodeTo: Node, var branchKind: Boolean = true, 
     }
 }
 
-class DataEdge(label: LinkType, nodeFrom: Node, nodeTo: Node, fromClosure: Boolean) :
+class DataEdge(label: String, nodeFrom: Node, nodeTo: Node, fromClosure: Boolean) :
     Edge(label, nodeFrom, nodeTo, fromClosure)
 
-enum class LinkType(repr: String) {
-    DEFINITION("def"),
-    RECEIVER("recv"),
-    REFERENCE("ref"),
-    PARAMETER("para"),
-    CONDITION("cond"),
-    QUALIFIER("qual"),
-    CONTROL("control"),
-    DEPENDENCE("dep")
+object LinkType {
+    const val DEFINITION = "def"
+    const val RECEIVER = "recv"
+    const val REFERENCE = "ref"
+    const val PARAMETER = "para"
+    const val CONDITION = "cond"
+    const val QUALIFIER = "qual"
+    const val CONTROL = "control"
+    const val DEPENDENCE = "dep"
 }
 
 @ExperimentalStdlibApi
@@ -267,7 +259,7 @@ class ExtControlFlowGraph(
         return resolvedReferences
     }
 
-    fun mergeGraph(graph: ExtControlFlowGraph, linkNode: Node? = null, linkType: LinkType? = null) {
+    fun mergeGraph(graph: ExtControlFlowGraph, linkNode: Node? = null, linkType: String? = null) {
         if (linkNode != null && linkType != null) {
             for (sink in sinks) {
                 sink.createEdge(linkNode, linkType)
@@ -287,7 +279,7 @@ class ExtControlFlowGraph(
         variableReferences.addAll(unresolvedReferences)
     }
 
-    fun parallelMergeGraphs(graphs: List<ExtControlFlowGraph>, operationLinkType: LinkType? = null) {
+    fun parallelMergeGraphs(graphs: List<ExtControlFlowGraph>, operationLinkType: String? = null) {
         val oldSinks = sinks.toMutableSet()
         val oldStatementSinks = statementSinks.toMutableSet()
         sinks.clear()
@@ -317,7 +309,7 @@ class ExtControlFlowGraph(
         }
     }
 
-    fun addNode(node: Node, linkType: LinkType? = null, clearSinks: Boolean = false) {
+    fun addNode(node: Node, linkType: String? = null, clearSinks: Boolean = false) {
         if (linkType != null) {
             sinks.forEach { it.createEdge(node, linkType) }
         }
