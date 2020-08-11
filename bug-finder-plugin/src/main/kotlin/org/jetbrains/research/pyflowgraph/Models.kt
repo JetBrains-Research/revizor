@@ -228,13 +228,13 @@ class ExtControlFlowGraph(
                 throw DuplicateEntryNodeException
             }
             if (node != null) {
-                entryNode = node
+                field = node
                 nodes.add(node)
             }
         }
     val nodes: MutableSet<Node> = mutableSetOf()
     val operationNodes: MutableSet<OperationNode> = mutableSetOf()
-    val variableReferences: MutableSet<Node> = mutableSetOf()
+    val variableReferences: MutableSet<DataNode> = mutableSetOf()
     var sinks: MutableSet<Node> = mutableSetOf()
     var statementSinks: MutableSet<StatementNode> = mutableSetOf()
     val statementSources: MutableSet<StatementNode> = mutableSetOf()
@@ -253,10 +253,10 @@ class ExtControlFlowGraph(
         }
     }
 
-    fun resolveReferences(graph: ExtControlFlowGraph): MutableSet<Node> {
-        val resolvedReferences = mutableSetOf<Node>()
+    fun resolveReferences(graph: ExtControlFlowGraph): MutableSet<DataNode> {
+        val resolvedReferences = mutableSetOf<DataNode>()
         for (refNode in graph.variableReferences) {
-            val defNodes: Set<Node> = TODO()
+            val defNodes = refNode.key?.let { visitor.context().getVariables(it) }
             if (defNodes != null) {
                 defNodes
                     .filter { it.statementNum < refNode.statementNum }
@@ -321,7 +321,7 @@ class ExtControlFlowGraph(
         if (linkType != null) {
             sinks.forEach { it.createEdge(node, linkType) }
         }
-        if (node.javaClass.kotlin.members.any { it.name == "key" } && linkType != LinkType.DEFINITION) {
+        if ((node is DataNode) && linkType != LinkType.DEFINITION) {
             variableReferences.add(node)
         }
         if (clearSinks) {

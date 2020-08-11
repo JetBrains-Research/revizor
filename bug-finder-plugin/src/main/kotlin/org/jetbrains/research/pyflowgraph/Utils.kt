@@ -1,5 +1,6 @@
 package org.jetbrains.research.pyflowgraph
 
+import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.*
 
 fun getNodeFullName(node: PyElement): String =
@@ -53,3 +54,7 @@ fun getNodeShortName(node: PyElement): String =
         is PyReferenceExpression, is PyTargetExpression -> (node as PyQualifiedExpression).referencedName ?: ""
         else -> throw IllegalArgumentException()
     }
+
+fun psiToPyOperation(node: PsiElement): PyElement {
+    TODO()
+}
