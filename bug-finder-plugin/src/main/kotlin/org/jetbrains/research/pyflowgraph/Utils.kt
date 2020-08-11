@@ -58,3 +58,7 @@ fun getNodeShortName(node: PyElement): String =
 fun psiToPyOperation(node: PsiElement): PyElement {
     TODO()
 }
+
+object DuplicateEntryNodeException : Throwable()
+
+object GraphBuildingException : Throwable()
