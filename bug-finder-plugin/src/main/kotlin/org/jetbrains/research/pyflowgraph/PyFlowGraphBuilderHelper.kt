@@ -33,7 +33,7 @@ class PyFlowGraphBuilderHelper(private val builder: PyFlowGraphBuilder) {
         preparedValueGraphs: PreparedAssignmentValue
     ): Pair<ExtControlFlowGraph, List<DataNode>> {
         when (target) {
-            is PyTargetExpression, is PyNamedParameter -> {
+            is PyTargetExpression, is PyNamedParameter, is PyReferenceExpression -> {
                 val name = getNodeFullName(target)
                 val key = getNodeKey(target)
                 val assignmentFlowGraph = (preparedValueGraphs as PreparedAssignmentValue.AssignedValue).value
@@ -104,13 +104,17 @@ class PyFlowGraphBuilderHelper(private val builder: PyFlowGraphBuilder) {
     ): PreparedAssignmentValue {
         when (target) {
             is PyTargetExpression, is PyNamedParameter ->
-                return PreparedAssignmentValue.AssignedValue(builder.visitPyElement(value))
+                return PreparedAssignmentValue.AssignedValue(
+                    builder.visitPyElement(value) ?: throw GraphBuildingException
+                )
             is PyParenthesizedExpression ->
                 return prepareAssignmentValues(target.containedExpression, value)
             is PyTupleExpression, is PyListLiteralExpression -> {
                 when (value) {
                     is PyCallExpression, is PyReferenceExpression ->
-                        return PreparedAssignmentValue.AssignedValue(builder.visitPyElement(value))
+                        return PreparedAssignmentValue.AssignedValue(
+                            builder.visitPyElement(value) ?: throw GraphBuildingException
+                        )
                     is PyListLiteralExpression, is PyTupleExpression -> {
                         val preparedSubAssignments = PreparedAssignmentValue.AssignedValues(mutableListOf())
                         val valueElements = (value as PySequenceExpression).elements.toList()
@@ -147,7 +151,7 @@ class PyFlowGraphBuilderHelper(private val builder: PyFlowGraphBuilder) {
                             )
                             val starredFlowGraph = createGraph()
                             starredFlowGraph.parallelMergeGraphs(
-                                starredValueElementsList.map { builder.visitPyElement(it) }
+                                starredValueElementsList.map { builder.visitPyElement(it) }.filterNotNull()
                             )
                             starredFlowGraph.addNode(operationNode, LinkType.PARAMETER)
                             preparedSubAssignments.values.add(
@@ -175,7 +179,7 @@ class PyFlowGraphBuilderHelper(private val builder: PyFlowGraphBuilder) {
 
     fun visitAssign(node: PyAssignmentStatement, targets: Array<PyExpression>): ExtControlFlowGraph {
         val operationNode = OperationNode(
-            label = OperationNode.Label.ASSIGN.name,
+            label = OperationNode.Label.ASSIGN,
             psi = node,
             controlBranchStack = builder.controlBranchStack,
             kind = OperationNode.Kind.ASSIGN

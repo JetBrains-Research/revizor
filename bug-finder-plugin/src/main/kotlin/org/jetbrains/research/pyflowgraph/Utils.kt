@@ -1,6 +1,5 @@
 package org.jetbrains.research.pyflowgraph
 
-import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.*
 
 fun getNodeFullName(node: PyElement): String =
@@ -55,9 +54,25 @@ fun getNodeShortName(node: PyElement): String =
         else -> throw IllegalArgumentException()
     }
 
-fun psiToPyOperation(node: PsiElement): PyElement {
-    TODO()
-}
+fun getOperationName(node: PyElement): String? =
+    if (node is PyAugAssignmentStatement) {
+        when (node.operation?.text) {
+            "+=" -> "add"
+            "-=" -> "sub"
+            "*=" -> "mult"
+            "/=" -> "div"
+            "%=" -> "mod"
+            "**=" -> "pow"
+            ">>=" -> "rshift"
+            "<<-" -> "lshift"
+            "&=" -> "bitand"
+            "|=" -> "bitor"
+            "^=" -> "bitxor"
+            else -> throw NotImplementedError("Unsupported operation type")
+        }
+    } else {
+        throw NotImplementedError("Unsupported operation node")
+    }
 
 object DuplicateEntryNodeException : Throwable()
 
