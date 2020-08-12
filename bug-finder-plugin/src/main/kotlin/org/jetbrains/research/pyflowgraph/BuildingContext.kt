@@ -17,6 +17,9 @@ class BuildingContext {
             for (defNode in defNodes.filter { it.key == node.key }) {
                 val defNodeStack = defNode.defControlBranchStack
                 val nodeStack = node.defControlBranchStack
+                if (defNodeStack == null || nodeStack == null) {
+                    continue
+                }
                 if (nodeStack.size <= defNodeStack.size
                     && defNodeStack.subList(0, nodeStack.size) == nodeStack
                 ) {

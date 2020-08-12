@@ -11,6 +11,18 @@ class PyFlowGraphBuilder {
     private val contextStack: MutableList<BuildingContext> = mutableListOf(BuildingContext())
     private val helper = PyAssignmentVisitorHelper(this)
 
+    fun buildForPyFunction(
+        node: PyFunction,
+        showDependencies: Boolean = false,
+        buildClosure: Boolean = true
+    ): ExtControlFlowGraph {
+        val fg = visitPyElement(node) ?: throw GraphBuildingException
+        if (!showDependencies) {
+            DependenciesResolver.resolve(flowGraph = fg)
+        }
+        return fg
+    }
+
     fun visitPyElement(node: PyElement?): ExtControlFlowGraph? =
         when (node) {
             is PyFunction -> visitFunction(node)

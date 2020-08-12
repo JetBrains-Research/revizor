@@ -16,7 +16,7 @@ abstract class Node(
     var syntaxTokenIntervals: String? = null
     var defFor: MutableList<Int> = mutableListOf()
     var defBy: MutableList<Int> = mutableListOf()
-    var defControlBranchStack: ControlBranchStack = mutableListOf()
+    var defControlBranchStack: ControlBranchStack? = mutableListOf()
     val inEdges = HashSet<Edge>()
     val outEdges = HashSet<Edge>()
 
@@ -45,10 +45,12 @@ abstract class Node(
 
     fun getIncomingNodes(label: String? = null) = inEdges
         .filter { label == null || it.label == label }
+        .map { it.nodeFrom }
         .toSet()
 
     fun getOutgoingNodes(label: String? = null) = outEdges
         .filter { label == null || it.label == label }
+        .map { it.nodeTo }
         .toSet()
 
     override fun toString(): String {
@@ -84,7 +86,7 @@ open class StatementNode(
     controlBranchStack: ControlBranchStack?
 ) : Node(label, psi) {
 
-    open val controlBranchStack: ControlBranchStack? = controlBranchStack?.map { it.copy() }?.toMutableList()
+    open var controlBranchStack: ControlBranchStack? = controlBranchStack?.map { it.copy() }?.toMutableList()
 
     init {
         if (this !is EntryNode && controlBranchStack != null) {
@@ -97,7 +99,7 @@ open class StatementNode(
 
     fun branchKind() = controlBranchStack?.last()?.second
 
-    private fun createControlEdge(
+    fun createControlEdge(
         nodeTo: StatementNode, branchKind: Boolean,
         addToStack: Boolean = true, fromClosure: Boolean = false
     ) {
@@ -115,13 +117,13 @@ open class StatementNode(
     }
 }
 
-class EmptyNode(override var controlBranchStack: ControlBranchStack) :
+class EmptyNode(override var controlBranchStack: ControlBranchStack?) :
     StatementNode("empty", null, controlBranchStack)
 
 class OperationNode(
     override var label: String,
     override var psi: PyElement?,
-    override var controlBranchStack: ControlBranchStack,
+    override var controlBranchStack: ControlBranchStack?,
     override val key: String? = null,
     var kind: String = Kind.UNCLASSIFIED
 ) : StatementNode(label, psi, controlBranchStack) {
@@ -160,7 +162,7 @@ class OperationNode(
 open class ControlNode(
     override var label: String,
     override var psi: PyElement?,
-    override val controlBranchStack: ControlBranchStack
+    override var controlBranchStack: ControlBranchStack?
 ) : StatementNode(label, psi, controlBranchStack) {
 
     object Label {
