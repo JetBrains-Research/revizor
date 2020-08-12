@@ -20,6 +20,9 @@ class PyFlowGraphBuilder {
         if (!showDependencies) {
             DependenciesResolver.resolve(flowGraph = fg)
         }
+        if (buildClosure) {
+            TransitiveClosureBuilder.buildClosure(flowGraph = fg)
+        }
         return fg
     }
 

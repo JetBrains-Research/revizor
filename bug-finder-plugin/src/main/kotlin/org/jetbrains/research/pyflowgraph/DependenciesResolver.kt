@@ -1,7 +1,7 @@
 package org.jetbrains.research.pyflowgraph
 
 @ExperimentalStdlibApi
-object DependenciesResolver {
+object DependenciesResolver : FlowGraphNodesProcessor {
     fun resolve(flowGraph: ExtControlFlowGraph) {
         processFlowGraphNodes(flowGraph, processorFunction = this::adjustControls)
         removeEmptyNodes(flowGraph)
@@ -18,18 +18,6 @@ object DependenciesResolver {
             node.inEdges
                 .filter { it.label == LinkType.DEPENDENCE }
                 .forEach { node.removeInEdge(it) }
-        }
-    }
-
-    private fun processFlowGraphNodes(
-        flowGraph: ExtControlFlowGraph,
-        processorFunction: (node: Node, processedNodes: MutableSet<Node>) -> Unit
-    ) {
-        val processedNodes = hashSetOf<Node>()
-        for (node in flowGraph.nodes) {
-            if (!processedNodes.contains(node)) {
-                processorFunction(node, processedNodes)
-            }
         }
     }
 
