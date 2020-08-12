@@ -485,6 +485,44 @@ class PyFlowGraphBuilder {
         return whileFlowGraph ?: throw GraphBuildingException
     }
 
+    private fun visitTry(node: PyTryExceptStatement): ExtControlFlowGraph {
+        val controlNode = ControlNode(ControlNode.Label.TRY, node, controlBranchStack)
+        val tryFlowGraph = createGraph()
+        tryFlowGraph.addNode(controlNode, LinkType.CONDITION)
+        val tryBodyFlowGraph = visitControlNodeBodyHelper(
+            controlNode = controlNode,
+            statements = node.tryPart.statementList.statements,
+            newBranchKind = true
+        )
+        switchControlBranch(controlNode, newBranchKind = false)
+        val exceptHandlersFlowGraphs = node.exceptParts.mapNotNull { visitPyElement(it) }
+        tryFlowGraph.parallelMergeGraphs(listOf(tryBodyFlowGraph).plus(exceptHandlersFlowGraphs))
+        popControlBranch()
+        tryFlowGraph.statementSinks.clear()
+        return tryFlowGraph
+    }
+
+    private fun visitExcept(node: PyExceptPart): ExtControlFlowGraph {
+        val controlNode = ControlNode(ControlNode.Label.EXCEPT, node, controlBranchStack)
+        // TODO: include node.target definition in original miner
+        val exceptFlowGraph = visitPyElement(node.exceptClass) ?: createGraph()
+        exceptFlowGraph.addNode(controlNode, LinkType.PARAMETER)
+        exceptFlowGraph.mergeGraph(
+            visitControlNodeBodyHelper(
+                controlNode,
+                node.statementList.statements,
+                newBranchKind = true
+            )
+        )
+        exceptFlowGraph.statementSources.clear() // TODO: what means "bad workaround"?
+        return exceptFlowGraph
+    }
+
+    // TODO: fix import stubs in original miner
+    private fun visitImport(node: PyImportStatement) = createGraph()
+
+    private fun visitImportFrom(node: PyFromImportStatement) = createGraph()
+
     private fun visitControlNodeBodyHelper(
         controlNode: ControlNode,
         statements: Array<PyStatement>,
