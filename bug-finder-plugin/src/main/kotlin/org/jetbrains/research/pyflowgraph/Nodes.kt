@@ -23,6 +23,7 @@ abstract class Node(
     fun getDefinitions() = inEdges
         .filter { it is DataEdge && it.label == LinkType.REFERENCE }
         .map { it.nodeFrom }
+        .toHashSet()
 
     fun createEdge(nodeTo: Node, linkType: String, fromClosure: Boolean = false) {
         val edge = DataEdge(linkType, this, nodeTo, fromClosure)
