@@ -239,6 +239,16 @@ class PyFlowGraphBuilder {
                 leftOperand = node.leftExpression,
                 rightOperand = node.rightExpression ?: throw GraphBuildingException
             )
+        } else if (node.isOperator("!=") || node.isOperator("==") || node.isOperator("<")
+            || node.isOperator("<=") || node.isOperator(">") || node.isOperator(">")
+        ) {
+            visitBinOperationHelper(
+                operationName = node.operator?.specialMethodName,
+                node = node,
+                operationKind = OperationNode.Kind.COMPARE,
+                leftOperand = node.leftExpression,
+                rightOperand = node.rightExpression ?: throw GraphBuildingException
+            )
         } else {
             visitBinOperationHelper(
                 operationName = node.operator?.specialMethodName,
