@@ -17,7 +17,7 @@ class ExtControlFlowGraph(
         }
     val nodes: MutableSet<Node> = mutableSetOf()
     val operationNodes: MutableSet<OperationNode> = mutableSetOf()
-    val variableReferences: MutableSet<DataNode> = mutableSetOf()
+    val variableReferences: MutableSet<Node> = mutableSetOf()
     var sinks: MutableSet<Node> = mutableSetOf()
     var statementSinks: MutableSet<StatementNode> = mutableSetOf()
     val statementSources: MutableSet<StatementNode> = mutableSetOf()
@@ -36,8 +36,8 @@ class ExtControlFlowGraph(
         }
     }
 
-    fun resolveReferences(graph: ExtControlFlowGraph): MutableSet<DataNode> {
-        val resolvedReferences = mutableSetOf<DataNode>()
+    fun resolveReferences(graph: ExtControlFlowGraph): MutableSet<Node> {
+        val resolvedReferences = mutableSetOf<Node>()
         for (refNode in graph.variableReferences) {
             val defNodes = refNode.key?.let { visitor.context().getVariables(it) }
             if (defNodes != null) {
@@ -104,7 +104,7 @@ class ExtControlFlowGraph(
         if (linkType != null) {
             sinks.forEach { it.createEdge(node, linkType) }
         }
-        if ((node is DataNode) && linkType != LinkType.DEFINITION) {
+        if ((node is DataNode || node is OperationNode) && linkType != LinkType.DEFINITION) {
             variableReferences.add(node)
         }
         if (clearSinks) {

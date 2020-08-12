@@ -380,6 +380,103 @@ class PyFlowGraphBuilder {
         return argsFlowGraphs.filterNotNull()
     }
 
+    private fun visitIfStatement(node: PyIfStatement): ExtControlFlowGraph {
+        val controlNode = ControlNode(ControlNode.Label.IF, node, controlBranchStack)
+        val ifFlowGraph = visitPyElement(node.ifPart.condition)
+        ifFlowGraph?.addNode(controlNode, LinkType.CONDITION)
+        val bodyFlowGraph = visitControlNodeBodyHelper(
+            controlNode,
+            node.ifPart.statementList.statements,
+            newBranchKind = true
+        )
+        val elseFlowGraph = visitElifPartsHelper(
+            globalIfControlNode = controlNode,
+            prevControlNode = controlNode,
+            elifParts = node.elifParts.toList(),
+            elsePart = node.elsePart
+        )
+        ifFlowGraph?.parallelMergeGraphs(listOf(bodyFlowGraph, elseFlowGraph))
+        return ifFlowGraph ?: throw GraphBuildingException
+    }
+
+    private fun visitElifPartsHelper(
+        globalIfControlNode: ControlNode,
+        prevControlNode: ControlNode,
+        elifParts: List<PyIfPart>,
+        elsePart: PyElsePart?
+    ): ExtControlFlowGraph {
+        if (elifParts.isNotEmpty()) {
+            val ifPart = elifParts.first()
+
+            // Emulating _visit_control_node_body call for nested elif-s each time
+            switchControlBranch(prevControlNode, true)
+            val controlWrapperFlowGraph = createGraph()
+            controlWrapperFlowGraph.addNode(EmptyNode(controlBranchStack))
+
+            val controlNode = ControlNode(ControlNode.Label.IF, ifPart, controlBranchStack)
+            val ifPartFlowGraph = visitPyElement(ifPart.condition)
+            ifPartFlowGraph?.addNode(controlNode, LinkType.CONDITION)
+            val bodyFlowGraph = visitControlNodeBodyHelper(
+                controlNode,
+                ifPart.statementList.statements,
+                newBranchKind = true
+            )
+            val elseFlowGraph =
+                if (elifParts.size > 1) {
+                    visitElifPartsHelper(
+                        globalIfControlNode,
+                        controlNode,
+                        elifParts.subList(1, elifParts.size),
+                        elsePart
+                    )
+                } else {
+                    visitControlNodeBodyHelper(
+                        controlNode,
+                        elsePart?.statementList?.statements ?: arrayOf(),
+                        newBranchKind = false
+                    )
+                }
+            ifPartFlowGraph?.parallelMergeGraphs(listOf(bodyFlowGraph, elseFlowGraph))
+
+            // Emulating _visit_control_node_body call for nested elif-s each time
+            ifPartFlowGraph?.let { controlWrapperFlowGraph.mergeGraph(it) } ?: throw GraphBuildingException
+            popControlBranch()
+
+            return controlWrapperFlowGraph
+        } else {
+            return visitControlNodeBodyHelper(
+                globalIfControlNode,
+                elsePart?.statementList?.statements ?: arrayOf(),
+                newBranchKind = false
+            )
+        }
+    }
+
+    private fun visitControlNodeBodyHelper(
+        controlNode: ControlNode,
+        statements: Array<PyStatement>,
+        newBranchKind: Boolean,
+        replaceControl: Boolean = false
+    ): ExtControlFlowGraph {
+        switchControlBranch(controlNode, newBranchKind, replaceControl)
+        val currentFlowGraph = createGraph()
+        currentFlowGraph.addNode(EmptyNode(controlBranchStack))
+        for (statement in statements) {
+            var statementFlowGraph: ExtControlFlowGraph? = null
+            try {
+                statementFlowGraph = visitPyElement(statement)
+            } finally {
+                if (statementFlowGraph == null) {
+                    println("Unable to build graph for $statement inside ${controlNode.psi}, skipping...")
+                    continue
+                }
+                currentFlowGraph.mergeGraph(statementFlowGraph)
+            }
+        }
+        popControlBranch()
+        return currentFlowGraph
+    }
+
     fun visitPyElement(node: PyElement?): ExtControlFlowGraph? =
         when (node) {
             is PyFunction -> visitFunction(node)
@@ -402,6 +499,7 @@ class PyFlowGraphBuilder {
             is PySliceExpression -> visitSlice(node)
             is PyCallExpression -> visitCall(node)
             is PyExpressionStatement -> visitPyElement(node.expression)
+            is PyIfStatement -> visitIfStatement(node)
             else -> null
         }
 }

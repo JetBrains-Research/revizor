@@ -1,6 +1,6 @@
 package org.jetbrains.research.pyflowgraph
 
-import com.intellij.psi.PsiElement
+import com.jetbrains.python.psi.PyElement
 
 typealias ControlBranchStack = MutableList<Pair<StatementNode?, Boolean>>
 
@@ -8,9 +8,10 @@ var statementCounter: Int = 0
 
 abstract class Node(
     open var label: String,
-    open var psi: PsiElement?,
+    open var psi: PyElement?,
     var statementNum: Int = statementCounter++
 ) {
+    open val key: String? = null
     var unmappable: Boolean? = null
     var syntaxTokenIntervals: String? = null
     var defFor: MutableList<Int> = mutableListOf()
@@ -57,8 +58,8 @@ abstract class Node(
 
 class DataNode(
     override var label: String,
-    override var psi: PsiElement?,
-    val key: String? = null,
+    override var psi: PyElement?,
+    override val key: String? = null,
     var kind: String = Kind.UNDEFINED
 ) : Node(label, psi) {
 
@@ -79,7 +80,7 @@ class DataNode(
 
 open class StatementNode(
     override var label: String,
-    override var psi: PsiElement?,
+    override var psi: PyElement?,
     controlBranchStack: ControlBranchStack?
 ) : Node(label, psi) {
 
@@ -119,9 +120,9 @@ class EmptyNode(override var controlBranchStack: ControlBranchStack) :
 
 class OperationNode(
     override var label: String,
-    override var psi: PsiElement?,
+    override var psi: PyElement?,
     override var controlBranchStack: ControlBranchStack,
-    var key: String? = null,
+    override val key: String? = null,
     var kind: String = Kind.UNCLASSIFIED
 ) : StatementNode(label, psi, controlBranchStack) {
 
@@ -158,7 +159,7 @@ class OperationNode(
 
 open class ControlNode(
     override var label: String,
-    override var psi: PsiElement?,
+    override var psi: PyElement?,
     override val controlBranchStack: ControlBranchStack
 ) : StatementNode(label, psi, controlBranchStack) {
 
@@ -175,4 +176,4 @@ open class ControlNode(
     }
 }
 
-class EntryNode(psi: PsiElement?) : ControlNode("START", psi, mutableListOf())
+class EntryNode(psi: PyElement?) : ControlNode("START", psi, mutableListOf())
