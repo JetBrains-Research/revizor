@@ -42,8 +42,8 @@ fun getNodeFullName(node: PyElement): String =
 fun getNodeKey(node: PyElement): String =
     when (node) {
         is PyFunction, is PyNamedParameter -> node.name ?: ""
-        is PyReferenceExpression, is PyTargetExpression -> (node as PyQualifiedExpression).asQualifiedName()?.toString()
-            ?: ""
+        is PyReferenceExpression, is PyTargetExpression ->
+            (node as PyQualifiedExpression).asQualifiedName()?.toString() ?: ""
         else -> throw IllegalArgumentException()
     }
 
@@ -72,6 +72,15 @@ fun getOperationName(node: PyElement): String? =
         }
     } else {
         throw NotImplementedError("Unsupported operation node")
+    }
+
+fun getCollectionLabel(node: PySequenceExpression): String =
+    when (node) {
+        is PyListLiteralExpression -> "List"
+        is PyTupleExpression -> "Tuple"
+        is PySetLiteralExpression -> "Set"
+        is PyDictLiteralExpression -> "Dict"
+        else -> throw IllegalArgumentException()
     }
 
 object DuplicateEntryNodeException : Throwable()

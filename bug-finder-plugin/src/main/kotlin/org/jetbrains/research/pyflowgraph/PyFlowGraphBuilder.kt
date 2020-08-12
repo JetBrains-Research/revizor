@@ -36,7 +36,7 @@ class PyFlowGraphBuilder {
         val currentFlowGraph = createGraph()
         currentFlowGraph.parallelMergeGraphs(node.elements.map { visitPyElement(it) }.filterNotNull())
         val operationNode = OperationNode(
-            label = node.name?.toLowerCase()?.trim('_') ?: "collection",
+            label = getCollectionLabel(node),
             psi = node,
             controlBranchStack = controlBranchStack,
             kind = OperationNode.Kind.COLLECTION
@@ -166,7 +166,7 @@ class PyFlowGraphBuilder {
         val currentFlowGraph = createGraph()
         currentFlowGraph.parallelMergeGraphs(keyValueFlowGraphs)
         val operationNode = OperationNode(
-            label = "Dict",
+            label = getCollectionLabel(node),
             psi = node,
             controlBranchStack = controlBranchStack,
             kind = OperationNode.Kind.COLLECTION
@@ -452,6 +452,39 @@ class PyFlowGraphBuilder {
         }
     }
 
+    private fun visitFor(node: PyForStatement): ExtControlFlowGraph {
+        val controlNode = ControlNode(ControlNode.Label.FOR, node, controlBranchStack)
+        val forFlowGraph = visitSimpleAssignment(
+            target = node.forPart.target ?: throw GraphBuildingException,
+            preparedValue = helper.prepareAssignmentValues(node.forPart.target, node.forPart.source)
+        )
+        forFlowGraph.addNode(controlNode, LinkType.CONDITION)
+        val forBodyFlowGraph = visitControlNodeBodyHelper(
+            controlNode = controlNode,
+            statements = node.forPart.statementList.statements,
+            newBranchKind = true
+        )
+        // TODO: it's easy to add `else` part, but it's not parsed in original miner
+        forFlowGraph.parallelMergeGraphs(listOf(forBodyFlowGraph))
+        forFlowGraph.statementSinks.clear()
+        return forFlowGraph
+    }
+
+    private fun visitWhile(node: PyWhileStatement): ExtControlFlowGraph {
+        val controlNode = ControlNode(ControlNode.Label.WHILE, node, controlBranchStack)
+        val whileFlowGraph = visitPyElement(node.whilePart.condition)
+        whileFlowGraph?.addNode(controlNode, LinkType.CONDITION)
+        val whileBodyFlowGraph = visitControlNodeBodyHelper(
+            controlNode = controlNode,
+            statements = node.whilePart.statementList.statements,
+            newBranchKind = true
+        )
+        // TODO: it's easy to add `else` part, but it's not parsed in original miner
+        whileFlowGraph?.parallelMergeGraphs(listOf(whileBodyFlowGraph))
+        whileFlowGraph?.statementSinks?.clear()
+        return whileFlowGraph ?: throw GraphBuildingException
+    }
+
     private fun visitControlNodeBodyHelper(
         controlNode: ControlNode,
         statements: Array<PyStatement>,
@@ -500,6 +533,8 @@ class PyFlowGraphBuilder {
             is PyCallExpression -> visitCall(node)
             is PyExpressionStatement -> visitPyElement(node.expression)
             is PyIfStatement -> visitIfStatement(node)
+            is PyForStatement -> visitFor(node)
+            is PyWhileStatement -> visitWhile(node)
             else -> null
         }
 }

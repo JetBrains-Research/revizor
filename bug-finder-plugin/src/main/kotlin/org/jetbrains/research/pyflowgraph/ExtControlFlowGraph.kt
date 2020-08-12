@@ -104,7 +104,7 @@ class ExtControlFlowGraph(
         if (linkType != null) {
             sinks.forEach { it.createEdge(node, linkType) }
         }
-        if ((node is DataNode || node is OperationNode) && linkType != LinkType.DEFINITION) {
+        if (node.key != null && linkType != LinkType.DEFINITION) {
             variableReferences.add(node)
         }
         if (clearSinks) {
