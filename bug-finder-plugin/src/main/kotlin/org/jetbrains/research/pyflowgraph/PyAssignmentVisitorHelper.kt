@@ -3,13 +3,38 @@ package org.jetbrains.research.pyflowgraph
 import com.jetbrains.python.psi.*
 
 @ExperimentalStdlibApi
-class PyFlowGraphBuilderHelper(private val builder: PyFlowGraphBuilder) {
+internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder) {
 
     // Helps to emulate dynamically-typed lists from python
     // TODO: fix it later
     sealed class PreparedAssignmentValue {
         data class AssignedValue(val value: ExtControlFlowGraph) : PreparedAssignmentValue()
         data class AssignedValues(val values: MutableList<PreparedAssignmentValue>) : PreparedAssignmentValue()
+    }
+
+    fun visitAssign(node: PyAssignmentStatement, targets: Array<PyExpression>): ExtControlFlowGraph {
+        val operationNode = OperationNode(
+            label = OperationNode.Label.ASSIGN,
+            psi = node,
+            controlBranchStack = builder.controlBranchStack,
+            kind = OperationNode.Kind.ASSIGN
+        )
+        val fgs = ArrayList<ExtControlFlowGraph>()
+        val assignedNodes = ArrayList<DataNode>()
+        for (target in targets) {
+            val preparedValueGraphs = prepareAssignmentValues(target, node.assignedValue)
+            val (currentAssignmentFlowGraph, variableNodes) = getAssignFlowGraphWithVars(
+                operationNode,
+                target,
+                preparedValueGraphs
+            )
+            assignedNodes.addAll(variableNodes)
+            fgs.add(currentAssignmentFlowGraph)
+        }
+        val assignmentFlowGraph = createGraph()
+        assignmentFlowGraph.parallelMergeGraphs(fgs)
+        assignedNodes.forEach { builder.context().addVariable(it) }
+        return assignmentFlowGraph
     }
 
     private fun createGraph() = builder.createGraph()
@@ -151,7 +176,7 @@ class PyFlowGraphBuilderHelper(private val builder: PyFlowGraphBuilder) {
                             )
                             val starredFlowGraph = createGraph()
                             starredFlowGraph.parallelMergeGraphs(
-                                starredValueElementsList.map { builder.visitPyElement(it) }.filterNotNull()
+                                starredValueElementsList.mapNotNull { builder.visitPyElement(it) }
                             )
                             starredFlowGraph.addNode(operationNode, LinkType.PARAMETER)
                             preparedSubAssignments.values.add(
@@ -159,11 +184,11 @@ class PyFlowGraphBuilderHelper(private val builder: PyFlowGraphBuilder) {
                             )
                             val restValueElements =
                                 valueElements.subList(targetStarredIndex + starredValueElementsCnt, valueElements.size)
-                            for ((i, value) in restValueElements.withIndex()) {
+                            for ((i, elem) in restValueElements.withIndex()) {
                                 preparedSubAssignments.values.add(
                                     prepareAssignmentValues(
                                         target = target.elements[targetStarredIndex + i + 1],
-                                        value = value
+                                        value = elem
                                     )
                                 )
                             }
@@ -175,30 +200,5 @@ class PyFlowGraphBuilderHelper(private val builder: PyFlowGraphBuilder) {
             }
             else -> throw GraphBuildingException
         }
-    }
-
-    fun visitAssign(node: PyAssignmentStatement, targets: Array<PyExpression>): ExtControlFlowGraph {
-        val operationNode = OperationNode(
-            label = OperationNode.Label.ASSIGN,
-            psi = node,
-            controlBranchStack = builder.controlBranchStack,
-            kind = OperationNode.Kind.ASSIGN
-        )
-        val fgs = ArrayList<ExtControlFlowGraph>()
-        val assignedNodes = ArrayList<DataNode>()
-        for (target in targets) {
-            val preparedValueGraphs = prepareAssignmentValues(target, node.assignedValue)
-            val (currentAssignmentFlowGraph, variableNodes) = getAssignFlowGraphWithVars(
-                operationNode,
-                target,
-                preparedValueGraphs
-            )
-            assignedNodes.addAll(variableNodes)
-            fgs.add(currentAssignmentFlowGraph)
-        }
-        val assignmentFlowGraph = createGraph()
-        assignmentFlowGraph.parallelMergeGraphs(fgs)
-        assignedNodes.forEach { builder.context().addVariable(it) }
-        return assignmentFlowGraph
     }
 }

@@ -4,12 +4,48 @@ import com.jetbrains.python.psi.*
 
 @ExperimentalStdlibApi
 class PyFlowGraphBuilder {
+    internal val controlBranchStack: ControlBranchStack = mutableListOf()
     private val flowGraph: ExtControlFlowGraph = createGraph()
-    var currentControlNode: Node? = null
-    var currentBranchKind: Boolean = true
-    val controlBranchStack: ControlBranchStack = mutableListOf()
+    private var currentControlNode: Node? = null
+    private var currentBranchKind: Boolean = true
     private val contextStack: MutableList<BuildingContext> = mutableListOf(BuildingContext())
-    private val helper = PyFlowGraphBuilderHelper(this)
+    private val helper = PyAssignmentVisitorHelper(this)
+
+    fun visitPyElement(node: PyElement?): ExtControlFlowGraph? =
+        when (node) {
+            is PyFunction -> visitFunction(node)
+            is PyReferenceExpression -> visitReference(node)
+            is PyBinaryExpression -> visitBinaryOperation(node)
+            is PyPrefixExpression -> visitPrefixOperation(node)
+            is PyTupleExpression -> visitTuple(node)
+            is PyListLiteralExpression -> visitList(node)
+            is PySetLiteralExpression -> visitSet(node)
+            is PyDictLiteralExpression -> visitDict(node)
+            is PyNumericLiteralExpression -> visitNumLiteral(node)
+            is PyStringLiteralExpression -> visitStrLiteral(node)
+            is PyBoolLiteralExpression -> visitBoolLiteral(node)
+            is PyNoneLiteralExpression -> visitNoneLiteral(node)
+            is PyPassStatement -> visitPass(node)
+            is PyLambdaExpression -> visitLambda(node)
+            is PyAssignmentStatement -> visitAssign(node)
+            is PyAugAssignmentStatement -> visitAugAssign(node)
+            is PySubscriptionExpression -> visitSubscript(node)
+            is PySliceExpression -> visitSlice(node)
+            is PyCallExpression -> visitCall(node)
+            is PyExpressionStatement -> visitPyElement(node.expression)
+            is PyIfStatement -> visitIfStatement(node)
+            is PyForStatement -> visitFor(node)
+            is PyWhileStatement -> visitWhile(node)
+            is PyTryExceptStatement -> visitTry(node)
+            is PyImportStatement -> visitImport()
+            is PyFromImportStatement -> visitImportFrom()
+            is PyBreakStatement -> visitBreak(node)
+            is PyContinueStatement -> visitContinue(node)
+            is PyRaiseStatement -> visitRaise(node)
+            is PyReturnStatement -> visitReturn(node)
+            is PyParenthesizedExpression -> visitPyElement(node.containedExpression)
+            else -> null
+        }
 
     fun createGraph(node: Node? = null) = ExtControlFlowGraph(this, node)
 
@@ -30,58 +66,6 @@ class PyFlowGraphBuilder {
         val lastElement = controlBranchStack.removeLast()
         currentControlNode = lastElement.first
         currentBranchKind = lastElement.second
-    }
-
-    private fun visitCollection(node: PySequenceExpression): ExtControlFlowGraph {
-        val currentFlowGraph = createGraph()
-        currentFlowGraph.parallelMergeGraphs(node.elements.map { visitPyElement(it) }.filterNotNull())
-        val operationNode = OperationNode(
-            label = getCollectionLabel(node),
-            psi = node,
-            controlBranchStack = controlBranchStack,
-            kind = OperationNode.Kind.COLLECTION
-        )
-        currentFlowGraph.addNode(operationNode, LinkType.PARAMETER)
-        return currentFlowGraph
-    }
-
-    private fun visitOperationHelper(
-        operationName: String?,
-        node: PyElement,
-        operationKind: String,
-        params: List<PyExpression>
-    ): ExtControlFlowGraph {
-        val operationNode = OperationNode(
-            label = operationName?.toLowerCase()?.trim('_') ?: "unknown",
-            psi = node,
-            controlBranchStack = controlBranchStack,
-            kind = operationKind
-        )
-        val paramsFlowGraphs: ArrayList<ExtControlFlowGraph> = ArrayList()
-        params.forEach { param ->
-            visitPyElement(param).also {
-                it?.addNode(operationNode, LinkType.PARAMETER)
-                if (it != null) {
-                    paramsFlowGraphs.add(it)
-                }
-            }
-        }
-        return createGraph().also { it.parallelMergeGraphs(paramsFlowGraphs) }
-    }
-
-    private fun visitBinOperationHelper(
-        node: PyElement,
-        leftOperand: PyExpression,
-        rightOperand: PyExpression,
-        operationName: String? = null,
-        operationKind: String = OperationNode.Kind.UNCLASSIFIED
-    ): ExtControlFlowGraph {
-        return visitOperationHelper(
-            operationName = operationName ?: "unknown",
-            node = node,
-            operationKind = operationKind,
-            params = arrayListOf(leftOperand, rightOperand)
-        )
     }
 
     private fun visitFunction(node: PyFunction): ExtControlFlowGraph {
@@ -145,11 +129,11 @@ class PyFlowGraphBuilder {
         return currentFlowGraph
     }
 
-    private fun visitList(node: PyListLiteralExpression): ExtControlFlowGraph = visitCollection(node)
+    private fun visitList(node: PyListLiteralExpression): ExtControlFlowGraph = visitCollectionHelper(node)
 
-    private fun visitTuple(node: PyTupleExpression): ExtControlFlowGraph = visitCollection(node)
+    private fun visitTuple(node: PyTupleExpression): ExtControlFlowGraph = visitCollectionHelper(node)
 
-    private fun visitSet(node: PySetLiteralExpression): ExtControlFlowGraph = visitCollection(node)
+    private fun visitSet(node: PySetLiteralExpression): ExtControlFlowGraph = visitCollectionHelper(node)
 
     private fun visitDict(node: PyDictLiteralExpression): ExtControlFlowGraph {
         val keyValueFlowGraphs = ArrayList<ExtControlFlowGraph>()
@@ -216,20 +200,6 @@ class PyFlowGraphBuilder {
         return mergeOperandWithIndexGraphs(operandFlowGraph, sliceFlowGraph, sliceNode)
     }
 
-    private fun mergeOperandWithIndexGraphs(
-        operandFlowGraph: ExtControlFlowGraph,
-        indexFlowGraph: ExtControlFlowGraph,
-        subscriptNode: DataNode
-    ): ExtControlFlowGraph {
-        indexFlowGraph.addNode(subscriptNode, linkType = LinkType.PARAMETER, clearSinks = true)
-        operandFlowGraph.mergeGraph(
-            indexFlowGraph,
-            linkNode = indexFlowGraph.sinks.first(),
-            linkType = LinkType.QUALIFIER
-        )
-        return operandFlowGraph
-    }
-
     private fun visitBinaryOperation(node: PyBinaryExpression): ExtControlFlowGraph {
         return if (node.isOperator("and") || node.isOperator("or")) {
             visitBinOperationHelper(
@@ -286,7 +256,7 @@ class PyFlowGraphBuilder {
             )
             return visitSimpleAssignment(
                 target = node.target,
-                preparedValue = PyFlowGraphBuilderHelper.PreparedAssignmentValue.AssignedValue(valueFlowGraph)
+                preparedValue = PyAssignmentVisitorHelper.PreparedAssignmentValue.AssignedValue(valueFlowGraph)
             )
         } else {
             throw GraphBuildingException
@@ -295,7 +265,7 @@ class PyFlowGraphBuilder {
 
     private fun visitSimpleAssignment(
         target: PyElement,
-        preparedValue: PyFlowGraphBuilderHelper.PreparedAssignmentValue
+        preparedValue: PyAssignmentVisitorHelper.PreparedAssignmentValue
     ): ExtControlFlowGraph {
         val operationNode = OperationNode(
             label = OperationNode.Label.ASSIGN,
@@ -355,39 +325,6 @@ class PyFlowGraphBuilder {
         } else {
             visitFunctionCallHelper(node, name, key)
         }
-    }
-
-    private fun visitFunctionCallHelper(node: PyCallExpression, name: String, key: String): ExtControlFlowGraph {
-        val argumentsFlowGraphs = visitFunctionCallArgumentsHelper(node)
-        val callFlowGraph = createGraph()
-        callFlowGraph.parallelMergeGraphs(argumentsFlowGraphs)
-        val operationNode = OperationNode(
-            label = name,
-            psi = node,
-            controlBranchStack = controlBranchStack,
-            kind = OperationNode.Kind.FUNC_CALL,
-            key = key
-        )
-        callFlowGraph.addNode(operationNode, LinkType.PARAMETER, clearSinks = true)
-        return callFlowGraph
-    }
-
-    private fun visitFunctionCallArgumentsHelper(node: PyCallExpression): List<ExtControlFlowGraph> {
-        val argsFlowGraphs = ArrayList<ExtControlFlowGraph?>()
-        for (arg in node.arguments) {
-            if (arg is PyKeywordArgument) {
-                val argFlowGraph = visitPyElement(arg.valueExpression)
-                val keyWordNode = DataNode(arg.keyword ?: "keyword", arg, kind = DataNode.Kind.KEYWORD)
-                argFlowGraph?.addNode(keyWordNode)
-                argsFlowGraphs.add(argFlowGraph)
-            } else {
-                argsFlowGraphs.add(visitPyElement(arg))
-            }
-        }
-        if (argsFlowGraphs.any { it == null }) {
-            println("Function has unsupported arguments, skipping them...")
-        }
-        return argsFlowGraphs.filterNotNull()
     }
 
     private fun visitIfStatement(node: PyIfStatement): ExtControlFlowGraph {
@@ -505,7 +442,7 @@ class PyFlowGraphBuilder {
             newBranchKind = true
         )
         switchControlBranch(controlNode, newBranchKind = false)
-        val exceptHandlersFlowGraphs = node.exceptParts.mapNotNull { visitPyElement(it) }
+        val exceptHandlersFlowGraphs = node.exceptParts.map { visitExcept(it) }
         tryFlowGraph.parallelMergeGraphs(listOf(tryBodyFlowGraph).plus(exceptHandlersFlowGraphs))
         popControlBranch()
         tryFlowGraph.statementSinks.clear()
@@ -529,34 +466,9 @@ class PyFlowGraphBuilder {
     }
 
     // TODO: fix import stubs in original miner
-    private fun visitImport(node: PyImportStatement) = createGraph()
+    private fun visitImport() = createGraph()
 
-    private fun visitImportFrom(node: PyFromImportStatement) = createGraph()
-
-    private fun visitControlNodeBodyHelper(
-        controlNode: ControlNode,
-        statements: Array<PyStatement>,
-        newBranchKind: Boolean,
-        replaceControl: Boolean = false
-    ): ExtControlFlowGraph {
-        switchControlBranch(controlNode, newBranchKind, replaceControl)
-        val currentFlowGraph = createGraph()
-        currentFlowGraph.addNode(EmptyNode(controlBranchStack))
-        for (statement in statements) {
-            var statementFlowGraph: ExtControlFlowGraph? = null
-            try {
-                statementFlowGraph = visitPyElement(statement)
-            } finally {
-                if (statementFlowGraph == null) {
-                    println("Unable to build graph for $statement inside ${controlNode.psi}, skipping...")
-                    continue
-                }
-                currentFlowGraph.mergeGraph(statementFlowGraph)
-            }
-        }
-        popControlBranch()
-        return currentFlowGraph
-    }
+    private fun visitImportFrom() = createGraph()
 
     private fun visitRaise(node: PyRaiseStatement): ExtControlFlowGraph =
         visitControlOperationStatementHelper(
@@ -590,6 +502,64 @@ class PyFlowGraphBuilder {
             resetVariables = false
         )
 
+    private fun visitFunctionCallHelper(node: PyCallExpression, name: String, key: String): ExtControlFlowGraph {
+        val argumentsFlowGraphs = visitFunctionCallArgumentsHelper(node)
+        val callFlowGraph = createGraph()
+        callFlowGraph.parallelMergeGraphs(argumentsFlowGraphs)
+        val operationNode = OperationNode(
+            label = name,
+            psi = node,
+            controlBranchStack = controlBranchStack,
+            kind = OperationNode.Kind.FUNC_CALL,
+            key = key
+        )
+        callFlowGraph.addNode(operationNode, LinkType.PARAMETER, clearSinks = true)
+        return callFlowGraph
+    }
+
+    private fun visitFunctionCallArgumentsHelper(node: PyCallExpression): List<ExtControlFlowGraph> {
+        val argsFlowGraphs = ArrayList<ExtControlFlowGraph?>()
+        for (arg in node.arguments) {
+            if (arg is PyKeywordArgument) {
+                val argFlowGraph = visitPyElement(arg.valueExpression)
+                val keyWordNode = DataNode(arg.keyword ?: "keyword", arg, kind = DataNode.Kind.KEYWORD)
+                argFlowGraph?.addNode(keyWordNode)
+                argsFlowGraphs.add(argFlowGraph)
+            } else {
+                argsFlowGraphs.add(visitPyElement(arg))
+            }
+        }
+        if (argsFlowGraphs.any { it == null }) {
+            println("Function has unsupported arguments, skipping them...")
+        }
+        return argsFlowGraphs.filterNotNull()
+    }
+
+    private fun visitControlNodeBodyHelper(
+        controlNode: ControlNode,
+        statements: Array<PyStatement>,
+        newBranchKind: Boolean,
+        replaceControl: Boolean = false
+    ): ExtControlFlowGraph {
+        switchControlBranch(controlNode, newBranchKind, replaceControl)
+        val currentFlowGraph = createGraph()
+        currentFlowGraph.addNode(EmptyNode(controlBranchStack))
+        for (statement in statements) {
+            var statementFlowGraph: ExtControlFlowGraph? = null
+            try {
+                statementFlowGraph = visitPyElement(statement)
+            } finally {
+                if (statementFlowGraph == null) {
+                    println("Unable to build graph for $statement inside ${controlNode.psi}, skipping...")
+                    continue
+                }
+                currentFlowGraph.mergeGraph(statementFlowGraph)
+            }
+        }
+        popControlBranch()
+        return currentFlowGraph
+    }
+
     private fun visitControlOperationStatementHelper(
         label: String,
         node: PyElement,
@@ -611,39 +581,70 @@ class PyFlowGraphBuilder {
         return fg
     }
 
-    fun visitPyElement(node: PyElement?): ExtControlFlowGraph? =
-        when (node) {
-            is PyFunction -> visitFunction(node)
-            is PyReferenceExpression -> visitReference(node)
-            is PyBinaryExpression -> visitBinaryOperation(node)
-            is PyPrefixExpression -> visitPrefixOperation(node)
-            is PyTupleExpression -> visitTuple(node)
-            is PyListLiteralExpression -> visitList(node)
-            is PySetLiteralExpression -> visitSet(node)
-            is PyDictLiteralExpression -> visitDict(node)
-            is PyNumericLiteralExpression -> visitNumLiteral(node)
-            is PyStringLiteralExpression -> visitStrLiteral(node)
-            is PyBoolLiteralExpression -> visitBoolLiteral(node)
-            is PyNoneLiteralExpression -> visitNoneLiteral(node)
-            is PyPassStatement -> visitPass(node)
-            is PyLambdaExpression -> visitLambda(node)
-            is PyAssignmentStatement -> visitAssign(node)
-            is PyAugAssignmentStatement -> visitAugAssign(node)
-            is PySubscriptionExpression -> visitSubscript(node)
-            is PySliceExpression -> visitSlice(node)
-            is PyCallExpression -> visitCall(node)
-            is PyExpressionStatement -> visitPyElement(node.expression)
-            is PyIfStatement -> visitIfStatement(node)
-            is PyForStatement -> visitFor(node)
-            is PyWhileStatement -> visitWhile(node)
-            is PyTryExceptStatement -> visitTry(node)
-            is PyImportStatement -> visitImport(node)
-            is PyFromImportStatement -> visitImportFrom(node)
-            is PyBreakStatement -> visitBreak(node)
-            is PyContinueStatement -> visitContinue(node)
-            is PyRaiseStatement -> visitRaise(node)
-            is PyReturnStatement -> visitReturn(node)
-            is PyParenthesizedExpression -> visitPyElement(node.containedExpression)
-            else -> null
+    private fun visitCollectionHelper(node: PySequenceExpression): ExtControlFlowGraph {
+        val currentFlowGraph = createGraph()
+        currentFlowGraph.parallelMergeGraphs(node.elements.mapNotNull { visitPyElement(it) })
+        val operationNode = OperationNode(
+            label = getCollectionLabel(node),
+            psi = node,
+            controlBranchStack = controlBranchStack,
+            kind = OperationNode.Kind.COLLECTION
+        )
+        currentFlowGraph.addNode(operationNode, LinkType.PARAMETER)
+        return currentFlowGraph
+    }
+
+    private fun visitOperationHelper(
+        operationName: String?,
+        node: PyElement,
+        operationKind: String,
+        params: List<PyExpression>
+    ): ExtControlFlowGraph {
+        val operationNode = OperationNode(
+            label = operationName?.toLowerCase()?.trim('_') ?: "unknown",
+            psi = node,
+            controlBranchStack = controlBranchStack,
+            kind = operationKind
+        )
+        val paramsFlowGraphs: ArrayList<ExtControlFlowGraph> = ArrayList()
+        params.forEach { param ->
+            visitPyElement(param).also {
+                it?.addNode(operationNode, LinkType.PARAMETER)
+                if (it != null) {
+                    paramsFlowGraphs.add(it)
+                }
+            }
         }
+        return createGraph().also { it.parallelMergeGraphs(paramsFlowGraphs) }
+    }
+
+    private fun visitBinOperationHelper(
+        node: PyElement,
+        leftOperand: PyExpression,
+        rightOperand: PyExpression,
+        operationName: String? = null,
+        operationKind: String = OperationNode.Kind.UNCLASSIFIED
+    ): ExtControlFlowGraph {
+        return visitOperationHelper(
+            operationName = operationName ?: "unknown",
+            node = node,
+            operationKind = operationKind,
+            params = arrayListOf(leftOperand, rightOperand)
+        )
+    }
+
+    private fun mergeOperandWithIndexGraphs(
+        operandFlowGraph: ExtControlFlowGraph,
+        indexFlowGraph: ExtControlFlowGraph,
+        subscriptNode: DataNode
+    ): ExtControlFlowGraph {
+        indexFlowGraph.addNode(subscriptNode, linkType = LinkType.PARAMETER, clearSinks = true)
+        operandFlowGraph.mergeGraph(
+            indexFlowGraph,
+            linkNode = indexFlowGraph.sinks.first(),
+            linkType = LinkType.QUALIFIER
+        )
+        return operandFlowGraph
+    }
+
 }
