@@ -548,6 +548,59 @@ class PyFlowGraphBuilder {
         return currentFlowGraph
     }
 
+    private fun visitRaise(node: PyRaiseStatement): ExtControlFlowGraph =
+        visitControlOperationStatementHelper(
+            OperationNode.Label.RAISE,
+            node,
+            OperationNode.Kind.RAISE,
+            resetVariables = true
+        )
+
+    private fun visitReturn(node: PyReturnStatement): ExtControlFlowGraph =
+        visitControlOperationStatementHelper(
+            OperationNode.Label.RETURN,
+            node,
+            OperationNode.Kind.RETURN,
+            resetVariables = true
+        )
+
+    private fun visitContinue(node: PyContinueStatement): ExtControlFlowGraph =
+        visitControlOperationStatementHelper(
+            OperationNode.Label.CONTINUE,
+            node,
+            OperationNode.Kind.CONTINUE,
+            resetVariables = false
+        )
+
+    private fun visitBreak(node: PyBreakStatement): ExtControlFlowGraph =
+        visitControlOperationStatementHelper(
+            OperationNode.Label.BREAK,
+            node,
+            OperationNode.Kind.BREAK,
+            resetVariables = false
+        )
+
+    private fun visitControlOperationStatementHelper(
+        label: String,
+        node: PyElement,
+        kind: String,
+        resetVariables: Boolean = false
+    ): ExtControlFlowGraph {
+        val fg = createGraph()
+        when (node) {
+            is PyReturnStatement -> visitPyElement(node.expression)?.let { fg.mergeGraph(it) }
+            // TODO: why there is only one expression in raise from original ast?
+            is PyRaiseStatement -> visitPyElement(node.expressions.firstOrNull())?.let { fg.mergeGraph(it) }
+        }
+        val operationNode = OperationNode(label, node, controlBranchStack, kind = kind)
+        fg.addNode(operationNode, LinkType.PARAMETER)
+        fg.statementSinks.clear()
+        if (resetVariables) {
+            context().removeVariables(controlBranchStack)
+        }
+        return fg
+    }
+
     fun visitPyElement(node: PyElement?): ExtControlFlowGraph? =
         when (node) {
             is PyFunction -> visitFunction(node)
@@ -573,6 +626,14 @@ class PyFlowGraphBuilder {
             is PyIfStatement -> visitIfStatement(node)
             is PyForStatement -> visitFor(node)
             is PyWhileStatement -> visitWhile(node)
+            is PyTryExceptStatement -> visitTry(node)
+            is PyImportStatement -> visitImport(node)
+            is PyFromImportStatement -> visitImportFrom(node)
+            is PyBreakStatement -> visitBreak(node)
+            is PyContinueStatement -> visitContinue(node)
+            is PyRaiseStatement -> visitRaise(node)
+            is PyReturnStatement -> visitReturn(node)
+            is PyParenthesizedExpression -> visitPyElement(node.containedExpression)
             else -> null
         }
 }
