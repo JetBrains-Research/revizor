@@ -22,7 +22,7 @@ class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor()
     override fun visitPyFunction(node: PyFunction?) {
         if (node != null) {
             try {
-                val methodJGraph = buildPyFlowGraphForMethod(node, builder = "python")
+                val methodJGraph = buildPyFlowGraphForMethod(node, builder = "kotlin")
                 val suggestions = PatternsStorage.getIsomorphicPatterns(targetGraph = methodJGraph).keys
                 if (suggestions.isNotEmpty()) {
                     holder.registerProblem(

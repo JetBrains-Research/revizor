@@ -17,6 +17,7 @@ object PatternSpecificGraphsLoader {
         val defaultDAG = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificEdge>(
             PatternSpecificEdge::class.java
         )
+        var edgeGlobalId = 0
         for (node in pfg.nodes) {
             val sourceVertex = PatternSpecificVertex(node)
             defaultDAG.addVertex(sourceVertex)
@@ -29,6 +30,7 @@ object PatternSpecificGraphsLoader {
                     sourceVertex,
                     targetVertex,
                     PatternSpecificEdge(
+                        id = edgeGlobalId++,
                         xlabel = outEdge.label,
                         fromClosure = outEdge.fromClosure
                     )
@@ -42,7 +44,10 @@ object PatternSpecificGraphsLoader {
         for (sourceVertex in targetDAG.vertexSet()) {
             val children = defaultDAG.outgoingEdgesOf(sourceVertex).map { defaultDAG.getEdgeTarget(it) }.toSet()
             for (targetVertex in children) {
-                val multipleEdge = PatternSpecificMultipleEdge(embeddedEdgeByXlabel = HashMap())
+                val multipleEdge = PatternSpecificMultipleEdge(
+                    id = edgeGlobalId++,
+                    embeddedEdgeByXlabel = HashMap()
+                )
                 for (outEdge in defaultDAG.getAllEdges(sourceVertex, targetVertex)) {
                     multipleEdge.embeddedEdgeByXlabel[outEdge.xlabel] = outEdge
                 }
@@ -85,14 +90,19 @@ object PatternSpecificGraphsLoader {
                 )
             )
         }
+        var edgeGlobalId = 0
         for (sourceVertexId in importedDAG.vertexSet()) {
             val children = importedDAG.outgoingEdgesOf(sourceVertexId)
                 .map { importedDAG.getEdgeTarget(it) }
                 .toSet()
             for (targetVertexId in children) {
-                val multipleEdge = PatternSpecificMultipleEdge(embeddedEdgeByXlabel = HashMap())
+                val multipleEdge = PatternSpecificMultipleEdge(
+                    id = edgeGlobalId++,
+                    embeddedEdgeByXlabel = HashMap()
+                )
                 for (outEdge in importedDAG.getAllEdges(sourceVertexId, targetVertexId)) {
                     val edge = PatternSpecificEdge(
+                        id = edgeGlobalId++,
                         xlabel = edgeAttributes[outEdge]?.get("xlabel")?.toString(),
                         fromClosure = edgeAttributes[outEdge]?.get("from_closure")?.toString()?.toBoolean(),
                         style = edgeAttributes[outEdge]?.get("style")?.toString()
