@@ -41,8 +41,7 @@ class ExtControlFlowGraph(
         for (refNode in graph.variableReferences) {
             val defNodes = refNode.key?.let { visitor.context().getVariables(it) }
             if (defNodes != null) {
-                defNodes
-                    .filter { it.statementNum < refNode.statementNum }
+                defNodes.filter { it.statementNum < refNode.statementNum }
                     .forEach { it.createEdge(refNode, LinkType.REFERENCE) }
                 resolvedReferences.add(refNode)
             }
@@ -60,7 +59,7 @@ class ExtControlFlowGraph(
         val unresolvedReferences = graph.variableReferences.minus(resolvedReferences)
         for (sink in statementSinks) {
             for (source in graph.statementSources) {
-                sink.createEdge(source, LinkType.REFERENCE)
+                sink.createEdge(source, LinkType.DEPENDENCE)
             }
         }
         nodes.addAll(graph.nodes)

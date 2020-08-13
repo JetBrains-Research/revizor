@@ -329,8 +329,8 @@ class PyFlowGraphBuilder {
         val name = node.callee?.let { getNodeShortName(it) } ?: throw GraphBuildingException
         val key = node.callee?.let { getNodeKey(it) } ?: throw GraphBuildingException
         return if (node.callee is PyQualifiedExpression && (node.callee as PyQualifiedExpression).isQualified) {
-            val callFlowGraph = visitFunctionCallHelper(node, name, key)
             val calleeFlowGraph = node.callee?.let { visitPyElement(it) } ?: throw GraphBuildingException
+            val callFlowGraph = visitFunctionCallHelper(node, name)
             calleeFlowGraph.mergeGraph(
                 callFlowGraph,
                 linkNode = callFlowGraph.sinks.first(),
@@ -486,7 +486,7 @@ class PyFlowGraphBuilder {
     private fun visitImportFrom() = createGraph()
 
     private fun visitRaise(node: PyRaiseStatement): ExtControlFlowGraph =
-        visitControlOperationStatementHelper(
+        visitOperationAndResetHelper(
             OperationNode.Label.RAISE,
             node,
             OperationNode.Kind.RAISE,
@@ -494,7 +494,7 @@ class PyFlowGraphBuilder {
         )
 
     private fun visitReturn(node: PyReturnStatement): ExtControlFlowGraph =
-        visitControlOperationStatementHelper(
+        visitOperationAndResetHelper(
             OperationNode.Label.RETURN,
             node,
             OperationNode.Kind.RETURN,
@@ -502,7 +502,7 @@ class PyFlowGraphBuilder {
         )
 
     private fun visitContinue(node: PyContinueStatement): ExtControlFlowGraph =
-        visitControlOperationStatementHelper(
+        visitOperationAndResetHelper(
             OperationNode.Label.CONTINUE,
             node,
             OperationNode.Kind.CONTINUE,
@@ -510,14 +510,18 @@ class PyFlowGraphBuilder {
         )
 
     private fun visitBreak(node: PyBreakStatement): ExtControlFlowGraph =
-        visitControlOperationStatementHelper(
+        visitOperationAndResetHelper(
             OperationNode.Label.BREAK,
             node,
             OperationNode.Kind.BREAK,
             resetVariables = false
         )
 
-    private fun visitFunctionCallHelper(node: PyCallExpression, name: String, key: String): ExtControlFlowGraph {
+    private fun visitFunctionCallHelper(
+        node: PyCallExpression,
+        name: String,
+        key: String? = null
+    ): ExtControlFlowGraph {
         val argumentsFlowGraphs = visitFunctionCallArgumentsHelper(node)
         val callFlowGraph = createGraph()
         callFlowGraph.parallelMergeGraphs(argumentsFlowGraphs)
@@ -575,7 +579,7 @@ class PyFlowGraphBuilder {
         return currentFlowGraph
     }
 
-    private fun visitControlOperationStatementHelper(
+    private fun visitOperationAndResetHelper(
         label: String,
         node: PyElement,
         kind: String,

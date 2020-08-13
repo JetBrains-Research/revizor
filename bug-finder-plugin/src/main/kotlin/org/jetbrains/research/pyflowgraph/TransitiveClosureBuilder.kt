@@ -10,7 +10,7 @@ object TransitiveClosureBuilder : FlowGraphNodesProcessor {
     }
 
     private fun buildDataClosure(node: Node, processedNodes: MutableSet<Node>) {
-        if (node.getDefinitions().isEmpty()) {
+        if (node.getDefinitions().isNotEmpty()) {
             return
         }
         for (edge in node.inEdges.toHashSet()) {
