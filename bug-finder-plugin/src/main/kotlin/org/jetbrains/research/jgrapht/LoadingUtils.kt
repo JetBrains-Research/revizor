@@ -1,4 +1,4 @@
-package org.jetbrains.research.localization
+package org.jetbrains.research.jgrapht
 
 import org.jgrapht.graph.DefaultEdge
 import org.jgrapht.graph.DirectedAcyclicGraph

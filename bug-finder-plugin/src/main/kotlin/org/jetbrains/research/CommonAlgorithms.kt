@@ -1,4 +1,4 @@
-package org.jetbrains.research.localization
+package org.jetbrains.research
 
 fun getLongestCommonSuffix(strings: ArrayList<String?>?): String {
     if (strings == null || strings.isEmpty())

@@ -2,7 +2,7 @@ package org.jetbrains.research
 
 import com.intellij.openapi.components.service
 import org.jetbrains.research.ide.BugFinderConfigService
-import org.jetbrains.research.localization.*
+import org.jetbrains.research.jgrapht.*
 import org.jgrapht.Graph
 import org.jgrapht.alg.isomorphism.VF2SubgraphIsomorphismInspector
 import org.jgrapht.graph.AsSubgraph

@@ -1,15 +1,6 @@
-package org.jetbrains.research.localization
+package org.jetbrains.research.jgrapht
 
 import org.jgrapht.graph.DefaultEdge
-
-data class Vertex(
-    val id: String,
-    val label: String?,
-    val originalLabel: String?,
-    val color: String?,
-    val shape: String?,
-    var longestCommonSuffix: String? = null
-)
 
 data class MultipleEdge(
     val id: DefaultEdge,
@@ -22,20 +13,6 @@ data class Edge(
     val fromClosure: Boolean?,
     val style: String?
 )
-
-class PatternVertexComparator : Comparator<Vertex> {
-    override fun compare(fromTarget: Vertex?, fromPattern: Vertex?): Int {
-        if (fromTarget?.label?.startsWith("var") == true
-            && fromPattern?.label?.startsWith("var") == true
-        ) {
-            val lcs = fromPattern.longestCommonSuffix ?: ""
-            return if (fromTarget.originalLabel?.endsWith(lcs) == true) 0 else 1
-        }
-        if (fromTarget?.originalLabel == fromPattern?.originalLabel && fromTarget?.label == fromPattern?.label)
-            return 0
-        return 1
-    }
-}
 
 class MultipleEdgeComparator : Comparator<MultipleEdge> {
     override fun compare(e0: MultipleEdge?, e1: MultipleEdge?): Int {
