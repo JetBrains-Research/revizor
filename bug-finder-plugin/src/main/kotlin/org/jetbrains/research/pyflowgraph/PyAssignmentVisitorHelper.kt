@@ -1,6 +1,10 @@
 package org.jetbrains.research.pyflowgraph
 
 import com.jetbrains.python.psi.*
+import org.jetbrains.research.pyflowgraph.models.DataNode
+import org.jetbrains.research.pyflowgraph.models.LinkType
+import org.jetbrains.research.pyflowgraph.models.OperationNode
+import org.jetbrains.research.pyflowgraph.models.PyFlowGraph
 
 @ExperimentalStdlibApi
 internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder) {
@@ -8,18 +12,18 @@ internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder
     // Helps to emulate dynamically-typed lists from python
     // TODO: fix it later
     sealed class PreparedAssignmentValue {
-        data class AssignedValue(val value: ExtControlFlowGraph) : PreparedAssignmentValue()
+        data class AssignedValue(val value: PyFlowGraph) : PreparedAssignmentValue()
         data class AssignedValues(val values: MutableList<PreparedAssignmentValue>) : PreparedAssignmentValue()
     }
 
-    fun visitAssign(node: PyAssignmentStatement, targets: Array<PyExpression>): ExtControlFlowGraph {
+    fun visitAssign(node: PyAssignmentStatement, targets: Array<PyExpression>): PyFlowGraph {
         val operationNode = OperationNode(
             label = OperationNode.Label.ASSIGN,
             psi = node,
             controlBranchStack = builder.controlBranchStack,
             kind = OperationNode.Kind.ASSIGN
         )
-        val fgs = ArrayList<ExtControlFlowGraph>()
+        val fgs = ArrayList<PyFlowGraph>()
         val assignedNodes = ArrayList<DataNode>()
         for (target in targets) {
             val preparedValueGraphs = prepareAssignmentValues(target, node.assignedValue)
@@ -56,7 +60,7 @@ internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder
         operationNode: OperationNode,
         target: PyElement,
         preparedValueGraphs: PreparedAssignmentValue
-    ): Pair<ExtControlFlowGraph, List<DataNode>> {
+    ): Pair<PyFlowGraph, List<DataNode>> {
         when (target) {
             is PyTargetExpression, is PyNamedParameter, is PyReferenceExpression -> {
                 val name = getNodeFullName(target)
@@ -83,7 +87,7 @@ internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder
                     is PreparedAssignmentValue.AssignedValue -> {
                         val preparedValueGraph = preparedValueGraphs.value
                         val assignGroup = getAssignGroup(target)
-                        val fgs = ArrayList<ExtControlFlowGraph>()
+                        val fgs = ArrayList<PyFlowGraph>()
                         for (element in assignGroup) {
                             val (fg, currentVarNodes) = getAssignFlowGraphWithVars(
                                 operationNode, element, PreparedAssignmentValue.AssignedValue(createGraph())
@@ -96,7 +100,7 @@ internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder
                     }
                     is PreparedAssignmentValue.AssignedValues -> {
                         val tempFlowGraph = createGraph()
-                        val tempFlowGraphs = ArrayList<ExtControlFlowGraph>()
+                        val tempFlowGraphs = ArrayList<PyFlowGraph>()
                         for ((i, element) in (target as PySequenceExpression).elements.withIndex()) {
                             val (fg, currentVars) = getAssignFlowGraphWithVars(
                                 operationNode,

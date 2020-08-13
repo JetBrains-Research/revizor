@@ -1,4 +1,4 @@
-package org.jetbrains.research.pyflowgraph
+package org.jetbrains.research.pyflowgraph.models
 
 class BuildingContext {
     private val variableKeyToDefNodes: MutableMap<String, MutableSet<DataNode>> = mutableMapOf()

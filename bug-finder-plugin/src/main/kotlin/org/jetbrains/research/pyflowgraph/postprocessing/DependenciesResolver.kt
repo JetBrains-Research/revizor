@@ -1,19 +1,21 @@
-package org.jetbrains.research.pyflowgraph
+package org.jetbrains.research.pyflowgraph.postprocessing
+
+import org.jetbrains.research.pyflowgraph.models.*
 
 @ExperimentalStdlibApi
 object DependenciesResolver : FlowGraphNodesProcessor {
-    fun resolve(flowGraph: ExtControlFlowGraph) {
+    fun resolve(flowGraph: PyFlowGraph) {
         processFlowGraphNodes(flowGraph, processorFunction = this::adjustControls)
         removeEmptyNodes(flowGraph)
         cleanUpDependencies(flowGraph)
     }
 
-    private fun removeEmptyNodes(flowGraph: ExtControlFlowGraph) =
+    private fun removeEmptyNodes(flowGraph: PyFlowGraph) =
         flowGraph.nodes.toMutableSet()
             .filterIsInstance<EmptyNode>()
             .forEach { flowGraph.removeNode(it) }
 
-    private fun cleanUpDependencies(flowGraph: ExtControlFlowGraph) {
+    private fun cleanUpDependencies(flowGraph: PyFlowGraph) {
         flowGraph.nodes.forEach { node ->
             node.inEdges
                 .filter { it.label == LinkType.DEPENDENCE }

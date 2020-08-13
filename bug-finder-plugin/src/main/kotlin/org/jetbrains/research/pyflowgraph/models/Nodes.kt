@@ -1,4 +1,4 @@
-package org.jetbrains.research.pyflowgraph
+package org.jetbrains.research.pyflowgraph.models
 
 import com.jetbrains.python.psi.PyElement
 
@@ -26,7 +26,8 @@ abstract class Node(
         .toHashSet()
 
     fun createEdge(nodeTo: Node, linkType: String, fromClosure: Boolean = false) {
-        val edge = DataEdge(linkType, this, nodeTo, fromClosure)
+        val edge =
+            DataEdge(linkType, this, nodeTo, fromClosure)
         outEdges.add(edge)
         nodeTo.inEdges.add(edge)
     }
@@ -70,7 +71,6 @@ class DataNode(
         const val VARIABLE_DECLARATION = "variable-decl"
         const val VARIABLE_USAGE = "variable-usage"
         const val SUBSCRIPT = "subscript"
-        const val SLICE = "slice"
         const val LITERAL = "literal"
         const val KEYWORD = "keyword"
         const val UNDEFINED = "undefined"
@@ -104,7 +104,12 @@ open class StatementNode(
         nodeTo: StatementNode, branchKind: Boolean,
         addToStack: Boolean = true, fromClosure: Boolean = false
     ) {
-        val controlEdge = ControlEdge(this, nodeTo, branchKind, fromClosure)
+        val controlEdge = ControlEdge(
+            this,
+            nodeTo,
+            branchKind,
+            fromClosure
+        )
         outEdges.add(controlEdge)
         nodeTo.inEdges.add(controlEdge)
         if (addToStack) {

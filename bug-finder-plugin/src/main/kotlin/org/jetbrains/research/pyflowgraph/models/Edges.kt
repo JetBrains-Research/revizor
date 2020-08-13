@@ -1,4 +1,4 @@
-package org.jetbrains.research.pyflowgraph
+package org.jetbrains.research.pyflowgraph.models
 
 open class Edge(
     var label: String,

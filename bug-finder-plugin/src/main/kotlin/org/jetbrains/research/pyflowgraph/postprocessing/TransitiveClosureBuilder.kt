@@ -1,9 +1,11 @@
-package org.jetbrains.research.pyflowgraph
+package org.jetbrains.research.pyflowgraph.postprocessing
+
+import org.jetbrains.research.pyflowgraph.models.*
 
 @ExperimentalStdlibApi
 object TransitiveClosureBuilder : FlowGraphNodesProcessor {
 
-    fun buildClosure(flowGraph: ExtControlFlowGraph) {
+    fun buildClosure(flowGraph: PyFlowGraph) {
         processFlowGraphNodes(flowGraph, this::buildDataClosure)
         processFlowGraphNodes(flowGraph, this::buildControlClosure)
         processFlowGraphNodes(flowGraph, this::buildControlDataClosure)

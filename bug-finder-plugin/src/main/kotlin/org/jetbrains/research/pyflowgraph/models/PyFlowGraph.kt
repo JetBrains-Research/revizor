@@ -1,8 +1,11 @@
-package org.jetbrains.research.pyflowgraph
+package org.jetbrains.research.pyflowgraph.models
+
+import org.jetbrains.research.pyflowgraph.DuplicateEntryNodeException
+import org.jetbrains.research.pyflowgraph.PyFlowGraphBuilder
 
 @ExperimentalStdlibApi
-class ExtControlFlowGraph(
-    val visitor: PyFlowGraphBuilder,
+class PyFlowGraph(
+    private val builder: PyFlowGraphBuilder,
     val node: Node? = null
 ) {
     var entryNode: EntryNode? = null
@@ -16,8 +19,8 @@ class ExtControlFlowGraph(
             }
         }
     val nodes: MutableSet<Node> = mutableSetOf()
-    val operationNodes: MutableSet<OperationNode> = mutableSetOf()
-    val variableReferences: MutableSet<Node> = mutableSetOf()
+    private val operationNodes: MutableSet<OperationNode> = mutableSetOf()
+    private val variableReferences: MutableSet<Node> = mutableSetOf()
     var sinks: MutableSet<Node> = mutableSetOf()
     var statementSinks: MutableSet<StatementNode> = mutableSetOf()
     val statementSources: MutableSet<StatementNode> = mutableSetOf()
@@ -36,10 +39,10 @@ class ExtControlFlowGraph(
         }
     }
 
-    fun resolveReferences(graph: ExtControlFlowGraph): MutableSet<Node> {
+    private fun resolveReferences(graph: PyFlowGraph): MutableSet<Node> {
         val resolvedReferences = mutableSetOf<Node>()
         for (refNode in graph.variableReferences) {
-            val defNodes = refNode.key?.let { visitor.context().getVariables(it) }
+            val defNodes = refNode.key?.let { builder.context().getVariables(it) }
             if (defNodes != null) {
                 defNodes.filter { it.statementNum < refNode.statementNum }
                     .forEach { it.createEdge(refNode, LinkType.REFERENCE) }
@@ -49,7 +52,7 @@ class ExtControlFlowGraph(
         return resolvedReferences
     }
 
-    fun mergeGraph(graph: ExtControlFlowGraph, linkNode: Node? = null, linkType: String? = null) {
+    fun mergeGraph(graph: PyFlowGraph, linkNode: Node? = null, linkType: String? = null) {
         if (linkNode != null && linkType != null) {
             for (sink in sinks) {
                 sink.createEdge(linkNode, linkType)
@@ -69,7 +72,7 @@ class ExtControlFlowGraph(
         variableReferences.addAll(unresolvedReferences)
     }
 
-    fun parallelMergeGraphs(graphs: List<ExtControlFlowGraph>, operationLinkType: String? = null) {
+    fun parallelMergeGraphs(graphs: List<PyFlowGraph>, operationLinkType: String? = null) {
         val oldSinks = sinks.toMutableSet()
         val oldStatementSinks = statementSinks.toMutableSet()
         sinks.clear()
@@ -134,6 +137,4 @@ class ExtControlFlowGraph(
         sinks.remove(node)
         statementSinks.remove(node)
     }
-
-    fun findFirstNodeByLabel(label: String) = nodes.find { it.label == label }
 }

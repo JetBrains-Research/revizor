@@ -1,10 +1,13 @@
-package org.jetbrains.research.pyflowgraph
+package org.jetbrains.research.pyflowgraph.postprocessing
+
+import org.jetbrains.research.pyflowgraph.models.Node
+import org.jetbrains.research.pyflowgraph.models.PyFlowGraph
 
 @ExperimentalStdlibApi
 interface FlowGraphNodesProcessor {
 
     fun processFlowGraphNodes(
-        flowGraph: ExtControlFlowGraph,
+        flowGraph: PyFlowGraph,
         processorFunction: (node: Node, processedNodes: MutableSet<Node>) -> Unit
     ) {
         val processedNodes = hashSetOf<Node>()
