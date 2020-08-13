@@ -12,8 +12,10 @@ import java.nio.file.Paths
 
 object PatternsStorage {
     private val patternsStoragePath: Path = service<BugFinderConfigService>().state.patternsOutputPath
-    private val unifiedPatternGraphByPatternDirPath = HashMap<Path, Graph<Vertex, MultipleEdge>>()
-    private val patternsGraphsByPatternsDirPath = HashMap<Path, ArrayList<Graph<Vertex, MultipleEdge>>>()
+    private val unifiedPatternGraphByPatternDirPath =
+        HashMap<Path, Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
+    private val patternsGraphsByPatternsDirPath =
+        HashMap<Path, ArrayList<Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>>()
 
     init {
         loadPatterns()
@@ -23,8 +25,8 @@ object PatternsStorage {
     private fun loadPatterns() {
         patternsStoragePath.toFile().walk().forEach {
             if (it.isFile && it.extension == "dot" && it.name.startsWith("fragment")) {
-                val currentGraph = loadDAGFromDotFile(it)
-                val subgraphBefore = AsSubgraph<Vertex, MultipleEdge>(
+                val currentGraph = PatternSpecificGraphsLoader.loadDAGFromDotFile(it)
+                val subgraphBefore = AsSubgraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
                     currentGraph,
                     currentGraph.vertexSet().filter { vertex -> vertex.color == "red2" }.toSet()
                 )
@@ -50,9 +52,10 @@ object PatternsStorage {
                 }
             }
             val baseGraphForUnification = fragmentsGraphs.first()
-            val unifiedGraph = DirectedAcyclicGraph<Vertex, MultipleEdge>(
-                MultipleEdge::class.java)
-            val verticesMap = HashMap<Vertex, Vertex>()
+            val unifiedGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
+                PatternSpecificMultipleEdge::class.java
+            )
+            val verticesMap = HashMap<PatternSpecificVertex, PatternSpecificVertex>()
             var variableVerticesCounter = 0
             for (vertex in baseGraphForUnification.vertexSet()) {
                 val newVertex = vertex.copy()
@@ -85,17 +88,18 @@ object PatternsStorage {
         }
     }
 
-    fun getIsomorphicPatterns(targetGraph: DirectedAcyclicGraph<Vertex, MultipleEdge>)
-            : Map<Path, Graph<Vertex, MultipleEdge>> {
-        val suitablePatterns = HashMap<Path, Graph<Vertex, MultipleEdge>>()
+    fun getIsomorphicPatterns(targetGraph: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>)
+            : Map<Path, Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>> {
+        val suitablePatterns = HashMap<Path, Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
         for (entry in unifiedPatternGraphByPatternDirPath) {
             val pathToPatternDir = entry.key
             val unifiedPatternGraph = entry.value
-            val isomorphismInspector = VF2SubgraphIsomorphismInspector<Vertex, MultipleEdge>(
-                targetGraph, unifiedPatternGraph,
-                PatternVertexComparator(),
-                MultipleEdgeComparator(), false
-            )
+            val isomorphismInspector =
+                VF2SubgraphIsomorphismInspector<PatternSpecificVertex, PatternSpecificMultipleEdge>(
+                    targetGraph, unifiedPatternGraph,
+                    PatternVertexComparator(),
+                    MultipleEdgeComparator(), false
+                )
             if (isomorphismInspector.isomorphismExists()) {
                 suitablePatterns[pathToPatternDir] = unifiedPatternGraph
             }

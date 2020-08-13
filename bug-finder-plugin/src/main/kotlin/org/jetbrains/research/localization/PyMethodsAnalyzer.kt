@@ -8,24 +8,26 @@ import com.jetbrains.python.psi.PyFunction
 import org.jetbrains.research.PatternsStorage
 import org.jetbrains.research.ide.BugFinderConfigService
 import org.jetbrains.research.ide.PatternsSuggestions
+import org.jetbrains.research.jgrapht.PatternSpecificGraphsLoader
 import org.jetbrains.research.pyflowgraph.GraphBuildingException
+import org.jetbrains.research.pyflowgraph.PyFlowGraphBuilder
 import java.io.File
 
 class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor() {
 
+    @ExperimentalStdlibApi
     override fun visitPyFunction(node: PyFunction?) {
         if (node != null) {
-            val tempFile = createTempFileFromMethodSource(node)
             try {
-                val dotGraphFile = buildPyFlowGraphBySubprocess(tempFile)
-                val pfg = loadDAGFromDotFile(dotGraphFile)
-                val suggestions = PatternsStorage.getIsomorphicPatterns(targetGraph = pfg).keys.toList()
+                val methodPyFlowGraph = PyFlowGraphBuilder().buildForPyFunction(node)
+                val methodJGraph = PatternSpecificGraphsLoader.loadDAGFromPyFlowGraph(methodPyFlowGraph)
+                val suggestions = PatternsStorage.getIsomorphicPatterns(targetGraph = methodJGraph).keys
                 if (suggestions.isNotEmpty()) {
                     holder.registerProblem(
                         node.nameIdentifier ?: node,
                         "Found relevant patterns in method <${node.name}>",
                         ProblemHighlightType.WEAK_WARNING,
-                        PatternsSuggestions(suggestions)
+                        PatternsSuggestions(suggestions.toList())
                     )
                 }
             } catch (exception: GraphBuildingException) {
