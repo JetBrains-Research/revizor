@@ -9,8 +9,11 @@ import org.jetbrains.research.PatternsStorage
 import org.jetbrains.research.ide.BugFinderConfigService
 import org.jetbrains.research.ide.PatternsSuggestions
 import org.jetbrains.research.jgrapht.PatternSpecificGraphsLoader
+import org.jetbrains.research.jgrapht.PatternSpecificMultipleEdge
+import org.jetbrains.research.jgrapht.PatternSpecificVertex
 import org.jetbrains.research.pyflowgraph.GraphBuildingException
 import org.jetbrains.research.pyflowgraph.PyFlowGraphBuilder
+import org.jgrapht.graph.DirectedAcyclicGraph
 import java.io.File
 
 class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor() {
@@ -19,8 +22,7 @@ class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor()
     override fun visitPyFunction(node: PyFunction?) {
         if (node != null) {
             try {
-                val methodPyFlowGraph = PyFlowGraphBuilder().buildForPyFunction(node)
-                val methodJGraph = PatternSpecificGraphsLoader.loadDAGFromPyFlowGraph(methodPyFlowGraph)
+                val methodJGraph = buildPyFlowGraphForMethod(node, builder = "python")
                 val suggestions = PatternsStorage.getIsomorphicPatterns(targetGraph = methodJGraph).keys
                 if (suggestions.isNotEmpty()) {
                     holder.registerProblem(
@@ -35,6 +37,22 @@ class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor()
             }
         }
     }
+
+    @ExperimentalStdlibApi
+    private fun buildPyFlowGraphForMethod(node: PyFunction, builder: String = "kotlin")
+            : DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> =
+        when (builder) {
+            "python" -> {
+                val tempFile = createTempFileFromMethodSource(node)
+                val dotFile = buildPyFlowGraphBySubprocess(tempFile)
+                PatternSpecificGraphsLoader.loadDAGFromDotFile(dotFile)
+            }
+            "kotlin" -> {
+                val methodPyFlowGraph = PyFlowGraphBuilder().buildForPyFunction(node)
+                PatternSpecificGraphsLoader.loadDAGFromPyFlowGraph(methodPyFlowGraph)
+            }
+            else -> throw  IllegalArgumentException()
+        }
 
     private fun createTempFileFromMethodSource(node: PyFunction): File {
         val configState = service<BugFinderConfigService>().state
