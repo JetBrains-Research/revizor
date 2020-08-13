@@ -1,9 +1,8 @@
 package org.jetbrains.research
 
 import com.intellij.openapi.components.service
-import org.jetbrains.research.common.*
 import org.jetbrains.research.ide.BugFinderConfigService
-import org.jetbrains.research.localization.loadDAGFromDotFile
+import org.jetbrains.research.localization.*
 import org.jgrapht.Graph
 import org.jgrapht.alg.isomorphism.VF2SubgraphIsomorphismInspector
 import org.jgrapht.graph.AsSubgraph
@@ -51,7 +50,8 @@ object PatternsStorage {
                 }
             }
             val baseGraphForUnification = fragmentsGraphs.first()
-            val unifiedGraph = DirectedAcyclicGraph<Vertex, MultipleEdge>(MultipleEdge::class.java)
+            val unifiedGraph = DirectedAcyclicGraph<Vertex, MultipleEdge>(
+                MultipleEdge::class.java)
             val verticesMap = HashMap<Vertex, Vertex>()
             var variableVerticesCounter = 0
             for (vertex in baseGraphForUnification.vertexSet()) {
@@ -92,7 +92,9 @@ object PatternsStorage {
             val pathToPatternDir = entry.key
             val unifiedPatternGraph = entry.value
             val isomorphismInspector = VF2SubgraphIsomorphismInspector<Vertex, MultipleEdge>(
-                targetGraph, unifiedPatternGraph, PatternVertexComparator(), MultipleEdgeComparator(), false
+                targetGraph, unifiedPatternGraph,
+                PatternVertexComparator(),
+                MultipleEdgeComparator(), false
             )
             if (isomorphismInspector.isomorphismExists()) {
                 suitablePatterns[pathToPatternDir] = unifiedPatternGraph

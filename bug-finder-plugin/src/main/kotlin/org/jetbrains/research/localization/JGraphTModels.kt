@@ -1,4 +1,4 @@
-package org.jetbrains.research.common
+package org.jetbrains.research.localization
 
 import org.jgrapht.graph.DefaultEdge
 

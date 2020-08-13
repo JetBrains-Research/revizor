@@ -1,40 +1,11 @@
 package org.jetbrains.research.localization
 
-import com.intellij.openapi.components.service
-import org.jetbrains.research.common.Edge
-import org.jetbrains.research.common.MultipleEdge
-import org.jetbrains.research.common.Vertex
-import org.jetbrains.research.ide.BugFinderConfigService
 import org.jgrapht.graph.DefaultEdge
 import org.jgrapht.graph.DirectedAcyclicGraph
 import org.jgrapht.graph.DirectedMultigraph
 import org.jgrapht.nio.Attribute
 import org.jgrapht.nio.dot.DOTImporter
 import java.io.File
-
-
-fun buildPyFlowGraph(inputFile: File): File {
-    val configState = service<BugFinderConfigService>().state
-    val pythonExecPath = configState.pythonExecutablePath.toString()
-    val mainScriptPath = configState.codeChangeMinerPath.resolve("main.py").toString()
-    val inputFilePath = inputFile.absolutePath
-    val outputFilePath = configState.tempDirectory
-        .resolve("pfg_${inputFile.nameWithoutExtension}.dot")
-        .toString()
-    val builder = ProcessBuilder().also {
-        it.command(pythonExecPath, mainScriptPath, "pfg", "-i", inputFilePath, "-o", outputFilePath)
-    }
-    val process = builder.start()
-    val exitCode = process.waitFor()
-    if (exitCode != 0) {
-        throw UnableToBuildPyFlowGraphException
-    }
-    val dotFile = File(outputFilePath)
-    val dotPdfFile = File(dotFile.absolutePath.plus(".pdf"))
-    dotFile.deleteOnExit()
-    dotPdfFile.deleteOnExit()
-    return dotFile
-}
 
 fun loadDAGFromDotFile(dotFile: File): DirectedAcyclicGraph<Vertex, MultipleEdge> {
     val importer = DOTImporter<String, DefaultEdge>()
@@ -50,7 +21,8 @@ fun loadDAGFromDotFile(dotFile: File): DirectedAcyclicGraph<Vertex, MultipleEdge
     val temp = DirectedMultigraph<String, DefaultEdge>(DefaultEdge::class.java)
     importer.importGraph(temp, dotFile)
 
-    val pfg = DirectedAcyclicGraph<Vertex, MultipleEdge>(MultipleEdge::class.java)
+    val pfg = DirectedAcyclicGraph<Vertex, MultipleEdge>(
+        MultipleEdge::class.java)
     fun getVertexById(id: String) = Vertex(
         id = id,
         label = vertexAttributes[id]?.get("label")?.toString()
@@ -94,5 +66,3 @@ fun loadDAGFromDotFile(dotFile: File): DirectedAcyclicGraph<Vertex, MultipleEdge
     }
     return pfg
 }
-
-object UnableToBuildPyFlowGraphException : Throwable()
