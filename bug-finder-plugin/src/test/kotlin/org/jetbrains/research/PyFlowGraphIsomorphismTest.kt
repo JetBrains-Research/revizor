@@ -29,4 +29,8 @@ class PyFlowGraphIsomorphismTest : BasePlatformTestCase() {
 
     fun `test function call with arguments`() = runTest("function_call.py")
     fun `test nested attribute call`() = runTest("nested_attributes_call.py")
+
+    fun `test subscript`() = runTest("subscript.py")
+    fun `test slice`() = runTest("slice.py")
+    fun `test subscript with slice`() = runTest("subscript_with_slice.py")
 }

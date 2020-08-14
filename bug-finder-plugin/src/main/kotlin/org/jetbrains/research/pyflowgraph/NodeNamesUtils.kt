@@ -30,12 +30,14 @@ fun getNodeFullName(node: PyElement): String =
         is PySliceExpression -> {
             val operand = getNodeFullName(node.operand)
             val sliceItems = arrayListOf<String>()
-            node.sliceItem?.lowerBound?.let { getNodeFullName(it) }?.let { sliceItems.add(it) }
-            node.sliceItem?.stride?.let { getNodeFullName(it) }?.let { sliceItems.add(it) }
-            node.sliceItem?.upperBound?.let { getNodeFullName(it) }?.let { sliceItems.add(it) }
+            // FIXME: getNodeFullName for expressions
+            node.sliceItem?.lowerBound?.let { sliceItems.add(getNodeFullName(it)) }
+            node.sliceItem?.stride?.let { sliceItems.add(getNodeFullName(it)) }
+            node.sliceItem?.upperBound?.let { sliceItems.add(getNodeFullName(it)) }
             "$operand[${sliceItems.joinToString(":")}]"
         }
         is PyLiteralExpression -> "."
+        is PyEmptyExpression -> ""
         else -> throw IllegalArgumentException()
     }
 

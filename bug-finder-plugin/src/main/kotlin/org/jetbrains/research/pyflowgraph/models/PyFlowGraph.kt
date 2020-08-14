@@ -137,4 +137,11 @@ class PyFlowGraph(
         sinks.remove(node)
         statementSinks.remove(node)
     }
+
+    fun makeConsistent() {
+        for (node in nodes) {
+            node.outEdges.removeIf { !nodes.contains(it.nodeTo) }
+            node.inEdges.removeIf { !nodes.contains(it.nodeFrom) }
+        }
+    }
 }

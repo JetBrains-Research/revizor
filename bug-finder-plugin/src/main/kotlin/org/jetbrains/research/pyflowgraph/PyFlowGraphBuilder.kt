@@ -28,6 +28,7 @@ class PyFlowGraphBuilder {
         if (buildClosure) {
             TransitiveClosureBuilder.buildClosure(flowGraph = fg)
         }
+        fg.makeConsistent()
         return fg
     }
 
