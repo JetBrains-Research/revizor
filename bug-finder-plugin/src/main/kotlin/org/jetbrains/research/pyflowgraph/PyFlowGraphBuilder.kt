@@ -223,7 +223,7 @@ class PyFlowGraphBuilder {
     private fun visitBinaryOperation(node: PyBinaryExpression): PyFlowGraph {
         return if (node.isOperator("and") || node.isOperator("or")) {
             visitBinOperationHelper(
-                operationName = node.operator?.specialMethodName,
+                operationName = getOperationName(node),
                 node = node,
                 operationKind = OperationNode.Kind.BOOL,
                 leftOperand = node.leftExpression,
@@ -233,7 +233,7 @@ class PyFlowGraphBuilder {
             || node.isOperator("<=") || node.isOperator(">") || node.isOperator(">")
         ) {
             visitBinOperationHelper(
-                operationName = node.operator?.specialMethodName,
+                operationName = getOperationName(node),
                 node = node,
                 operationKind = OperationNode.Kind.COMPARE,
                 leftOperand = node.leftExpression,
@@ -241,7 +241,7 @@ class PyFlowGraphBuilder {
             )
         } else {
             visitBinOperationHelper(
-                operationName = node.operator?.specialMethodName,
+                operationName = getOperationName(node),
                 node = node,
                 operationKind = OperationNode.Kind.BINARY,
                 leftOperand = node.leftExpression,
@@ -254,7 +254,7 @@ class PyFlowGraphBuilder {
         val params = ArrayList<PyExpression>()
         node.operand?.let { params.add(it) }
         return visitOperationHelper(
-            operationName = node.operator.specialMethodName,
+            operationName = getOperationName(node),
             node = node,
             operationKind = OperationNode.Kind.UNARY,
             params = params

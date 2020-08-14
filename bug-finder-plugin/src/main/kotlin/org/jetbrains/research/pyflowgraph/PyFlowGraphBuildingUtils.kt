@@ -55,23 +55,52 @@ fun getNodeShortName(node: PyElement): String =
     }
 
 fun getOperationName(node: PyElement): String? =
-    if (node is PyAugAssignmentStatement) {
-        when (node.operation?.text) {
-            "+=" -> "add"
-            "-=" -> "sub"
-            "*=" -> "mult"
-            "/=" -> "div"
-            "%=" -> "mod"
-            "**=" -> "pow"
-            ">>=" -> "rshift"
-            "<<-" -> "lshift"
-            "&=" -> "bitand"
-            "|=" -> "bitor"
-            "^=" -> "bitxor"
-            else -> throw NotImplementedError("Unsupported operation type")
+    when (node) {
+        is PyAugAssignmentStatement -> {
+            when (node.operation?.text) {
+                "+=" -> "add"
+                "-=" -> "sub"
+                "*=" -> "mult"
+                "/=" -> "div"
+                "%=" -> "mod"
+                "**=" -> "pow"
+                ">>=" -> "rshift"
+                "<<-" -> "lshift"
+                "&=" -> "bitand"
+                "|=" -> "bitor"
+                "^=" -> "bitxor"
+                else -> throw NotImplementedError("Unsupported operation type")
+            }
         }
-    } else {
-        throw NotImplementedError("Unsupported operation node")
+        is PyBinaryExpression -> {
+            when (node.psiOperator?.text) {
+                "+" -> "add"
+                "-" -> "sub"
+                "*" -> "mult"
+                "/" -> "div"
+                "%" -> "mod"
+                "and" -> "and"
+                "or" -> "or"
+                ">" -> "Gt"
+                ">=" -> "GtE"
+                "<" -> "Lt"
+                "<=" -> "LtE"
+                "==" -> "Eq"
+                "!=" -> "NotEq"
+                else -> throw NotImplementedError("Unsupported operation type")
+            }
+        }
+        is PyPrefixExpression -> {
+            when (node.operator.toString()) {
+                "Py:MINUS" -> "USub"
+                "Py:PLUS" -> "UAdd"
+                "Py:NOT_KEYWORD" -> "Not"
+                else -> throw NotImplementedError("Unsupported operation type")
+            }
+        }
+        else -> {
+            throw NotImplementedError("Unsupported operation node")
+        }
     }
 
 fun getCollectionLabel(node: PySequenceExpression): String =
