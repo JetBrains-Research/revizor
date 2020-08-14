@@ -2,10 +2,12 @@ package org.jetbrains.research
 
 import com.intellij.openapi.components.service
 import org.jetbrains.research.common.getLongestCommonSuffix
+import org.jetbrains.research.common.weakSubGraphIsomorphismExists
 import org.jetbrains.research.ide.BugFinderConfigService
-import org.jetbrains.research.jgrapht.*
+import org.jetbrains.research.jgrapht.PatternSpecificGraphsLoader
+import org.jetbrains.research.jgrapht.PatternSpecificMultipleEdge
+import org.jetbrains.research.jgrapht.PatternSpecificVertex
 import org.jgrapht.Graph
-import org.jgrapht.alg.isomorphism.VF2SubgraphIsomorphismInspector
 import org.jgrapht.graph.AsSubgraph
 import org.jgrapht.graph.DirectedAcyclicGraph
 import java.nio.file.Path
@@ -95,13 +97,7 @@ object PatternsStorage {
         for (entry in unifiedPatternGraphByPatternDirPath) {
             val pathToPatternDir = entry.key
             val unifiedPatternGraph = entry.value
-            val isomorphismInspector =
-                VF2SubgraphIsomorphismInspector<PatternSpecificVertex, PatternSpecificMultipleEdge>(
-                    targetGraph, unifiedPatternGraph,
-                    PatternVertexComparator(),
-                    MultipleEdgeComparator(), false
-                )
-            if (isomorphismInspector.isomorphismExists()) {
+            if (weakSubGraphIsomorphismExists(targetGraph, unifiedPatternGraph)) {
                 suitablePatterns[pathToPatternDir] = unifiedPatternGraph
             }
         }
