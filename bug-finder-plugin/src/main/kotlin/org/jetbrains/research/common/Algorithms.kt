@@ -1,4 +1,4 @@
-package org.jetbrains.research
+package org.jetbrains.research.common
 
 fun getLongestCommonSuffix(strings: ArrayList<String?>?): String {
     if (strings == null || strings.isEmpty())

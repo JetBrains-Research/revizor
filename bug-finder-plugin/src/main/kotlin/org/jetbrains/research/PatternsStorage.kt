@@ -1,6 +1,7 @@
 package org.jetbrains.research
 
 import com.intellij.openapi.components.service
+import org.jetbrains.research.common.getLongestCommonSuffix
 import org.jetbrains.research.ide.BugFinderConfigService
 import org.jetbrains.research.jgrapht.*
 import org.jgrapht.Graph
