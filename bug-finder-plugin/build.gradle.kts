@@ -30,6 +30,5 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 }
 
 tasks.withType<Test> {
-    useJUnitPlatform()
-    jvmArgs("--enable-preview")
+    useJUnit()
 }
