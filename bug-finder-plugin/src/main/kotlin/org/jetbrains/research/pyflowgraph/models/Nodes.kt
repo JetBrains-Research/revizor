@@ -87,7 +87,7 @@ open class StatementNode(
     controlBranchStack: ControlBranchStack?
 ) : Node(label, psi) {
 
-    open var controlBranchStack: ControlBranchStack? = controlBranchStack?.map { it.copy() }?.toMutableList()
+    open var controlBranchStack: ControlBranchStack? = controlBranchStack?.toMutableList()
 
     init {
         if (this !is EntryNode && controlBranchStack != null) {
@@ -123,13 +123,13 @@ open class StatementNode(
     }
 }
 
-class EmptyNode(override var controlBranchStack: ControlBranchStack?) :
+class EmptyNode(controlBranchStack: ControlBranchStack?) :
     StatementNode("empty", null, controlBranchStack)
 
 class OperationNode(
     override var label: String,
     override var psi: PyElement?,
-    override var controlBranchStack: ControlBranchStack?,
+    controlBranchStack: ControlBranchStack?,
     override val key: String? = null,
     var kind: String = Kind.UNCLASSIFIED
 ) : StatementNode(label, psi, controlBranchStack) {
@@ -168,7 +168,7 @@ class OperationNode(
 open class ControlNode(
     override var label: String,
     override var psi: PyElement?,
-    override var controlBranchStack: ControlBranchStack?
+    controlBranchStack: ControlBranchStack?
 ) : StatementNode(label, psi, controlBranchStack) {
 
     object Label {

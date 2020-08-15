@@ -43,4 +43,6 @@ class PyFlowGraphIsomorphismTest : BasePlatformTestCase() {
     fun `test tuple declaration`() = runTest("tuple_declaration.py")
     fun `test dict declaration`() = runTest("dict_declaration.py")
 
+    fun `test for loop traversing list`() = runTest("for_traversing_list.py")
+
 }
