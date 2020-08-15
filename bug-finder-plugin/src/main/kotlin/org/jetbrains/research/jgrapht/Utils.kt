@@ -1,14 +1,12 @@
 package org.jetbrains.research.jgrapht
 
-import com.intellij.openapi.components.service
-import org.jetbrains.research.ide.BugFinderConfigService
 import org.jgrapht.graph.DirectedAcyclicGraph
 import org.jgrapht.nio.Attribute
 import org.jgrapht.nio.DefaultAttribute
 import org.jgrapht.nio.dot.DOTExporter
-import java.nio.file.Paths
+import java.io.File
 
-fun exportDotFile(graph: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificEdge>) {
+fun exportDotFile(graph: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificEdge>, file: File) {
     val exporter = DOTExporter<PatternSpecificVertex, PatternSpecificEdge> { v -> v.id }
     exporter.setVertexAttributeProvider { v ->
         val map = HashMap<String, Attribute>()
@@ -24,10 +22,23 @@ fun exportDotFile(graph: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpec
         map["from_closure"] = DefaultAttribute.createAttribute(e.fromClosure)
         map
     }
-    exporter.exportGraph(
-        graph,
-        service<BugFinderConfigService>().state.tempDirectory
-            .resolve(Paths.get("${graph.hashCode()}.dot"))
-            .toFile()
-    )
+    exporter.exportGraph(graph, file)
+}
+
+fun exportDotFileForGraphWithMultipleEdges(
+    graphWithMultipleEdges: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>,
+    file: File
+) {
+    val targetGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificEdge>(PatternSpecificEdge::class.java)
+    graphWithMultipleEdges.vertexSet().forEach { targetGraph.addVertex(it) }
+    for (multipleEdge in graphWithMultipleEdges.edgeSet()) {
+        for (edge in multipleEdge.embeddedEdgeByXlabel.values) {
+            targetGraph.addEdge(
+                graphWithMultipleEdges.getEdgeSource(multipleEdge),
+                graphWithMultipleEdges.getEdgeTarget(multipleEdge),
+                edge
+            )
+        }
+    }
+    exportDotFile(targetGraph, file)
 }
