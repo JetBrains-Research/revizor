@@ -11,7 +11,7 @@ import org.jetbrains.research.pyflowgraph.PyFlowGraphBuilder
 import org.jgrapht.graph.DirectedAcyclicGraph
 import java.io.File
 
-@ExperimentalStdlibApi
+
 fun buildPyFlowGraphForMethod(node: PyFunction, builder: String = "kotlin")
         : DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> =
     when (builder) {

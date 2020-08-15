@@ -6,7 +6,7 @@ import junit.framework.TestCase
 import org.jetbrains.research.common.buildPyFlowGraphForMethod
 import org.jetbrains.research.common.strictGraphIsomorphismExists
 
-@ExperimentalStdlibApi
+
 class PyFlowGraphIsomorphismTest : BasePlatformTestCase() {
 
     override fun getTestDataPath() = "src/test/resources/testData"

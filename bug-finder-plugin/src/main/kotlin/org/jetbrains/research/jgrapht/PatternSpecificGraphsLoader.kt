@@ -11,7 +11,7 @@ import java.io.File
 
 object PatternSpecificGraphsLoader {
 
-    @ExperimentalStdlibApi
+
     fun loadDAGFromPyFlowGraph(pfg: PyFlowGraph):
             DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> {
         val defaultDAG = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificEdge>(

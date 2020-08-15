@@ -5,7 +5,7 @@ import org.jetbrains.research.pyflowgraph.models.*
 import org.jetbrains.research.pyflowgraph.postprocessing.DependenciesResolver
 import org.jetbrains.research.pyflowgraph.postprocessing.TransitiveClosureBuilder
 
-@ExperimentalStdlibApi
+
 class PyFlowGraphBuilder {
     internal val controlBranchStack: ControlBranchStack = mutableListOf()
     private val flowGraph: PyFlowGraph = createGraph()
@@ -74,7 +74,7 @@ class PyFlowGraphBuilder {
 
     private fun switchContext(newContext: BuildingContext) = contextStack.add(newContext)
 
-    private fun popContext() = contextStack.removeLast()
+    private fun popContext() = contextStack.removeAt(contextStack.indices.last)
 
     private fun switchControlBranch(newControl: StatementNode, newBranchKind: Boolean, replace: Boolean = false) {
         if (replace) {
@@ -84,7 +84,7 @@ class PyFlowGraphBuilder {
     }
 
     private fun popControlBranch() {
-        val lastElement = controlBranchStack.removeLast()
+        val lastElement = controlBranchStack.removeAt(controlBranchStack.indices.last)
         currentControlNode = lastElement.first
         currentBranchKind = lastElement.second
     }

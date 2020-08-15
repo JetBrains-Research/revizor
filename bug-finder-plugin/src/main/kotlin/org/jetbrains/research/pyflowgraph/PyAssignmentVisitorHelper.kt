@@ -6,7 +6,7 @@ import org.jetbrains.research.pyflowgraph.models.LinkType
 import org.jetbrains.research.pyflowgraph.models.OperationNode
 import org.jetbrains.research.pyflowgraph.models.PyFlowGraph
 
-@ExperimentalStdlibApi
+
 internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder) {
 
     // Helps to emulate dynamically-typed lists from python

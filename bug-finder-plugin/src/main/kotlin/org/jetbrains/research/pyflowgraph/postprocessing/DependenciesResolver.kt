@@ -2,7 +2,7 @@ package org.jetbrains.research.pyflowgraph.postprocessing
 
 import org.jetbrains.research.pyflowgraph.models.*
 
-@ExperimentalStdlibApi
+
 object DependenciesResolver : FlowGraphNodesProcessor {
     fun resolve(flowGraph: PyFlowGraph) {
         processFlowGraphNodes(flowGraph, processorFunction = this::adjustControls)

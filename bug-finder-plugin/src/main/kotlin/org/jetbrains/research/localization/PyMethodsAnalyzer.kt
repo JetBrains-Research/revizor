@@ -11,7 +11,7 @@ import org.jetbrains.research.pyflowgraph.GraphBuildingException
 
 class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor() {
 
-    @ExperimentalStdlibApi
+
     override fun visitPyFunction(node: PyFunction?) {
         if (node != null) {
             try {

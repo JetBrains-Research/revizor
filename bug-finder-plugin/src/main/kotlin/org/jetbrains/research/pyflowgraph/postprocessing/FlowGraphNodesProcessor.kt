@@ -3,7 +3,7 @@ package org.jetbrains.research.pyflowgraph.postprocessing
 import org.jetbrains.research.pyflowgraph.models.Node
 import org.jetbrains.research.pyflowgraph.models.PyFlowGraph
 
-@ExperimentalStdlibApi
+
 interface FlowGraphNodesProcessor {
 
     fun processFlowGraphNodes(

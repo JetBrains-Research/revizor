@@ -3,7 +3,7 @@ package org.jetbrains.research.pyflowgraph.models
 import org.jetbrains.research.pyflowgraph.DuplicateEntryNodeException
 import org.jetbrains.research.pyflowgraph.PyFlowGraphBuilder
 
-@ExperimentalStdlibApi
+
 class PyFlowGraph(
     private val builder: PyFlowGraphBuilder,
     val node: Node? = null

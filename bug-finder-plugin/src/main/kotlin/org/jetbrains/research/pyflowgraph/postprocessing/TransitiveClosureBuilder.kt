@@ -2,7 +2,7 @@ package org.jetbrains.research.pyflowgraph.postprocessing
 
 import org.jetbrains.research.pyflowgraph.models.*
 
-@ExperimentalStdlibApi
+
 object TransitiveClosureBuilder : FlowGraphNodesProcessor {
 
     fun buildClosure(flowGraph: PyFlowGraph) {
