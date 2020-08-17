@@ -4,7 +4,7 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.jetbrains.python.psi.PyFunction
 import junit.framework.TestCase
 import org.jetbrains.research.common.buildPyFlowGraphForMethod
-import org.jetbrains.research.common.strictGraphIsomorphismExists
+import org.jetbrains.research.common.getStrictGraphIsomorphismInspector
 
 
 class PyFlowGraphIsomorphismTest : BasePlatformTestCase() {
@@ -16,7 +16,8 @@ class PyFlowGraphIsomorphismTest : BasePlatformTestCase() {
         val node = psiFile.firstChild as PyFunction
         val expectedGraph = buildPyFlowGraphForMethod(node, builder = "python")
         val actualGraph = buildPyFlowGraphForMethod(node, builder = "kotlin")
-        TestCase.assertTrue(strictGraphIsomorphismExists(expectedGraph, actualGraph))
+        val isomorphismInspector = getStrictGraphIsomorphismInspector(expectedGraph, actualGraph)
+        TestCase.assertTrue(isomorphismInspector.isomorphismExists())
     }
 
     fun `test empty function with pass statement`() = runTest("pass_statement.py")

@@ -2,12 +2,13 @@ package org.jetbrains.research
 
 import com.intellij.openapi.components.service
 import org.jetbrains.research.common.getLongestCommonSuffix
-import org.jetbrains.research.common.weakSubGraphIsomorphismExists
+import org.jetbrains.research.common.getWeakSubGraphIsomorphismInspector
 import org.jetbrains.research.ide.BugFinderConfigService
 import org.jetbrains.research.jgrapht.PatternSpecificGraphsLoader
 import org.jetbrains.research.jgrapht.PatternSpecificMultipleEdge
 import org.jetbrains.research.jgrapht.PatternSpecificVertex
 import org.jgrapht.Graph
+import org.jgrapht.GraphMapping
 import org.jgrapht.graph.AsSubgraph
 import org.jgrapht.graph.DirectedAcyclicGraph
 import java.nio.file.Path
@@ -24,6 +25,8 @@ object PatternsStorage {
         loadPatterns()
         unifyVarsOriginalLabels()
     }
+
+    fun getUnifiedPatternGraphByPath(pathToPatternDir: Path) = unifiedPatternGraphByPatternDirPath[pathToPatternDir]
 
     private fun loadPatterns() {
         patternsStoragePath.toFile().walk().forEach {
@@ -92,13 +95,17 @@ object PatternsStorage {
     }
 
     fun getIsomorphicPatterns(targetGraph: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>)
-            : Map<Path, Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>> {
-        val suitablePatterns = HashMap<Path, Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
+            : HashMap<Path, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>> {
+        val suitablePatterns = HashMap<Path, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
         for (entry in unifiedPatternGraphByPatternDirPath) {
             val pathToPatternDir = entry.key
             val unifiedPatternGraph = entry.value
-            if (weakSubGraphIsomorphismExists(targetGraph, unifiedPatternGraph)) {
-                suitablePatterns[pathToPatternDir] = unifiedPatternGraph
+            val inspector = getWeakSubGraphIsomorphismInspector(targetGraph, unifiedPatternGraph)
+            if (inspector.isomorphismExists()) {
+                val mapping = inspector.mappings.asSequence().iterator().next()
+                if (mapping != null) {
+                    suitablePatterns[pathToPatternDir] = mapping
+                }
             }
         }
         return suitablePatterns

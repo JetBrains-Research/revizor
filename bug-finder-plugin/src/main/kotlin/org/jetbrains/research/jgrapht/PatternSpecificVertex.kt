@@ -9,7 +9,8 @@ data class PatternSpecificVertex(
     var originalLabel: String? = null,
     var color: String? = null,
     var shape: String? = null,
-    var longestCommonSuffix: String? = null
+    var longestCommonSuffix: String? = null,
+    var origin: Node? = null
 ) {
 
     object CommonLabel {
@@ -36,5 +37,6 @@ data class PatternSpecificVertex(
         }
         this.originalLabel = pfgNode.label
         this.color = "red2"
+        this.origin = pfgNode
     }
 }

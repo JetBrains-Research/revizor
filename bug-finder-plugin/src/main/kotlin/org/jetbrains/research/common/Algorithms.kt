@@ -16,32 +16,27 @@ fun getLongestCommonSuffix(strings: ArrayList<String?>?): String {
     return lcs ?: ""
 }
 
-fun weakSubGraphIsomorphismExists(
+fun getWeakSubGraphIsomorphismInspector(
     target: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>,
     pattern: Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>
-): Boolean {
-    val isomorphismInspector =
-        VF2SubgraphIsomorphismInspector<PatternSpecificVertex, PatternSpecificMultipleEdge>(
-            target,
-            pattern,
-            WeakVertexComparator(),
-            MultipleEdgeComparator(),
-            false
-        )
-    return isomorphismInspector.isomorphismExists()
-}
+) =
+    VF2SubgraphIsomorphismInspector(
+        target,
+        pattern,
+        WeakVertexComparator(),
+        MultipleEdgeComparator(),
+        false
+    )
 
-fun strictGraphIsomorphismExists(
+
+fun getStrictGraphIsomorphismInspector(
     graph1: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>,
     graph2: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>
-): Boolean {
-    val isomorphismInspector =
-        VF2GraphIsomorphismInspector<PatternSpecificVertex, PatternSpecificMultipleEdge>(
-            graph1,
-            graph2,
-            StrictVertexComparator(),
-            MultipleEdgeComparator(),
-            false
-        )
-    return isomorphismInspector.isomorphismExists()
-}
+) =
+    VF2GraphIsomorphismInspector<PatternSpecificVertex, PatternSpecificMultipleEdge>(
+        graph1,
+        graph2,
+        StrictVertexComparator(),
+        MultipleEdgeComparator(),
+        false
+    )

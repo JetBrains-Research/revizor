@@ -10,6 +10,7 @@ import org.jetbrains.research.PatternsStorage
 import java.nio.file.Path
 
 class PatternsSuggestions(private val suggestions: List<Path>) : LocalQuickFix {
+
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         val editor = FileEditorManager.getInstance(project).selectedTextEditor
         val suggestionsPopup = JBPopupFactory.getInstance().createListPopup(
