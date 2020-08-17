@@ -114,6 +114,4 @@ fun getCollectionLabel(node: PySequenceExpression): String =
         else -> throw IllegalArgumentException()
     }
 
-object DuplicateEntryNodeException : Throwable()
-
-object GraphBuildingException : Throwable()
+object GraphBuildingException : Exception()

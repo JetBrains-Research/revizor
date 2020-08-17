@@ -99,11 +99,11 @@ class PyFlowGraphBuilder {
             for (statement in node.statementList.statements) {
                 val statementFlowGraph = try {
                     visitPyElement(statement)
-                } catch (e: Exception) {
+                } catch (e: GraphBuildingException) {
                     null
                 }
                 if (statementFlowGraph == null) {
-                    print("Unable to build pfg for $statement, skipping...")
+                    println("Unable to build pfg for $statement, skipping...")
                     continue
                 }
                 flowGraph.mergeGraph(statementFlowGraph)
@@ -555,7 +555,8 @@ class PyFlowGraphBuilder {
             }
         }
         if (argsFlowGraphs.any { it == null }) {
-            println("Function has unsupported arguments, skipping them...")
+            val calleeShortName = node.callee?.let { getNodeShortName(it) }
+            println("Function call <$calleeShortName> has unsupported arguments, skipping them...")
         }
         return argsFlowGraphs.filterNotNull()
     }

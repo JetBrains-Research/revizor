@@ -1,6 +1,6 @@
 package org.jetbrains.research.pyflowgraph.models
 
-import org.jetbrains.research.pyflowgraph.DuplicateEntryNodeException
+import org.jetbrains.research.pyflowgraph.GraphBuildingException
 import org.jetbrains.research.pyflowgraph.PyFlowGraphBuilder
 
 
@@ -11,7 +11,7 @@ class PyFlowGraph(
     var entryNode: EntryNode? = null
         set(node) {
             if (entryNode != null) {
-                throw DuplicateEntryNodeException
+                throw GraphBuildingException
             }
             if (node != null) {
                 field = node
