@@ -44,5 +44,6 @@ class PyFlowGraphIsomorphismTest : BasePlatformTestCase() {
     fun `test dict declaration`() = runTest("dict_declaration.py")
 
     fun `test for loop traversing list`() = runTest("for_traversing_list.py")
+    fun `test for loop with list enumeration`() = runTest("for_enumeration.py")
 
 }

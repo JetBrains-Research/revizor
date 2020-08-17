@@ -12,9 +12,10 @@ abstract class Node(
     var statementNum: Int = statementCounter++
 ) {
     open val key: String? = null
-    var unmappable: Boolean? = null
-    var syntaxTokenIntervals: String? = null
     var defFor: MutableList<Int> = mutableListOf()
+        set(value) {
+            field.addAll(value)
+        }
     var defBy: MutableList<Int> = mutableListOf()
     var defControlBranchStack: ControlBranchStack? = mutableListOf()
     val inEdges = HashSet<Edge>()

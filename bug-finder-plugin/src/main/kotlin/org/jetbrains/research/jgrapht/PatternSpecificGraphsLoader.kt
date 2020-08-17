@@ -14,7 +14,7 @@ object PatternSpecificGraphsLoader {
 
     fun loadDAGFromPyFlowGraph(pfg: PyFlowGraph):
             DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> {
-        val defaultDAG = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificEdge>(
+        val defaultDAG = DirectedMultigraph<PatternSpecificVertex, PatternSpecificEdge>(
             PatternSpecificEdge::class.java
         )
         var edgeGlobalId = 0

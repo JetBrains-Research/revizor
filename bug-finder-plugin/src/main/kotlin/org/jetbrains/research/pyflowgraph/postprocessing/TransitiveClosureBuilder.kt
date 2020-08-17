@@ -19,7 +19,6 @@ object TransitiveClosureBuilder : FlowGraphNodesProcessor {
             if (edge !is DataEdge) {
                 continue
             }
-
             val inNodes = edge.nodeFrom.getDefinitions()
             if (inNodes.isEmpty()) {
                 inNodes.add(edge.nodeFrom)
@@ -30,7 +29,6 @@ object TransitiveClosureBuilder : FlowGraphNodesProcessor {
                     }
                 }
             }
-
             for (inNode in inNodes) {
                 if (!processedNodes.contains(inNode)) {
                     buildDataClosure(inNode, processedNodes)
