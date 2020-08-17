@@ -53,5 +53,6 @@ class PyFlowGraphIsomorphismTest : BasePlatformTestCase() {
     fun `test if with several elifs and else`() = runTest("many_elifs.py")
     fun `test try except`() = runTest("try_except.py")
 
-
+    fun `test complicated for with continue statements`() = runTest("continue.py")
+    fun `test complicated for with break statement`() = runTest("break.py")
 }
