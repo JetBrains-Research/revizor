@@ -5,8 +5,11 @@ class WeakVertexComparator : Comparator<PatternSpecificVertex> {
         if (fromTarget?.label?.startsWith("var") == true
             && fromPattern?.label?.startsWith("var") == true
         ) {
-            val lcs = fromPattern.longestCommonSuffix ?: ""
-            return if (fromTarget.originalLabel?.endsWith(lcs) == true) 0 else 1
+            return if (fromPattern.possibleVarNames.size <= 3) {
+                if (fromPattern.possibleVarNames.contains(fromTarget.originalLabel)) 0 else 1
+            } else {
+                0
+            }
         }
         if (fromTarget?.originalLabel?.toLowerCase() == fromPattern?.originalLabel?.toLowerCase()
             && fromTarget?.label?.toLowerCase() == fromPattern?.label?.toLowerCase()

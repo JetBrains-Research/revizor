@@ -21,7 +21,7 @@ class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor()
                 val patternsMappings = PatternsStorage.getIsomorphicPatterns(targetGraph = methodJGraph)
                 val patternPathByProblematicToken = HashMap<PsiElement, ArrayList<Path>>()
                 for ((path, mapping) in patternsMappings) {
-                    val patternGraph = PatternsStorage.getUnifiedPatternGraphByPath(path)!!
+                    val patternGraph = PatternsStorage.getPatternGraphByPath(path)!!
                     for (vertex in patternGraph.vertexSet()) {
                         val mappedTargetVertex = mapping.getVertexCorrespondence(vertex, false)
                         if (mappedTargetVertex.origin?.psi != null) {
@@ -38,6 +38,7 @@ class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor()
                         PatternsSuggestions(patternsPaths)
                     )
                 }
+                print(holder.resultCount)
             } catch (exception: GraphBuildingException) {
                 println("Unable to build PyFlowGraph for method <${node.name}>")
             }

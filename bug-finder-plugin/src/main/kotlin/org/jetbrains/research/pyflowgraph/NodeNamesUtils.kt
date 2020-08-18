@@ -79,6 +79,7 @@ fun getOperationName(node: PyElement): String? =
                 "+" -> "add"
                 "-" -> "sub"
                 "*" -> "mult"
+                "**" -> "pow"
                 "/" -> "div"
                 "%" -> "mod"
                 "and" -> "and"

@@ -1,7 +1,6 @@
 package org.jetbrains.research
 
 import com.intellij.openapi.components.service
-import org.jetbrains.research.common.getLongestCommonSuffix
 import org.jetbrains.research.common.getWeakSubGraphIsomorphismInspector
 import org.jetbrains.research.ide.BugFinderConfigService
 import org.jetbrains.research.jgrapht.PatternSpecificGraphsLoader
@@ -16,17 +15,17 @@ import java.nio.file.Paths
 
 object PatternsStorage {
     private val patternsStoragePath: Path = service<BugFinderConfigService>().state.patternsOutputPath
-    private val unifiedPatternGraphByPatternDirPath =
+    private val finalPatternGraphByPatternDirPath =
         HashMap<Path, Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
-    private val patternsGraphsByPatternsDirPath =
+    private val patternFragmentsGraphsByPatternsDirPath =
         HashMap<Path, ArrayList<Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>>()
 
     init {
         loadPatterns()
-        unifyVarsOriginalLabels()
+        extractCommonVariableLabels()
     }
 
-    fun getUnifiedPatternGraphByPath(pathToPatternDir: Path) = unifiedPatternGraphByPatternDirPath[pathToPatternDir]
+    fun getPatternGraphByPath(pathToPatternDir: Path) = finalPatternGraphByPatternDirPath[pathToPatternDir]
 
     private fun loadPatterns() {
         patternsStoragePath.toFile().walk().forEach {
@@ -36,52 +35,48 @@ object PatternsStorage {
                     currentGraph,
                     currentGraph.vertexSet().filter { vertex -> vertex.color == "red2" }.toSet()
                 )
-                patternsGraphsByPatternsDirPath.getOrPut(Paths.get(it.parent)) { ArrayList() }
+                patternFragmentsGraphsByPatternsDirPath.getOrPut(Paths.get(it.parent)) { ArrayList() }
                     .add(subgraphBefore)
             }
         }
     }
 
-    private fun unifyVarsOriginalLabels() {
-        for (entry in patternsGraphsByPatternsDirPath) {
-            val pathToPatternDir = entry.key
-            val fragmentsGraphs = entry.value
-            val variableOriginalLabelsGroups = HashMap<Int, ArrayList<String?>>()
+    private fun extractCommonVariableLabels() {
+        for ((pathToPatternDir, fragmentsGraphs) in patternFragmentsGraphsByPatternsDirPath) {
+            val variableOriginalLabelsGroups = HashMap<Int, HashSet<String>>()
             for (graph in fragmentsGraphs) {
                 var variableVerticesCounter = 0
                 for (vertex in graph.vertexSet()) {
                     if (vertex.label?.startsWith("var") == true) {
-                        variableOriginalLabelsGroups.getOrPut(variableVerticesCounter) { ArrayList() }
-                            .add(vertex.originalLabel)
+                        variableOriginalLabelsGroups.getOrPut(variableVerticesCounter) { hashSetOf() }
+                            .add(vertex.originalLabel!!)
                         variableVerticesCounter++
                     }
                 }
             }
-            val baseGraphForUnification = fragmentsGraphs.first()
-            val unifiedGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
+            val baseGraph = fragmentsGraphs.first()
+            val finalGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
                 PatternSpecificMultipleEdge::class.java
             )
-            val verticesMap = HashMap<PatternSpecificVertex, PatternSpecificVertex>()
+            val verticesMapping = HashMap<PatternSpecificVertex, PatternSpecificVertex>()
             var variableVerticesCounter = 0
-            for (vertex in baseGraphForUnification.vertexSet()) {
+            for (vertex in baseGraph.vertexSet()) {
                 val newVertex = vertex.copy()
                 if (vertex.label?.startsWith("var") == true) {
-                    newVertex.longestCommonSuffix = getLongestCommonSuffix(
-                        variableOriginalLabelsGroups[variableVerticesCounter]
-                    )
+                    newVertex.possibleVarNames = variableOriginalLabelsGroups[variableVerticesCounter]!!
                     variableVerticesCounter++
                 }
-                unifiedGraph.addVertex(newVertex)
-                verticesMap[vertex] = newVertex
+                finalGraph.addVertex(newVertex)
+                verticesMapping[vertex] = newVertex
             }
-            for (edge in baseGraphForUnification.edgeSet()) {
-                unifiedGraph.addEdge(
-                    verticesMap[baseGraphForUnification.getEdgeSource(edge)],
-                    verticesMap[baseGraphForUnification.getEdgeTarget(edge)],
+            for (edge in baseGraph.edgeSet()) {
+                finalGraph.addEdge(
+                    verticesMapping[baseGraph.getEdgeSource(edge)],
+                    verticesMapping[baseGraph.getEdgeTarget(edge)],
                     edge.copy()
                 )
             }
-            unifiedPatternGraphByPatternDirPath[pathToPatternDir] = unifiedGraph
+            finalPatternGraphByPatternDirPath[pathToPatternDir] = finalGraph
         }
     }
 
@@ -97,7 +92,7 @@ object PatternsStorage {
     fun getIsomorphicPatterns(targetGraph: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>)
             : HashMap<Path, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>> {
         val suitablePatterns = HashMap<Path, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
-        for (entry in unifiedPatternGraphByPatternDirPath) {
+        for (entry in finalPatternGraphByPatternDirPath) {
             val pathToPatternDir = entry.key
             val unifiedPatternGraph = entry.value
             val inspector = getWeakSubGraphIsomorphismInspector(targetGraph, unifiedPatternGraph)
