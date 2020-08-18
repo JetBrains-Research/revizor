@@ -13,7 +13,6 @@ import java.nio.file.Path
 
 class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor() {
 
-
     override fun visitPyFunction(node: PyFunction?) {
         if (node != null) {
             try {
@@ -30,6 +29,9 @@ class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor()
                         }
                     }
                 }
+                if (holder.hasResults()) {
+                    holder.results.clear()
+                }
                 for ((token, patternsPaths) in patternPathByProblematicToken) {
                     holder.registerProblem(
                         token,
@@ -38,7 +40,6 @@ class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor()
                         PatternsSuggestions(patternsPaths)
                     )
                 }
-                print(holder.resultCount)
             } catch (exception: GraphBuildingException) {
                 println("Unable to build PyFlowGraph for method <${node.name}>")
             }
