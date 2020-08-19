@@ -92,6 +92,8 @@ fun getOperationName(node: PyElement): String? =
                 "!=" -> "NotEq"
                 "in" -> "In"
                 "not in" -> "NotIn"
+                "is" -> "Is"
+                "is not" -> "IsNot"
                 else -> throw NotImplementedError("Unsupported operation type")
             }
         }

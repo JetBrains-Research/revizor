@@ -5,8 +5,8 @@ class WeakVertexComparator : Comparator<PatternSpecificVertex> {
         if (fromTarget?.label?.startsWith("var") == true
             && fromPattern?.label?.startsWith("var") == true
         ) {
-            return if (fromPattern.possibleVarNames.size <= 3) {
-                if (fromPattern.possibleVarNames.contains(fromTarget.originalLabel)) 0 else 1
+            return if (fromPattern.possibleVarLabels.size <= 3) {
+                if (fromPattern.possibleVarLabels.contains(fromTarget.originalLabel)) 0 else 1
             } else {
                 0
             }

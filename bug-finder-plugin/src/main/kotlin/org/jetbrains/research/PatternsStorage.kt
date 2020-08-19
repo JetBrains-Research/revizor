@@ -1,108 +1,103 @@
 package org.jetbrains.research
 
-import com.intellij.openapi.components.service
+import com.google.gson.Gson
 import org.jetbrains.research.common.getWeakSubGraphIsomorphismInspector
-import org.jetbrains.research.ide.BugFinderConfigService
 import org.jetbrains.research.jgrapht.PatternSpecificGraphsLoader
 import org.jetbrains.research.jgrapht.PatternSpecificMultipleEdge
 import org.jetbrains.research.jgrapht.PatternSpecificVertex
-import org.jgrapht.Graph
 import org.jgrapht.GraphMapping
 import org.jgrapht.graph.AsSubgraph
 import org.jgrapht.graph.DirectedAcyclicGraph
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.io.BufferedReader
+import java.io.File
+import java.io.InputStreamReader
+import java.util.jar.JarFile
 
 object PatternsStorage {
-    private val patternsStoragePath: Path = service<BugFinderConfigService>().state.patternsOutputPath
-    private val finalPatternGraphByPatternDirPath =
-        HashMap<Path, Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
-    private val patternFragmentsGraphsByPatternsDirPath =
-        HashMap<Path, ArrayList<Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>>()
+    private val patternById =
+        HashMap<String, DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
+    private val patternDescById = HashMap<String, String>()
+
 
     init {
-        loadPatterns()
-        extractCommonVariableLabels()
-    }
-
-    fun getPatternGraphByPath(pathToPatternDir: Path) = finalPatternGraphByPatternDirPath[pathToPatternDir]
-
-    private fun loadPatterns() {
-        patternsStoragePath.toFile().walk().forEach {
-            if (it.isFile && it.extension == "dot" && it.name.startsWith("fragment")) {
-                val currentGraph = PatternSpecificGraphsLoader.loadDAGFromDotFile(it)
-                val subgraphBefore = AsSubgraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
-                    currentGraph,
-                    currentGraph.vertexSet().filter { vertex -> vertex.color == "red2" }.toSet()
-                )
-                patternFragmentsGraphsByPatternsDirPath.getOrPut(Paths.get(it.parent)) { ArrayList() }
-                    .add(subgraphBefore)
-            }
-        }
-    }
-
-    private fun extractCommonVariableLabels() {
-        for ((pathToPatternDir, fragmentsGraphs) in patternFragmentsGraphsByPatternsDirPath) {
-            val variableOriginalLabelsGroups = HashMap<Int, HashSet<String>>()
-            for (graph in fragmentsGraphs) {
-                var variableVerticesCounter = 0
-                for (vertex in graph.vertexSet()) {
-                    if (vertex.label?.startsWith("var") == true) {
-                        variableOriginalLabelsGroups.getOrPut(variableVerticesCounter) { hashSetOf() }
-                            .add(vertex.originalLabel!!)
-                        variableVerticesCounter++
-                    }
+        var jar: JarFile? = null
+        try {
+            val file = File(this::class.java.getResource("").path)
+            val jarFilePath = file.parentFile.parentFile.parent
+                .replace("(!|file:\\\\)".toRegex(), "")
+                .replace("file:/", "/")
+            jar = JarFile(jarFilePath)
+            val entries = jar.entries()
+            while (entries.hasMoreElements()) {
+                val je = entries.nextElement()
+                val jarEntryPathParts = je.name.split("/")
+                val patternId = jarEntryPathParts.getOrNull(1)
+                if (jarEntryPathParts.size == 3
+                    && jarEntryPathParts.first() == "patterns"
+                    && patternId?.toIntOrNull() != null
+                    && jarEntryPathParts.last().endsWith(".dot")
+                ) {
+                    val dotSrcStream = this::class.java.getResourceAsStream("/${je.name}")
+                    val currentGraph = PatternSpecificGraphsLoader.loadDAGFromDotInputStream(dotSrcStream)
+                    val subgraphBefore = AsSubgraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
+                        currentGraph,
+                        currentGraph.vertexSet()
+                            .filter { vertex -> vertex.color == "red2" }
+                            .toSet()
+                    )
+                    val variableLabelsGroups = loadVariableLabelsGroups(patternId) ?: arrayListOf()
+                    val targetGraph = PatternsPreprocessor.createPatternGraph(subgraphBefore, variableLabelsGroups)
+                    patternById[patternId] = targetGraph
+                    patternDescById[patternId] = loadDescription(patternId) ?: "No description provided"
                 }
             }
-            val baseGraph = fragmentsGraphs.first()
-            val finalGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
-                PatternSpecificMultipleEdge::class.java
-            )
-            val verticesMapping = HashMap<PatternSpecificVertex, PatternSpecificVertex>()
-            var variableVerticesCounter = 0
-            for (vertex in baseGraph.vertexSet()) {
-                val newVertex = vertex.copy()
-                if (vertex.label?.startsWith("var") == true) {
-                    newVertex.possibleVarNames = variableOriginalLabelsGroups[variableVerticesCounter]!!
-                    variableVerticesCounter++
-                }
-                finalGraph.addVertex(newVertex)
-                verticesMapping[vertex] = newVertex
-            }
-            for (edge in baseGraph.edgeSet()) {
-                finalGraph.addEdge(
-                    verticesMapping[baseGraph.getEdgeSource(edge)],
-                    verticesMapping[baseGraph.getEdgeTarget(edge)],
-                    edge.copy()
-                )
-            }
-            finalPatternGraphByPatternDirPath[pathToPatternDir] = finalGraph
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        } finally {
+            jar?.close()
         }
     }
 
-    fun getDescription(pathToPatternDir: Path): String? {
-        val descriptionFile = pathToPatternDir.resolve("description.txt").toFile()
-        return if (descriptionFile.exists()) {
-            descriptionFile.readText()
-        } else {
-            null
-        }
-    }
+    fun getPatternById(patternId: String) = patternById[patternId]
+
+    fun getPatternDescriptionById(patternId: String) = patternDescById[patternId]
 
     fun getIsomorphicPatterns(targetGraph: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>)
-            : HashMap<Path, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>> {
-        val suitablePatterns = HashMap<Path, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
-        for (entry in finalPatternGraphByPatternDirPath) {
-            val pathToPatternDir = entry.key
-            val unifiedPatternGraph = entry.value
-            val inspector = getWeakSubGraphIsomorphismInspector(targetGraph, unifiedPatternGraph)
+            : HashMap<String, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>> {
+        val suitablePatterns = HashMap<String, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
+        for ((patternId, graph) in patternById) {
+            val inspector = getWeakSubGraphIsomorphismInspector(targetGraph, graph)
             if (inspector.isomorphismExists()) {
                 val mapping = inspector.mappings.asSequence().iterator().next()
                 if (mapping != null) {
-                    suitablePatterns[pathToPatternDir] = mapping
+                    suitablePatterns[patternId] = mapping
                 }
             }
         }
         return suitablePatterns
+    }
+
+    private fun loadDescription(patternId: String): String? {
+        val filePath = "/patterns/$patternId/description.txt"
+        val stream = this::class.java.getResourceAsStream(filePath)
+        return InputStreamReader(stream).use { inputStreamReader ->
+            BufferedReader(inputStreamReader).use { bufferedReader ->
+                bufferedReader.readText()
+            }
+        }
+    }
+
+    private fun loadVariableLabelsGroups(patternId: String): ArrayList<HashSet<String>>? {
+        val filePath = "/patterns/$patternId/possible_variable_labels.json"
+        val stream = this::class.java.getResourceAsStream(filePath)
+        val fileContent = InputStreamReader(stream).use { inputStreamReader ->
+            BufferedReader(inputStreamReader).use { bufferedReader ->
+                bufferedReader.readText()
+            }
+        }
+        val json = Gson().fromJson(fileContent, ArrayList<ArrayList<String>>()::class.java)
+        val varLabelsGroups = ArrayList<HashSet<String>>()
+        json.forEach { varLabelsGroups.add(it.toHashSet()) }
+        return varLabelsGroups
     }
 }

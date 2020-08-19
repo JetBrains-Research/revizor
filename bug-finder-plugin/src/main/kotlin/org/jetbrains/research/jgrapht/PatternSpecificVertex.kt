@@ -9,7 +9,7 @@ data class PatternSpecificVertex(
     var originalLabel: String? = null,
     var color: String? = null,
     var shape: String? = null,
-    var possibleVarNames: HashSet<String> = hashSetOf(),
+    var possibleVarLabels: HashSet<String> = hashSetOf(),
     var origin: Node? = null
 ) {
 

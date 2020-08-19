@@ -7,16 +7,15 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
 import org.jetbrains.research.PatternsStorage
-import java.nio.file.Path
 
-class PatternsSuggestions(private val suggestions: List<Path>) : LocalQuickFix {
+class PatternsSuggestions(private val patternsIds: List<String>) : LocalQuickFix {
 
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         val editor = FileEditorManager.getInstance(project).selectedTextEditor
         val suggestionsPopup = JBPopupFactory.getInstance().createListPopup(
-            object : BaseListPopupStep<Path>("Patterns", suggestions) {
-                override fun getTextFor(value: Path): String {
-                    return PatternsStorage.getDescription(value) ?: "Unnamed pattern: $value"
+            object : BaseListPopupStep<String>("Patterns", patternsIds) {
+                override fun getTextFor(patternId: String): String {
+                    return PatternsStorage.getPatternDescriptionById(patternId) ?: "Unnamed pattern: $patternId"
                 }
             }
         )

@@ -9,7 +9,6 @@ import org.jetbrains.research.PatternsStorage
 import org.jetbrains.research.common.buildPyFlowGraphForMethod
 import org.jetbrains.research.ide.PatternsSuggestions
 import org.jetbrains.research.pyflowgraph.GraphBuildingException
-import java.nio.file.Path
 
 class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor() {
 
@@ -18,26 +17,23 @@ class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor()
             try {
                 val methodJGraph = buildPyFlowGraphForMethod(node, builder = "kotlin")
                 val patternsMappings = PatternsStorage.getIsomorphicPatterns(targetGraph = methodJGraph)
-                val patternPathByProblematicToken = HashMap<PsiElement, ArrayList<Path>>()
-                for ((path, mapping) in patternsMappings) {
-                    val patternGraph = PatternsStorage.getPatternGraphByPath(path)!!
+                val patternsIdsByProblematicToken = HashMap<PsiElement, ArrayList<String>>()
+                for ((patternId, mapping) in patternsMappings) {
+                    val patternGraph = PatternsStorage.getPatternById(patternId)!!
                     for (vertex in patternGraph.vertexSet()) {
                         val mappedTargetVertex = mapping.getVertexCorrespondence(vertex, false)
                         if (mappedTargetVertex.origin?.psi != null) {
                             val problematicToken = mappedTargetVertex.origin!!.psi!!.originalElement
-                            patternPathByProblematicToken.getOrPut(problematicToken) { arrayListOf() }.add(path)
+                            patternsIdsByProblematicToken.getOrPut(problematicToken) { arrayListOf() }.add(patternId)
                         }
                     }
                 }
-                if (holder.hasResults()) {
-                    holder.results.clear()
-                }
-                for ((token, patternsPaths) in patternPathByProblematicToken) {
+                for ((token, patternsIds) in patternsIdsByProblematicToken) {
                     holder.registerProblem(
                         token,
                         "Found relevant patterns in method <${node.name}>",
                         ProblemHighlightType.WARNING,
-                        PatternsSuggestions(patternsPaths)
+                        PatternsSuggestions(patternsIds)
                     )
                 }
             } catch (exception: GraphBuildingException) {

@@ -18,7 +18,7 @@ fun buildPyFlowGraphForMethod(node: PyFunction, builder: String = "kotlin")
         "python" -> {
             val tempFile = createTempFileFromMethodPsi(node)
             val dotFile = buildPyFlowGraphBySubprocess(tempFile)
-            PatternSpecificGraphsLoader.loadDAGFromDotFile(dotFile)
+            PatternSpecificGraphsLoader.loadDAGFromDotInputStream(dotFile.inputStream())
         }
         "kotlin" -> {
             val methodPyFlowGraph = PyFlowGraphBuilder().buildForPyFunction(node)

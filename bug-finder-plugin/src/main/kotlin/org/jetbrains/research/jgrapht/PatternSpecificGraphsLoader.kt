@@ -6,11 +6,10 @@ import org.jgrapht.graph.DirectedAcyclicGraph
 import org.jgrapht.graph.DirectedMultigraph
 import org.jgrapht.nio.Attribute
 import org.jgrapht.nio.dot.DOTImporter
-import java.io.File
+import java.io.InputStream
 
 
 object PatternSpecificGraphsLoader {
-
 
     fun loadDAGFromPyFlowGraph(pfg: PyFlowGraph):
             DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> {
@@ -57,7 +56,8 @@ object PatternSpecificGraphsLoader {
         return targetDAG
     }
 
-    fun loadDAGFromDotFile(dotFile: File): DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> {
+    fun loadDAGFromDotInputStream(dotInput: InputStream)
+            : DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> {
         val importer = DOTImporter<String, DefaultEdge>()
         importer.setVertexFactory { id -> id }
         val vertexAttributes = HashMap<String, HashMap<String, Attribute>>()
@@ -69,7 +69,7 @@ object PatternSpecificGraphsLoader {
             edgeAttributes.getOrPut(pair.first) { HashMap() }[pair.second] = attr
         }
         val importedDAG = DirectedMultigraph<String, DefaultEdge>(DefaultEdge::class.java)
-        importer.importGraph(importedDAG, dotFile)
+        importer.importGraph(importedDAG, dotInput)
 
         val targetDAG = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
             PatternSpecificMultipleEdge::class.java
