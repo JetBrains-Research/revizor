@@ -1,0 +1,16 @@
+digraph "fragment-11316525.dot" {
+	subgraph "subgraph: 6863 to 6864" {
+		graph [rank=same]
+		6863 [label="exists (exists) [6863]" color=red2 shape=box]
+		6864 [label="isfile (isfile) [6864]" color=green4 shape=box]
+	}
+	subgraph "subgraph: 6851 to 6850" {
+		graph [rank=same]
+		6851 [label="var (os.path.isfile) [6851]" color=green4 shape=ellipse]
+		6850 [label="var (os.path.exists) [6850]" color=red2 shape=ellipse]
+	}
+	6850 -> 6863 [xlabel=recv]
+	6851 -> 6864 [xlabel=recv]
+	6863 -> 6864 [xlabel=map]
+	6850 -> 6851 [xlabel=map]
+}

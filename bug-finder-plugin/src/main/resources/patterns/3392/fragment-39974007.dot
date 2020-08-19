@@ -1,0 +1,12 @@
+digraph "fragment-39974007.dot" {
+	subgraph "subgraph: 1342 to 1343" {
+		graph [rank=same]
+		1342 [label="keys (keys) [1342]" color=red2 shape=box]
+		1343 [label="len (len) [1343]" color=green4 shape=box]
+	}
+	1344 [label="var (self.values.keys) [1344]" color=red2 shape=ellipse]
+	1341 [label="len (len) [1341]" color=red2 shape=box]
+	1344 -> 1342 [xlabel=recv]
+	1342 -> 1343 [xlabel=map]
+	1342 -> 1341 [xlabel=para]
+}

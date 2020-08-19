@@ -1,0 +1,22 @@
+digraph "fragment-4259511.dot" {
+	subgraph "subgraph: 11815 to 11816" {
+		graph [rank=same]
+		11815 [label="log (log) [11815]" color=red2 shape=box]
+		11816 [label="softplus (softplus) [11816]" color=green4 shape=box]
+	}
+	11832 [label="exp (exp) [11832]" color=red2 shape=box]
+	11850 [label="add (add) [11850]" color=red2 shape=box]
+	11801 [label="var (tf.log) [11801]" color=red2 shape=ellipse]
+	11862 [label="var (tf.math.softplus) [11862]" color=green4 shape=ellipse]
+	11851 [label="var (tf.math) [11851]" color=green4 shape=ellipse]
+	11844 [label="lit (1.0) [11844]" color=red2 shape=ellipse]
+	11844 -> 11815 [xlabel=para]
+	11850 -> 11815 [xlabel=para]
+	11801 -> 11815 [xlabel=recv]
+	11832 -> 11815 [xlabel=para]
+	11862 -> 11816 [xlabel=recv]
+	11815 -> 11816 [xlabel=map]
+	11832 -> 11850 [xlabel=para]
+	11844 -> 11850 [xlabel=para]
+	11851 -> 11862 [xlabel=qual]
+}
