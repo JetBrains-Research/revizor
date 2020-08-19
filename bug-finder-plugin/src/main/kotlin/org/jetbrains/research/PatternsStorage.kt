@@ -77,26 +77,34 @@ object PatternsStorage {
     }
 
     private fun loadDescription(patternId: String): String? {
-        val filePath = "/patterns/$patternId/description.txt"
-        val stream = this::class.java.getResourceAsStream(filePath)
-        return InputStreamReader(stream).use { inputStreamReader ->
-            BufferedReader(inputStreamReader).use { bufferedReader ->
-                bufferedReader.readText()
+        return try {
+            val filePath = "/patterns/$patternId/description.txt"
+            val stream = this::class.java.getResourceAsStream(filePath)
+            InputStreamReader(stream).use { inputStreamReader ->
+                BufferedReader(inputStreamReader).use { bufferedReader ->
+                    bufferedReader.readText()
+                }
             }
+        } catch (ex: NullPointerException) {
+            null
         }
     }
 
     private fun loadVariableLabelsGroups(patternId: String): ArrayList<HashSet<String>>? {
-        val filePath = "/patterns/$patternId/possible_variable_labels.json"
-        val stream = this::class.java.getResourceAsStream(filePath)
-        val fileContent = InputStreamReader(stream).use { inputStreamReader ->
-            BufferedReader(inputStreamReader).use { bufferedReader ->
-                bufferedReader.readText()
+        return try {
+            val filePath = "/patterns/$patternId/possible_variable_labels.json"
+            val stream = this::class.java.getResourceAsStream(filePath)
+            val fileContent = InputStreamReader(stream).use { inputStreamReader ->
+                BufferedReader(inputStreamReader).use { bufferedReader ->
+                    bufferedReader.readText()
+                }
             }
+            val json = Gson().fromJson(fileContent, ArrayList<ArrayList<String>>()::class.java)
+            val varLabelsGroups = ArrayList<HashSet<String>>()
+            json.forEach { varLabelsGroups.add(it.toHashSet()) }
+            varLabelsGroups
+        } catch (ex: NullPointerException) {
+            null
         }
-        val json = Gson().fromJson(fileContent, ArrayList<ArrayList<String>>()::class.java)
-        val varLabelsGroups = ArrayList<HashSet<String>>()
-        json.forEach { varLabelsGroups.add(it.toHashSet()) }
-        return varLabelsGroups
     }
 }

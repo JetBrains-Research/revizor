@@ -1,5 +1,5 @@
 {
-  "patterns_storage_path": "/home/oleg/prog/jetbrains/data/output_final_best",
+  "patterns_storage_path": "/home/oleg/prog/jetbrains/bug-finder/bug-finder-plugin/src/main/resources/patterns",
   "code_change_miner_path": "/home/oleg/prog/jetbrains/bug-finder/code_change_miner",
   "temp_directory_path": "/home/oleg/.temp/"
 }

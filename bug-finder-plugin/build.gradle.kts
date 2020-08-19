@@ -2,6 +2,7 @@ plugins {
     id("org.jetbrains.intellij") version "0.4.21"
     java
     kotlin("jvm") version "1.3.72"
+    application
 }
 
 group = "org.jetbrains.research"
@@ -16,6 +17,7 @@ dependencies {
     implementation(group = "org.jgrapht", name = "jgrapht-core", version = "1.5.0")
     implementation(group = "org.jgrapht", name = "jgrapht-io", version = "1.5.0")
     implementation("org.junit.jupiter:junit-jupiter:5.4.2")
+    implementation(group = "com.google.code.gson", name = "gson", version = "2.8.6")
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
@@ -31,4 +33,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnit()
+}
+
+application {
+    mainClassName = "org.jetbrains.research.PatternsPreprocessing"
 }
