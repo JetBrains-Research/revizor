@@ -1,8 +1,7 @@
 package org.jetbrains.research.common
 
-import com.intellij.openapi.components.service
 import com.jetbrains.python.psi.PyFunction
-import org.jetbrains.research.ide.BugFinderConfigService
+import org.jetbrains.research.Config
 import org.jetbrains.research.jgrapht.PatternSpecificGraphsLoader
 import org.jetbrains.research.jgrapht.PatternSpecificMultipleEdge
 import org.jetbrains.research.jgrapht.PatternSpecificVertex
@@ -28,11 +27,10 @@ fun buildPyFlowGraphForMethod(node: PyFunction, builder: String = "kotlin")
     }
 
 fun createTempFileFromMethodPsi(node: PyFunction): File {
-    val configState = service<BugFinderConfigService>().state
     val currentMethodSrc: String = node.originalElement.text
     val tempFile = createTempFile(
         prefix = "method_${node.name}_",
-        directory = configState.tempDirectory.toFile()
+        directory = Config.TEMP_DIRECTORY_PATH.toFile()
     )
     tempFile.writeText(currentMethodSrc)
     tempFile.deleteOnExit()
@@ -40,11 +38,10 @@ fun createTempFileFromMethodPsi(node: PyFunction): File {
 }
 
 fun buildPyFlowGraphBySubprocess(inputFile: File): File {
-    val configState = service<BugFinderConfigService>().state
-    val pythonExecPath = configState.pythonExecutablePath.toString()
-    val mainScriptPath = configState.codeChangeMinerPath.resolve("main.py").toString()
+    val pythonExecPath = Config.PYTHON_EXECUTABLE_PATH.toString()
+    val mainScriptPath = Config.CODE_CHANGE_MINER_PATH.resolve("main.py").toString()
     val inputFilePath = inputFile.absolutePath
-    val outputFilePath = configState.tempDirectory
+    val outputFilePath = Config.TEMP_DIRECTORY_PATH
         .resolve("pfg_${inputFile.nameWithoutExtension}.dot")
         .toString()
     val builder = ProcessBuilder().also {

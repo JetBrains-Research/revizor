@@ -1,8 +1,6 @@
 package org.jetbrains.research
 
 import com.google.gson.Gson
-import com.intellij.openapi.components.service
-import org.jetbrains.research.ide.BugFinderConfigService
 import org.jetbrains.research.jgrapht.PatternSpecificGraphsLoader
 import org.jetbrains.research.jgrapht.PatternSpecificMultipleEdge
 import org.jetbrains.research.jgrapht.PatternSpecificVertex
@@ -14,8 +12,7 @@ import java.nio.file.Paths
 
 
 object PatternsPreprocessor {
-    private val patternsStoragePath: Path =
-        service<BugFinderConfigService>().state.patternsOutputPath
+    private val patternsStoragePath: Path = Config.PATTERNS_STORAGE_PATH
     private val finalPatternGraphByPatternDirPath =
         HashMap<Path, Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
     private val patternFragmentsGraphsByPatternDirPath =

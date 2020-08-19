@@ -13,7 +13,6 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="org.jetbrains.research.ide.BugFinderStartupActivity"/>
-        <applicationService serviceImplementation="org.jetbrains.research.ide.BugFinderConfigService"/>
         <localInspection language="Python"
                          groupPath="Python"
                          groupName="BugFinder plugin"
