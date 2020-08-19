@@ -18,7 +18,6 @@ object PatternsStorage {
         HashMap<String, DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
     private val patternDescById = HashMap<String, String>()
 
-
     init {
         var jar: JarFile? = null
         try {

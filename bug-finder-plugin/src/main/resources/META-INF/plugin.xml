@@ -4,7 +4,8 @@
     <vendor>JetBrains Research</vendor>
 
     <description><![CDATA[
-        Data driven bug fix suggestion based on popular Python code change patterns
+        A static code analysis tool that tries to find complicated,
+        semantic, and, as far as possible, buggy patterns in your Python code.
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>

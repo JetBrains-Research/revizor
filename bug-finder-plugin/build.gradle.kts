@@ -20,9 +20,9 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    setPlugins("Pythonid")
-    version = "2020.2"
+    version = "2019.3"
     type = "PY"
+    setPlugins("Pythonid")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

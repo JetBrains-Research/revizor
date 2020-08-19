@@ -1,7 +1,9 @@
 <html>
 <body>
-<b>BugFinder</b> inspection tries to find buggy patterns in your code.
-It works together with <b>code-change-miner</b> tool.
-Current aim of the inspection is to suggest real human-made fixes for found patterns.
+<b>BugFinder</b> inspection aims to locate complex (and possibly buggy) patterns in your Python code.
+It works with patterns represented in Python Flow Graphs, which were mined by
+<a href="https://github.com/JetBrains-Research/code-change-miner">code-change-miner</a> tool. Actually,
+inspection tries to find isomorphic subgraphs of patterns in yours program control flow graph, which is built
+automatically.
 </body>
 </html>
