@@ -1,0 +1,1 @@
+os.path.exists() → os.path.isfile()

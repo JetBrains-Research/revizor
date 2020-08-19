@@ -1,0 +1,1 @@
+isinstance(x, collections.Callable/types.FunctionType) → iscallable(x)
