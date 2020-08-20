@@ -1,0 +1,6 @@
+{
+  "patterns_storage_path": "/home/oleg/prog/jetbrains/bug-finder/plugin/src/main/resources/patterns",
+  "code_change_miner_path": "/home/oleg/prog/jetbrains/bug-finder/code_change_miner",
+  "temp_directory_path": "/home/oleg/.temp/",
+  "python_executable_path": "/home/oleg/miniconda3/envs/bug-finder/bin/python"
+}
