@@ -2,5 +2,5 @@ group = rootProject.group
 version = rootProject.version
 
 dependencies {
-    implementation(project(":plugin"))
+    implementation(project(rootProject.path))
 }
