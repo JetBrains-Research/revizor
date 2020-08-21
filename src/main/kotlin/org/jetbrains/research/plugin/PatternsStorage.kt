@@ -12,6 +12,8 @@ import org.jgrapht.graph.DirectedAcyclicGraph
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
+import java.net.URL
+import java.nio.file.Paths
 import java.util.jar.JarFile
 
 object PatternsStorage {
@@ -22,10 +24,8 @@ object PatternsStorage {
     init {
         var jar: JarFile? = null
         try {
-            val file = File(this::class.java.getResource("").path)
-            val jarFilePath = file.parentFile.parentFile.parentFile.parent
-                .replace("(!|file:\\\\)".toRegex(), "")
-                .replace("file:/", "/")  // FIXME
+            val resourceFile = File(this::class.java.getResource("").path)
+            val jarFilePath = Paths.get(URL(resourceFile.path).toURI()).toString().substringBeforeLast("!")
             jar = JarFile(jarFilePath)
             val entries = jar.entries()
             while (entries.hasMoreElements()) {

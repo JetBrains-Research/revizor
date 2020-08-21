@@ -9,11 +9,6 @@ import org.jetbrains.research.plugin.common.getStrictGraphIsomorphismInspector
 
 class PyFlowGraphIsomorphismTest : BasePlatformTestCase() {
 
-    override fun setUp() {
-        super.setUp()
-        Config
-    }
-
     override fun getTestDataPath() = "src/test/resources/testData"
 
     private fun runTest(fileName: String) {
