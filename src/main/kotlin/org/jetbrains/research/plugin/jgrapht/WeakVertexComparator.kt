@@ -1,14 +1,18 @@
 package org.jetbrains.research.plugin.jgrapht
 
+import org.jetbrains.research.plugin.jgrapht.PatternSpecificVertex.LabelsGroup.Indicator.*
+
 class WeakVertexComparator : Comparator<PatternSpecificVertex> {
     override fun compare(fromTarget: PatternSpecificVertex?, fromPattern: PatternSpecificVertex?): Int {
         if (fromTarget?.label?.startsWith("var") == true
             && fromPattern?.label?.startsWith("var") == true
         ) {
-            return if (fromPattern.possibleVarLabels.size <= 3) {
-                if (fromPattern.possibleVarLabels.contains(fromTarget.originalLabel)) 0 else 1
-            } else {
-                0
+            return when (fromPattern.dataNodeInfo?.whatMatters) {
+                VALUABLE_ORIGINAL_LABEL ->
+                    if (fromPattern.dataNodeInfo!!.labels.contains(fromTarget.originalLabel)) 0 else 1
+                LONGEST_COMMON_SUFFIX ->
+                    if (fromTarget.originalLabel!!.contains(fromPattern.dataNodeInfo!!.longestCommonSuffix)) 0 else 1
+                NOTHING, null -> 0
             }
         }
         if (fromTarget?.originalLabel?.toLowerCase() == fromPattern?.originalLabel?.toLowerCase()

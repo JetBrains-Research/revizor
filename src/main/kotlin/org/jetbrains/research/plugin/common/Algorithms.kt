@@ -6,7 +6,7 @@ import org.jgrapht.alg.isomorphism.VF2GraphIsomorphismInspector
 import org.jgrapht.alg.isomorphism.VF2SubgraphIsomorphismInspector
 import org.jgrapht.graph.DirectedAcyclicGraph
 
-fun getLongestCommonSuffix(strings: ArrayList<String?>?): String {
+fun getLongestCommonSuffix(strings: Collection<String?>?): String {
     if (strings == null || strings.isEmpty())
         return ""
     var lcs = strings.first()

@@ -1,39 +1,11 @@
 package org.jetbrains.research.plugin.jgrapht
 
-import org.jgrapht.Graph
 import org.jgrapht.graph.DirectedAcyclicGraph
 import org.jgrapht.nio.Attribute
 import org.jgrapht.nio.DefaultAttribute
 import org.jgrapht.nio.dot.DOTExporter
 import java.io.File
 
-fun createPatternGraph(
-    baseGraph: Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>,
-    variableLabelsGroups: ArrayList<HashSet<String>>
-): DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> {
-    val targetGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
-        PatternSpecificMultipleEdge::class.java
-    )
-    val verticesMapping = HashMap<PatternSpecificVertex, PatternSpecificVertex>()
-    var variableVerticesCounter = 0
-    for (vertex in baseGraph.vertexSet()) {
-        val newVertex = vertex.copy()
-        if (vertex.label?.startsWith("var") == true) {
-            newVertex.possibleVarLabels = variableLabelsGroups.getOrNull(variableVerticesCounter) ?: hashSetOf()
-            variableVerticesCounter++
-        }
-        targetGraph.addVertex(newVertex)
-        verticesMapping[vertex] = newVertex
-    }
-    for (edge in baseGraph.edgeSet()) {
-        targetGraph.addEdge(
-            verticesMapping[baseGraph.getEdgeSource(edge)],
-            verticesMapping[baseGraph.getEdgeTarget(edge)],
-            edge.copy()
-        )
-    }
-    return targetGraph
-}
 
 fun exportDotFile(graph: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificEdge>, file: File) {
     val exporter = DOTExporter<PatternSpecificVertex, PatternSpecificEdge> { v -> v.id }

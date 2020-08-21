@@ -1,11 +1,11 @@
 package org.jetbrains.research.plugin
 
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.jetbrains.research.plugin.common.getWeakSubGraphIsomorphismInspector
-import org.jetbrains.research.plugin.jgrapht.PatternSpecificGraphsLoader
+import org.jetbrains.research.plugin.jgrapht.PatternSpecificGraphFactory
 import org.jetbrains.research.plugin.jgrapht.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.PatternSpecificVertex
-import org.jetbrains.research.plugin.jgrapht.createPatternGraph
 import org.jgrapht.GraphMapping
 import org.jgrapht.graph.AsSubgraph
 import org.jgrapht.graph.DirectedAcyclicGraph
@@ -15,9 +15,9 @@ import java.io.InputStreamReader
 import java.util.jar.JarFile
 
 object PatternsStorage {
+    private val patternDescById = HashMap<String, String>()
     private val patternById =
         HashMap<String, DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
-    private val patternDescById = HashMap<String, String>()
 
     init {
         var jar: JarFile? = null
@@ -25,7 +25,7 @@ object PatternsStorage {
             val file = File(this::class.java.getResource("").path)
             val jarFilePath = file.parentFile.parentFile.parentFile.parent
                 .replace("(!|file:\\\\)".toRegex(), "")
-                .replace("file:/", "/")
+                .replace("file:/", "/")  // FIXME
             jar = JarFile(jarFilePath)
             val entries = jar.entries()
             while (entries.hasMoreElements()) {
@@ -38,7 +38,7 @@ object PatternsStorage {
                     && jarEntryPathParts.last().endsWith(".dot")
                 ) {
                     val dotSrcStream = this::class.java.getResourceAsStream("/${je.name}")
-                    val currentGraph = PatternSpecificGraphsLoader.loadDAGFromDotInputStream(dotSrcStream)
+                    val currentGraph = PatternSpecificGraphFactory.createGraph(dotSrcStream)
                     val subgraphBefore = AsSubgraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
                         currentGraph,
                         currentGraph.vertexSet()
@@ -46,7 +46,7 @@ object PatternsStorage {
                             .toSet()
                     )
                     val variableLabelsGroups = loadVariableLabelsGroups(patternId) ?: arrayListOf()
-                    val targetGraph = createPatternGraph(subgraphBefore, variableLabelsGroups)
+                    val targetGraph = PatternSpecificGraphFactory.createGraph(subgraphBefore, variableLabelsGroups)
                     patternById[patternId] = targetGraph
                     patternDescById[patternId] =
                         loadDescription(patternId) ?: "No description provided"
@@ -92,7 +92,7 @@ object PatternsStorage {
         }
     }
 
-    private fun loadVariableLabelsGroups(patternId: String): ArrayList<HashSet<String>>? {
+    private fun loadVariableLabelsGroups(patternId: String): ArrayList<PatternSpecificVertex.LabelsGroup>? {
         return try {
             val filePath = "/patterns/$patternId/possible_variable_labels.json"
             val stream = this::class.java.getResourceAsStream(filePath)
@@ -101,10 +101,19 @@ object PatternsStorage {
                     bufferedReader.readText()
                 }
             }
-            val json = Gson().fromJson(fileContent, ArrayList<ArrayList<String>>()::class.java)
-            val varLabelsGroups = ArrayList<HashSet<String>>()
-            json.forEach { varLabelsGroups.add(it.toHashSet()) }
-            varLabelsGroups
+            val type = object : TypeToken<ArrayList<PatternSpecificVertex.LabelsGroup>>() {}.type
+            val json = Gson().fromJson<ArrayList<PatternSpecificVertex.LabelsGroup>>(fileContent, type)
+            val labelsGroups = ArrayList<PatternSpecificVertex.LabelsGroup>()
+            json.forEach {
+                labelsGroups.add(
+                    PatternSpecificVertex.LabelsGroup(
+                        whatMatters = it.whatMatters,
+                        labels = it.labels.toHashSet(),
+                        longestCommonSuffix = it.longestCommonSuffix
+                    )
+                )
+            }
+            labelsGroups
         } catch (ex: NullPointerException) {
             null
         }

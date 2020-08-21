@@ -9,9 +9,17 @@ data class PatternSpecificVertex(
     var originalLabel: String? = null,
     var color: String? = null,
     var shape: String? = null,
-    var possibleVarLabels: HashSet<String> = hashSetOf(),
+    var dataNodeInfo: LabelsGroup? = null,
     var origin: Node? = null
 ) {
+
+    data class LabelsGroup(
+        val whatMatters: Indicator?,
+        val labels: HashSet<String>,
+        val longestCommonSuffix: String
+    ) {
+        enum class Indicator { LONGEST_COMMON_SUFFIX, VALUABLE_ORIGINAL_LABEL, NOTHING }
+    }
 
     object CommonLabel {
         const val VARIABLE = "var"

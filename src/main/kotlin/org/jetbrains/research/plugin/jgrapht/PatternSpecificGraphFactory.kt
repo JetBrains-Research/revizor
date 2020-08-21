@@ -1,6 +1,7 @@
 package org.jetbrains.research.plugin.jgrapht
 
 import org.jetbrains.research.plugin.pyflowgraph.models.PyFlowGraph
+import org.jgrapht.Graph
 import org.jgrapht.graph.DefaultEdge
 import org.jgrapht.graph.DirectedAcyclicGraph
 import org.jgrapht.graph.DirectedMultigraph
@@ -9,9 +10,42 @@ import org.jgrapht.nio.dot.DOTImporter
 import java.io.InputStream
 
 
-object PatternSpecificGraphsLoader {
+object PatternSpecificGraphFactory {
 
-    fun loadDAGFromPyFlowGraph(pfg: PyFlowGraph):
+    fun createGraph(
+        baseGraph: Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>,
+        variableLabelsGroups: ArrayList<PatternSpecificVertex.LabelsGroup>
+    ): DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> {
+        val targetGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
+            PatternSpecificMultipleEdge::class.java
+        )
+        val verticesMapping = HashMap<PatternSpecificVertex, PatternSpecificVertex>()
+        var variableVerticesCounter = 0
+        for (vertex in baseGraph.vertexSet()) {
+            val newVertex = vertex.copy()
+            if (vertex.label?.startsWith("var") == true) {
+                newVertex.dataNodeInfo = variableLabelsGroups.getOrNull(variableVerticesCounter)
+                    ?: PatternSpecificVertex.LabelsGroup(
+                        whatMatters = null,
+                        labels = hashSetOf(),
+                        longestCommonSuffix = ""
+                    )
+                variableVerticesCounter++
+            }
+            targetGraph.addVertex(newVertex)
+            verticesMapping[vertex] = newVertex
+        }
+        for (edge in baseGraph.edgeSet()) {
+            targetGraph.addEdge(
+                verticesMapping[baseGraph.getEdgeSource(edge)],
+                verticesMapping[baseGraph.getEdgeTarget(edge)],
+                edge.copy()
+            )
+        }
+        return targetGraph
+    }
+
+    fun createGraph(pfg: PyFlowGraph):
             DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> {
         val defaultDAG = DirectedMultigraph<PatternSpecificVertex, PatternSpecificEdge>(
             PatternSpecificEdge::class.java
@@ -56,7 +90,7 @@ object PatternSpecificGraphsLoader {
         return targetDAG
     }
 
-    fun loadDAGFromDotInputStream(dotInput: InputStream)
+    fun createGraph(dotInput: InputStream)
             : DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> {
         val importer = DOTImporter<String, DefaultEdge>()
         importer.setVertexFactory { id -> id }

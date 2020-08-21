@@ -2,12 +2,12 @@ group = "org.jetbrains.research.bug-finder"
 version = "1.0-SNAPSHOT"
 
 plugins {
-    id("org.jetbrains.intellij") version "0.4.21" apply true
+    id("org.jetbrains.intellij") version "0.4.21"
     kotlin("jvm") version "1.3.72"
     java
 }
 
-intellij  {
+intellij {
     version = "2020.2"
     type = "PY"
     setPlugins("Pythonid")
@@ -16,12 +16,12 @@ intellij  {
 allprojects {
     repositories {
         mavenCentral()
+        maven("https://kotlin.bintray.com/kotlinx")
     }
 
     apply {
         plugin("kotlin")
         plugin("java")
-        plugin("org.jetbrains.intellij")
     }
 
     dependencies {
