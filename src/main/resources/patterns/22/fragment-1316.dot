@@ -1,0 +1,20 @@
+digraph "fragment-1316.dot" {
+	subgraph "subgraph: 1304 to 1305" {
+		graph [rank=same]
+		1304 [label="list (list) [1304]" color=red2 shape=box]
+		1305 [label="list (list) [1305]" color=green4 shape=box]
+	}
+	1309 [label="keys (keys) [1309]" color=red2 shape=box]
+	1308 [label="var (possible.keys) [1308]" color=red2 shape=ellipse]
+	subgraph "subgraph: 1303 to 1302" {
+		graph [rank=same]
+		1303 [label="var (possible) [1303]" color=green4 shape=ellipse]
+		1302 [label="var (possible) [1302]" color=red2 shape=ellipse]
+	}
+	1309 -> 1304 [xlabel=para from_closure=False]
+	1304 -> 1305 [xlabel=map from_closure=False]
+	1303 -> 1305 [xlabel=para from_closure=True]
+	1308 -> 1309 [xlabel=recv from_closure=False]
+	1302 -> 1308 [xlabel=qual from_closure=True]
+	1302 -> 1303 [xlabel=map from_closure=False]
+}

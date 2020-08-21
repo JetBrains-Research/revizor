@@ -1,0 +1,21 @@
+digraph "fragment-325.dot" {
+	subgraph "subgraph: 1457 to 1456" {
+		graph [rank=same]
+		1457 [label="range (range) [1457]" color=red2 shape=box]
+		1456 [label="enumerate (enumerate) [1456]" color=green4 shape=box]
+	}
+	1461 [label="len (len) [1461]" color=red2 shape=box]
+	1465 [label="= (=) [1465]" color=red2 shape=box]
+	1460 [label="var (dim) [1460]" color=red2 shape=ellipse]
+	1463 [label="var (static) [1463]" color=red2 shape=ellipse]
+	1461 -> 1457 [xlabel=para from_closure=False]
+	1457 -> 1456 [xlabel=map from_closure=False]
+	1463 -> 1461 [xlabel=para from_closure=True]
+	1457 -> 1465 [xlabel=para from_closure=True]
+	1457 -> 1465 [xlabel=control from_closure=True]
+	1461 -> 1465 [xlabel=control from_closure=True]
+	1461 -> 1465 [xlabel=para from_closure=True]
+	1457 -> 1460 [xlabel=def from_closure=True]
+	1461 -> 1460 [xlabel=def from_closure=True]
+	1465 -> 1460 [xlabel=def from_closure=False]
+}

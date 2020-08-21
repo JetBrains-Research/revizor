@@ -1,0 +1,29 @@
+[
+  {
+    "whatMatters": "NOTHING",
+    "labels": [
+      "x1_i",
+      "string1",
+      "cjn",
+      "string2",
+      "name",
+      "dim",
+      "action",
+      "m"
+    ],
+    "longestCommonSuffix": ""
+  },
+  {
+    "whatMatters": "NOTHING",
+    "labels": [
+      "static",
+      "str_list",
+      "lb",
+      "braid",
+      "list_to_use",
+      "x1",
+      "actions"
+    ],
+    "longestCommonSuffix": ""
+  }
+]

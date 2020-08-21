@@ -1,1 +1,1 @@
-Use log1p()
+Use .log1p()

@@ -1,1 +1,1 @@
-Maybe use os.makedirs()?
+Use os.makedirs()
