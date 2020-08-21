@@ -16,7 +16,7 @@ typealias FragmentsByPathMap = HashMap<Path, ArrayList<Graph<PatternSpecificVert
 typealias PatternGraphByPathMap = HashMap<Path, Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>
 
 
-internal fun loadFragments(inputPatternsStorage: String): FragmentsByPathMap {
+private fun loadFragments(inputPatternsStorage: String): FragmentsByPathMap {
     val fragmentsByDirectory = FragmentsByPathMap()
     File(inputPatternsStorage).walk().forEach {
         if (it.isFile && it.extension == "dot" && it.name.startsWith("fragment")) {
@@ -31,7 +31,7 @@ internal fun loadFragments(inputPatternsStorage: String): FragmentsByPathMap {
     return fragmentsByDirectory
 }
 
-internal fun getVarsGroups(fragments: List<Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>)
+private fun getVarsGroups(fragments: List<Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>)
         : ArrayList<PatternSpecificVertex.LabelsGroup> {
     val labelsGroups = ArrayList<PatternSpecificVertex.LabelsGroup>()
     for (graph in fragments) {
@@ -56,7 +56,7 @@ internal fun getVarsGroups(fragments: List<Graph<PatternSpecificVertex, PatternS
     return labelsGroups
 }
 
-internal fun collectVariableLabelsGroups(fragmentsMap: FragmentsByPathMap): PatternGraphByPathMap {
+private fun collectVariableLabelsGroups(fragmentsMap: FragmentsByPathMap): PatternGraphByPathMap {
     val graphs = PatternGraphByPathMap()
     for ((path, fragmentsGraphs) in fragmentsMap) {
         graphs[path] = PatternSpecificGraphFactory.createGraph(
@@ -67,7 +67,7 @@ internal fun collectVariableLabelsGroups(fragmentsMap: FragmentsByPathMap): Patt
     return graphs
 }
 
-internal fun markPatterns(patternsGraphs: PatternGraphByPathMap, addDescription: Boolean) {
+private fun markPatterns(patternsGraphs: PatternGraphByPathMap, addDescription: Boolean) {
     println("Start marking")
     for ((path, graph) in patternsGraphs) {
         println("-".repeat(70))
@@ -127,7 +127,7 @@ internal fun markPatterns(patternsGraphs: PatternGraphByPathMap, addDescription:
     println("Finish marking")
 }
 
-internal fun copyUsefulFiles(from: String, dest: String) {
+private fun copyUsefulFiles(from: String, dest: String) {
     File(dest).mkdirs()
     File(from).listFiles()?.forEach { patternDir ->
         val dotFile = patternDir
