@@ -14,12 +14,12 @@ class MultipleEdgeComparator : Comparator<PatternSpecificMultipleEdge> {
 }
 
 class EdgeComparator : Comparator<PatternSpecificEdge> {
-    override fun compare(fromPattern: PatternSpecificEdge?, fromTarget: PatternSpecificEdge?): Int {
+    override fun compare(fromTarget: PatternSpecificEdge?, fromPattern: PatternSpecificEdge?): Int {
         if (fromPattern?.fromClosure != null)
-            if (fromPattern.xlabel == fromTarget?.xlabel && fromPattern.fromClosure == fromTarget?.fromClosure)
+            if (fromTarget?.xlabel == fromPattern.xlabel && fromTarget?.fromClosure == fromPattern.fromClosure)
                 return 0
-        else if (fromPattern.xlabel == fromTarget?.xlabel)
-            return 0
+            else if (fromTarget?.xlabel == fromPattern.xlabel)
+                return 0
         return 1
     }
 }

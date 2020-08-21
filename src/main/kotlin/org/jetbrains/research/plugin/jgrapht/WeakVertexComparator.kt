@@ -11,7 +11,7 @@ class WeakVertexComparator : Comparator<PatternSpecificVertex> {
                 VALUABLE_ORIGINAL_LABEL ->
                     if (fromPattern.dataNodeInfo!!.labels.contains(fromTarget.originalLabel)) 0 else 1
                 LONGEST_COMMON_SUFFIX ->
-                    if (fromTarget.originalLabel!!.contains(fromPattern.dataNodeInfo!!.longestCommonSuffix)) 0 else 1
+                    if (fromTarget.originalLabel!!.endsWith(fromPattern.dataNodeInfo!!.longestCommonSuffix)) 0 else 1
                 NOTHING, null -> 0
             }
         }
