@@ -99,7 +99,7 @@ class PyFlowGraphBuilder {
             for (statement in node.statementList.statements) {
                 val statementFlowGraph = try {
                     visitPyElement(statement)
-                } catch (e: GraphBuildingException) {
+                } catch (e: Exception) {
                     null
                 }
                 if (statementFlowGraph == null) {
