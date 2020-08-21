@@ -1,1 +1,18 @@
-[["os.path.exists"],["cachedir","checkpoint_dir"]]
+[
+  {
+    "whatMatters": "VALUABLE_ORIGINAL_LABEL",
+    "labels": [
+      "os.path.exists"
+    ],
+    "longestCommonSuffix": ""
+  },
+  {
+    "whatMatters": "NOTHING",
+    "labels": [
+      "checkpoint_dir",
+      "datadir",
+      "cachedir"
+    ],
+    "longestCommonSuffix": ""
+  }
+]

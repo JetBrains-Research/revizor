@@ -1,1 +1,24 @@
-[["static","columns","list_to_use","actions"],["name","dim","action","value"]]
+[
+  {
+    "whatMatters": "NOTHING",
+    "labels": [
+      "list_to_use",
+      "x1",
+      "static",
+      "actions",
+      "columns"
+    ],
+    "longestCommonSuffix": ""
+  },
+  {
+    "whatMatters": "NOTHING",
+    "labels": [
+      "name",
+      "dim",
+      "action",
+      "x1_i",
+      "value"
+    ],
+    "longestCommonSuffix": ""
+  }
+]

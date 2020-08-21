@@ -1,1 +1,13 @@
-[["math.log","numpy.log","np.log","cuda.cupy.log","tf.log"]]
+[
+  {
+    "whatMatters": "VALUABLE_ORIGINAL_LABEL",
+    "labels": [
+      "math.log",
+      "numpy.log",
+      "np.log",
+      "cuda.cupy.log",
+      "tf.log"
+    ],
+    "longestCommonSuffix": ""
+  }
+]

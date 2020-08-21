@@ -1,1 +1,9 @@
-[["os.path.exists"]]
+[
+  {
+    "whatMatters": "VALUABLE_ORIGINAL_LABEL",
+    "labels": [
+      "os.path.exists"
+    ],
+    "longestCommonSuffix": ""
+  }
+]

@@ -1,1 +1,18 @@
-[["os.mkdir"],["target_dir","migrations_directory"]]
+[
+  {
+    "whatMatters": "VALUABLE_ORIGINAL_LABEL",
+    "labels": [
+      "os.mkdir"
+    ],
+    "longestCommonSuffix": ""
+  },
+  {
+    "whatMatters": "NOTHING",
+    "labels": [
+      "dir",
+      "target_dir",
+      "migrations_directory"
+    ],
+    "longestCommonSuffix": ""
+  }
+]

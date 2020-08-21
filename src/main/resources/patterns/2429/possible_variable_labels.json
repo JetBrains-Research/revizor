@@ -1,1 +1,18 @@
-[["collections.Callable","types.FunctionType"],["types","collections"]]
+[
+  {
+    "whatMatters": "VALUABLE_ORIGINAL_LABEL",
+    "labels": [
+      "types.FunctionType",
+      "collections.Callable"
+    ],
+    "longestCommonSuffix": ""
+  },
+  {
+    "whatMatters": "VALUABLE_ORIGINAL_LABEL",
+    "labels": [
+      "collections",
+      "types"
+    ],
+    "longestCommonSuffix": ""
+  }
+]

@@ -1,1 +1,10 @@
-[["numpy.array","np.array"]]
+[
+  {
+    "whatMatters": "VALUABLE_ORIGINAL_LABEL",
+    "labels": [
+      "numpy.array",
+      "np.array"
+    ],
+    "longestCommonSuffix": ""
+  }
+]

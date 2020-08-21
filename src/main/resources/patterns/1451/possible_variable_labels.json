@@ -1,1 +1,24 @@
-[["usedAttrs","ns_src","feats","point"],["usedVals","point_score","ns_dst","tags"]]
+[
+  {
+    "whatMatters": "NOTHING",
+    "labels": [
+      "trackers_as_states",
+      "ns_src",
+      "feats",
+      "point",
+      "usedAttrs"
+    ],
+    "longestCommonSuffix": ""
+  },
+  {
+    "whatMatters": "NOTHING",
+    "labels": [
+      "point_score",
+      "training_trackers",
+      "ns_dst",
+      "usedVals",
+      "tags"
+    ],
+    "longestCommonSuffix": ""
+  }
+]
