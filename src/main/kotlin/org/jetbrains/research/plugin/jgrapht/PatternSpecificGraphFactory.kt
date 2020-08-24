@@ -1,5 +1,8 @@
 package org.jetbrains.research.plugin.jgrapht
 
+import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificEdge
+import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
+import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jetbrains.research.plugin.pyflowgraph.models.PyFlowGraph
 import org.jgrapht.Graph
 import org.jgrapht.graph.DefaultEdge

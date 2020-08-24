@@ -1,6 +1,10 @@
 package org.jetbrains.research.plugin.common
 
-import org.jetbrains.research.plugin.jgrapht.*
+import org.jetbrains.research.plugin.jgrapht.edges.MultipleEdgeComparator
+import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
+import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
+import org.jetbrains.research.plugin.jgrapht.vertices.StrictVertexComparator
+import org.jetbrains.research.plugin.jgrapht.vertices.WeakVertexComparator
 import org.jgrapht.Graph
 import org.jgrapht.alg.isomorphism.VF2GraphIsomorphismInspector
 import org.jgrapht.alg.isomorphism.VF2SubgraphIsomorphismInspector

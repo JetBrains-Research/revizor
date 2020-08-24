@@ -3,8 +3,8 @@ package org.jetbrains.research.marking
 import com.google.gson.Gson
 import org.jetbrains.research.plugin.common.getLongestCommonSuffix
 import org.jetbrains.research.plugin.jgrapht.PatternSpecificGraphFactory
-import org.jetbrains.research.plugin.jgrapht.PatternSpecificMultipleEdge
-import org.jetbrains.research.plugin.jgrapht.PatternSpecificVertex
+import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
+import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.Graph
 import org.jgrapht.graph.AsSubgraph
 import java.io.File

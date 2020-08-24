@@ -1,4 +1,4 @@
-package org.jetbrains.research.plugin.jgrapht
+package org.jetbrains.research.plugin.jgrapht.edges
 
 class MultipleEdgeComparator : Comparator<PatternSpecificMultipleEdge> {
     override fun compare(e0: PatternSpecificMultipleEdge?, e1: PatternSpecificMultipleEdge?): Int {

@@ -1,6 +1,6 @@
-package org.jetbrains.research.plugin.jgrapht
+package org.jetbrains.research.plugin.jgrapht.vertices
 
-import org.jetbrains.research.plugin.jgrapht.PatternSpecificVertex.LabelsGroup.Indicator.*
+import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex.LabelsGroup.Indicator.*
 
 class WeakVertexComparator : Comparator<PatternSpecificVertex> {
     override fun compare(fromTarget: PatternSpecificVertex?, fromPattern: PatternSpecificVertex?): Int {

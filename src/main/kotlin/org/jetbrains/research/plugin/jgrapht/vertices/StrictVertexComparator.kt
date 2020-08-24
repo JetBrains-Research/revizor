@@ -1,4 +1,4 @@
-package org.jetbrains.research.plugin.jgrapht
+package org.jetbrains.research.plugin.jgrapht.vertices
 
 class StrictVertexComparator : Comparator<PatternSpecificVertex> {
     override fun compare(fromTarget: PatternSpecificVertex?, fromPattern: PatternSpecificVertex?): Int {

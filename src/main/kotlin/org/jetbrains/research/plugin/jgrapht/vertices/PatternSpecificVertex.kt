@@ -1,4 +1,4 @@
-package org.jetbrains.research.plugin.jgrapht
+package org.jetbrains.research.plugin.jgrapht.vertices
 
 import org.jetbrains.research.plugin.pyflowgraph.models.DataNode
 import org.jetbrains.research.plugin.pyflowgraph.models.Node

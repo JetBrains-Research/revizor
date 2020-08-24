@@ -4,8 +4,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.jetbrains.research.plugin.common.getWeakSubGraphIsomorphismInspector
 import org.jetbrains.research.plugin.jgrapht.PatternSpecificGraphFactory
-import org.jetbrains.research.plugin.jgrapht.PatternSpecificMultipleEdge
-import org.jetbrains.research.plugin.jgrapht.PatternSpecificVertex
+import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
+import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.GraphMapping
 import org.jgrapht.graph.AsSubgraph
 import org.jgrapht.graph.DirectedAcyclicGraph

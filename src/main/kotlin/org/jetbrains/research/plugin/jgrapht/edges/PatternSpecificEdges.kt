@@ -1,4 +1,4 @@
-package org.jetbrains.research.plugin.jgrapht
+package org.jetbrains.research.plugin.jgrapht.edges
 
 data class PatternSpecificMultipleEdge(
     private val id: Int,
