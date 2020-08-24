@@ -1,1 +1,0 @@
-Use tf.math.softmax()

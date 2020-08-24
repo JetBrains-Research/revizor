@@ -10,9 +10,9 @@ digraph "fragment-3282519.dot" {
 		21847 [label="var (numpy.array) [21847]" color=red2 shape=ellipse]
 	}
 	21851 [label="range (range) [21851]" color=red2 shape=box]
-	21851 -> 21849 [xlabel=para]
-	21847 -> 21849 [xlabel=recv]
-	21848 -> 21850 [xlabel=recv]
-	21849 -> 21850 [xlabel=map]
-	21847 -> 21848 [xlabel=map]
+	21851 -> 21849 [xlabel=para from_closure=False]
+	21847 -> 21849 [xlabel=recv from_closure=False]
+	21848 -> 21850 [xlabel=recv from_closure=False]
+	21849 -> 21850 [xlabel=map from_closure=False]
+	21847 -> 21848 [xlabel=map from_closure=False]
 }

@@ -8,5 +8,5 @@ digraph "fragment-121.dot" {
 	1349 [label="len (len) [1349]" color=red2 shape=box]
 	1353 -> 1347 [xlabel=recv from_closure=False]
 	1347 -> 1346 [xlabel=map from_closure=False]
-	1347 -> 1349 [xlabel=para from_closure=True]
+	1347 -> 1349 [xlabel=para from_closure=False]
 }
