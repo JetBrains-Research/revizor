@@ -8,6 +8,7 @@ digraph "fragment-325.dot" {
 	1465 [label="= (=) [1465]" color=red2 shape=box]
 	1460 [label="var (dim) [1460]" color=red2 shape=ellipse]
 	1463 [label="var (static) [1463]" color=red2 shape=ellipse]
+	1459 [label="static[i] (static[i]) [7]" color=red2 shape=ellipse]
 	1461 -> 1457 [xlabel=para from_closure=False]
 	1457 -> 1456 [xlabel=map from_closure=False]
 	1463 -> 1461 [xlabel=para from_closure=True]
@@ -18,4 +19,9 @@ digraph "fragment-325.dot" {
 	1457 -> 1460 [xlabel=def from_closure=True]
 	1461 -> 1460 [xlabel=def from_closure=True]
 	1465 -> 1460 [xlabel=def from_closure=False]
+	1459 -> 1460 [xlabel=def from_closure=False]
+	1459 -> 1465 [xlabel=para from_closure=False]
+	1463 -> 1459 [xlabel=qual from_closure=True]
+	1457 -> 1459 [xlabel=para from_closure=True]
+	1461 -> 1459 [xlabel=para from_closure=True]
 }

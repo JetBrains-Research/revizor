@@ -15,6 +15,11 @@ class WeakVertexComparator : Comparator<PatternSpecificVertex> {
                 NOTHING, null -> 0
             }
         }
+        if (fromPattern?.originalLabel?.matches("""^.*?\[.*?\]$""".toRegex()) == true
+            && fromTarget?.originalLabel?.matches("""^.*?\[.*?\]$""".toRegex()) == true
+        ) {
+            return 0
+        }
         if (fromTarget?.originalLabel?.toLowerCase() == fromPattern?.originalLabel?.toLowerCase()
             && fromTarget?.label?.toLowerCase() == fromPattern?.label?.toLowerCase()
         ) {
