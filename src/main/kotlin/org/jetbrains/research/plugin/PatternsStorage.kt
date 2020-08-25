@@ -10,9 +10,7 @@ import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.GraphMapping
 import org.jgrapht.graph.AsSubgraph
 import org.jgrapht.graph.DirectedAcyclicGraph
-import java.io.BufferedReader
 import java.io.File
-import java.io.InputStreamReader
 import java.net.URL
 import java.nio.file.Paths
 import java.util.jar.JarFile
@@ -73,10 +71,6 @@ object PatternsStorage {
         for ((patternId, graph) in patternById) {
             val inspector = getWeakSubgraphIsomorphismInspector(targetGraph, graph)
             if (inspector.isomorphismExists()) {
-//                val mapping = inspector.mappings.asSequence().iterator().next()
-//                if (mapping != null) {
-//                    suitablePatterns[patternId] = mapping
-//                }
                 for (mapping in inspector.mappings) {
                     suitablePatterns.getOrPut(patternId) { arrayListOf() }.add(mapping)
                 }
@@ -87,14 +81,8 @@ object PatternsStorage {
 
     private fun loadDescription(patternId: String): String? {
         return try {
-            val filePath = "/patterns/$patternId/description.txt"
-            val stream = this::class.java.getResourceAsStream(filePath)
-            InputStreamReader(stream).use { inputStreamReader ->
-                BufferedReader(inputStreamReader).use { bufferedReader ->
-                    bufferedReader.readText()
-                }
-            }
-        } catch (ex: NullPointerException) {
+            this::class.java.getResource("/patterns/$patternId/description.txt").readText()
+        } catch (ex: Exception) {
             null
         }
     }
@@ -102,12 +90,7 @@ object PatternsStorage {
     private fun loadVariableLabelsGroups(patternId: String): ArrayList<PatternSpecificVertex.LabelsGroup>? {
         return try {
             val filePath = "/patterns/$patternId/possible_variable_labels.json"
-            val stream = this::class.java.getResourceAsStream(filePath)
-            val fileContent = InputStreamReader(stream).use { inputStreamReader ->
-                BufferedReader(inputStreamReader).use { bufferedReader ->
-                    bufferedReader.readText()
-                }
-            }
+            val fileContent = this::class.java.getResource(filePath).readText()
             val type = object : TypeToken<ArrayList<PatternSpecificVertex.LabelsGroup>>() {}.type
             val json = Gson().fromJson<ArrayList<PatternSpecificVertex.LabelsGroup>>(fileContent, type)
             val labelsGroups = ArrayList<PatternSpecificVertex.LabelsGroup>()
@@ -121,7 +104,7 @@ object PatternsStorage {
                 )
             }
             labelsGroups
-        } catch (ex: NullPointerException) {
+        } catch (ex: Exception) {
             null
         }
     }
