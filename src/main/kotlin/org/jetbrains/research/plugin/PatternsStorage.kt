@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.intellij.openapi.diagnostic.Logger
 import org.jetbrains.research.plugin.common.getWeakSubgraphIsomorphismInspector
-import org.jetbrains.research.plugin.jgrapht.PatternSpecificGraphFactory
+import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.GraphMapping
@@ -37,7 +37,7 @@ object PatternsStorage {
                     && jarEntryPathParts.last().endsWith(".dot")
                 ) {
                     val dotSrcStream = this::class.java.getResourceAsStream("/${je.name}")
-                    val currentGraph = PatternSpecificGraphFactory.createGraph(dotSrcStream)
+                    val currentGraph = createPatternSpecificGraph(dotSrcStream)
                     val subgraphBefore = AsSubgraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
                         currentGraph,
                         currentGraph.vertexSet()
@@ -45,7 +45,7 @@ object PatternsStorage {
                             .toSet()
                     )
                     val variableLabelsGroups = loadVariableLabelsGroups(patternId) ?: arrayListOf()
-                    val targetGraph = PatternSpecificGraphFactory.createGraph(subgraphBefore, variableLabelsGroups)
+                    val targetGraph = createPatternSpecificGraph(subgraphBefore, variableLabelsGroups)
                     patternById[patternId] = targetGraph
                     patternDescById[patternId] = loadDescription(patternId) ?: "No description provided"
                 }

@@ -2,9 +2,9 @@ package org.jetbrains.research.marking
 
 import com.google.gson.Gson
 import org.jetbrains.research.plugin.common.getLongestCommonSuffix
-import org.jetbrains.research.plugin.jgrapht.PatternSpecificGraphFactory
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
+import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
 import org.jgrapht.Graph
 import org.jgrapht.graph.AsSubgraph
 import java.io.File
@@ -20,7 +20,7 @@ private fun loadFragments(inputPatternsStorage: String): FragmentsByPathMap {
     val fragmentsByDirectory = FragmentsByPathMap()
     File(inputPatternsStorage).walk().forEach {
         if (it.isFile && it.extension == "dot" && it.name.startsWith("fragment")) {
-            val currentGraph = PatternSpecificGraphFactory.createGraph(it.inputStream())
+            val currentGraph = createPatternSpecificGraph(it.inputStream())
             val subgraphBefore = AsSubgraph(
                 currentGraph,
                 currentGraph.vertexSet()
@@ -61,7 +61,7 @@ private fun getVarsGroups(fragments: List<Graph<PatternSpecificVertex, PatternSp
 private fun collectVariableLabelsGroups(fragmentsMap: FragmentsByPathMap): PatternGraphByPathMap {
     val graphs = PatternGraphByPathMap()
     for ((path, fragmentsGraphs) in fragmentsMap) {
-        graphs[path] = PatternSpecificGraphFactory.createGraph(
+        graphs[path] = createPatternSpecificGraph(
             baseGraph = fragmentsGraphs.first(),
             variableLabelsGroups = getVarsGroups(fragmentsGraphs)
         )

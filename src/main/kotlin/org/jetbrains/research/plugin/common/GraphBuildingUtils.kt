@@ -2,7 +2,7 @@ package org.jetbrains.research.plugin.common
 
 import com.jetbrains.python.psi.PyFunction
 import org.jetbrains.research.plugin.Config
-import org.jetbrains.research.plugin.jgrapht.PatternSpecificGraphFactory
+import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jetbrains.research.plugin.pyflowgraph.GraphBuildingException
@@ -17,11 +17,11 @@ fun buildPyFlowGraphForMethod(node: PyFunction, builder: String = "kotlin")
         "python" -> {
             val tempFile = createTempFileFromMethodPsi(node)
             val dotFile = buildPyFlowGraphBySubprocess(tempFile)
-            PatternSpecificGraphFactory.createGraph(dotFile.inputStream())
+            createPatternSpecificGraph(dotFile.inputStream())
         }
         "kotlin" -> {
             val methodPyFlowGraph = PyFlowGraphBuilder().buildForPyFunction(node)
-            PatternSpecificGraphFactory.createGraph(methodPyFlowGraph)
+            createPatternSpecificGraph(methodPyFlowGraph)
         }
         else -> throw  IllegalArgumentException()
     }
