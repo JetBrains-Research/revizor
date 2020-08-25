@@ -4,13 +4,16 @@ import com.jetbrains.python.psi.PyElement
 
 typealias ControlBranchStack = MutableList<Pair<StatementNode?, Boolean>>
 
-var statementCounter: Int = 0
-
 abstract class Node(
     open var label: String,
     open var psi: PyElement?,
     var statementNum: Int = statementCounter++
 ) {
+
+    private companion object State {
+        var statementCounter: Int = 0
+    }
+
     open val key: String? = null
     var defFor: MutableList<Int> = mutableListOf()
         set(value) {
