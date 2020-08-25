@@ -3,9 +3,10 @@ package org.jetbrains.research.plugin.pyflowgraph.postprocessing
 import org.jetbrains.research.plugin.pyflowgraph.models.*
 
 
-object DependenciesResolver : FlowGraphNodesProcessor {
+object DependenciesResolver {
+
     fun resolve(flowGraph: PyFlowGraph) {
-        processFlowGraphNodes(flowGraph, processorFunction = this::adjustControls)
+        flowGraph.processNodes(processorFunction = this::adjustControls)
         removeEmptyNodes(flowGraph)
         cleanUpDependencies(flowGraph)
     }

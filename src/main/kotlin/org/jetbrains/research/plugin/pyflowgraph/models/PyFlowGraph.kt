@@ -39,6 +39,15 @@ class PyFlowGraph(
         }
     }
 
+    fun processNodes(processorFunction: (node: Node, processedNodes: MutableSet<Node>) -> Unit) {
+        val processedNodes = hashSetOf<Node>()
+        for (node in nodes) {
+            if (!processedNodes.contains(node)) {
+                processorFunction(node, processedNodes)
+            }
+        }
+    }
+
     private fun resolveReferences(graph: PyFlowGraph): MutableSet<Node> {
         val resolvedReferences = mutableSetOf<Node>()
         for (refNode in graph.variableReferences) {

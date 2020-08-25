@@ -3,12 +3,12 @@ package org.jetbrains.research.plugin.pyflowgraph.postprocessing
 import org.jetbrains.research.plugin.pyflowgraph.models.*
 
 
-object TransitiveClosureBuilder : FlowGraphNodesProcessor {
+object TransitiveClosureBuilder {
 
     fun buildClosure(flowGraph: PyFlowGraph) {
-        processFlowGraphNodes(flowGraph, this::buildDataClosure)
-        processFlowGraphNodes(flowGraph, this::buildControlClosure)
-        processFlowGraphNodes(flowGraph, this::buildControlDataClosure)
+        flowGraph.processNodes(this::buildDataClosure)
+        flowGraph.processNodes(this::buildControlClosure)
+        flowGraph.processNodes(this::buildControlDataClosure)
     }
 
     private fun buildDataClosure(node: Node, processedNodes: MutableSet<Node>) {
