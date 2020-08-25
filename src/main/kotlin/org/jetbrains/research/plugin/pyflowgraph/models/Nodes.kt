@@ -16,13 +16,14 @@ abstract class Node(
 
     open val key: String? = null
     var defFor: MutableList<Int> = mutableListOf()
-        set(value) {
-            field.addAll(value)
-        }
     var defBy: MutableList<Int> = mutableListOf()
     var defControlBranchStack: ControlBranchStack? = mutableListOf()
     val inEdges = HashSet<Edge>()
     val outEdges = HashSet<Edge>()
+
+    fun updateDefFor(elements: MutableList<Int>) {
+        defFor.addAll(elements)
+    }
 
     fun getDefinitions() = inEdges
         .filter { it is DataEdge && it.label == LinkType.REFERENCE }

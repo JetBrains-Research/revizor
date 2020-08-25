@@ -39,7 +39,7 @@ object TransitiveClosureBuilder : FlowGraphNodesProcessor {
                         && !inNodeEdge.nodeFrom.hasInEdge(node, edge.label)
                     ) {
                         val afterInNode = inNodeEdge.nodeFrom
-                        afterInNode.defFor = inNode.defFor
+                        afterInNode.updateDefFor(inNode.defFor)
                         val defFor = afterInNode.defFor
                         if (edge.label == LinkType.DEFINITION
                             && (defFor.isEmpty() || !defFor.contains(node.statementNum))

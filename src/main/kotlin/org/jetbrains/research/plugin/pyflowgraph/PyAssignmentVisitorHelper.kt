@@ -70,7 +70,7 @@ internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder
 
                 val sinkNums = ArrayList<Int>()
                 for (sink in assignmentFlowGraph.sinks) {
-                    sink.defFor = mutableListOf(varNode.statementNum)
+                    sink.updateDefFor(mutableListOf(varNode.statementNum))
                     sinkNums.add(sink.statementNum)
                 }
                 varNode.defBy = sinkNums
