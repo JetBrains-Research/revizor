@@ -3,7 +3,7 @@ package org.jetbrains.research.plugin
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.intellij.openapi.diagnostic.Logger
-import org.jetbrains.research.plugin.common.getWeakSubGraphIsomorphismInspector
+import org.jetbrains.research.plugin.common.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.plugin.jgrapht.PatternSpecificGraphFactory
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
@@ -60,19 +60,25 @@ object PatternsStorage {
         }
     }
 
-    fun getPatternById(patternId: String) = patternById[patternId]
+    fun getPatternById(patternId: String): DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>? =
+        patternById[patternId]
 
-    fun getPatternDescriptionById(patternId: String) = patternDescById[patternId]
+    fun getPatternDescriptionById(patternId: String): String =
+        patternDescById[patternId] ?: "Unnamed pattern: $patternId"
 
     fun getIsomorphicPatterns(targetGraph: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>)
-            : HashMap<String, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>> {
-        val suitablePatterns = HashMap<String, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
+            : HashMap<String, ArrayList<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>> {
+        val suitablePatterns =
+            HashMap<String, ArrayList<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>>()
         for ((patternId, graph) in patternById) {
-            val inspector = getWeakSubGraphIsomorphismInspector(targetGraph, graph)
+            val inspector = getWeakSubgraphIsomorphismInspector(targetGraph, graph)
             if (inspector.isomorphismExists()) {
-                val mapping = inspector.mappings.asSequence().iterator().next()
-                if (mapping != null) {
-                    suitablePatterns[patternId] = mapping
+//                val mapping = inspector.mappings.asSequence().iterator().next()
+//                if (mapping != null) {
+//                    suitablePatterns[patternId] = mapping
+//                }
+                for (mapping in inspector.mappings) {
+                    suitablePatterns.getOrPut(patternId) { arrayListOf() }.add(mapping)
                 }
             }
         }

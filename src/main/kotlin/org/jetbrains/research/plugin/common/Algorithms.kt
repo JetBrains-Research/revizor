@@ -20,7 +20,7 @@ fun getLongestCommonSuffix(strings: Collection<String?>?): String {
     return lcs ?: ""
 }
 
-fun getWeakSubGraphIsomorphismInspector(
+fun getWeakSubgraphIsomorphismInspector(
     target: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>,
     pattern: Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>
 ) =
