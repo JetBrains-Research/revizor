@@ -174,7 +174,7 @@ class PyFlowGraphBuilder {
         val currentFlowGraph = createGraph()
         currentFlowGraph.parallelMergeGraphs(keyValueFlowGraphs)
         val operationNode = OperationNode(
-            label = getCollectionLabel(node),
+            label = node.getCollectionLabel(),
             psi = node,
             controlBranchStack = controlBranchStack,
             kind = OperationNode.Kind.COLLECTION
@@ -184,8 +184,8 @@ class PyFlowGraphBuilder {
     }
 
     private fun visitReference(node: PyReferenceExpression): PyFlowGraph {
-        val referenceFullname = getNodeFullName(node)
-        val referenceKey = getNodeKey(node)
+        val referenceFullname = node.getFullName()
+        val referenceKey = node.getKey()
         val referenceNode = DataNode(
             label = referenceFullname,
             psi = node,
@@ -209,7 +209,7 @@ class PyFlowGraphBuilder {
             ?: throw GraphBuildingException("Unable to build pfg for <${node.operand}>")
         val indexFlowGraph = visitPyElement(node.indexExpression)
             ?: throw GraphBuildingException("Unable to build pfg for <${node.indexExpression}>")
-        val subscriptFullName = getNodeFullName(node)
+        val subscriptFullName = node.getFullName()
         val subscriptNode = DataNode(label = subscriptFullName, psi = node, kind = DataNode.Kind.SUBSCRIPT)
         return mergeOperandWithIndexGraphs(operandFlowGraph, indexFlowGraph, subscriptNode)
     }
@@ -223,7 +223,7 @@ class PyFlowGraphBuilder {
         node.sliceItem?.upperBound?.let { visitPyElement(it) }?.let { sliceItemsGraphs.add(it) }
         val sliceFlowGraph = createGraph()
         sliceFlowGraph.parallelMergeGraphs(sliceItemsGraphs)
-        val sliceFullName = getNodeFullName(node)
+        val sliceFullName = node.getFullName()
         val sliceNode = DataNode(label = sliceFullName, psi = node, kind = DataNode.Kind.SUBSCRIPT)
         return mergeOperandWithIndexGraphs(operandFlowGraph, sliceFlowGraph, sliceNode)
     }
@@ -231,7 +231,7 @@ class PyFlowGraphBuilder {
     private fun visitBinaryOperation(node: PyBinaryExpression): PyFlowGraph {
         return if (node.isOperator("and") || node.isOperator("or")) {
             visitBinOperationHelper(
-                operationName = getOperationName(node),
+                operationName = node.getOperationName(),
                 node = node,
                 operationKind = OperationNode.Kind.BOOL,
                 leftOperand = node.leftExpression,
@@ -241,7 +241,7 @@ class PyFlowGraphBuilder {
             || node.isOperator("<=") || node.isOperator(">") || node.isOperator(">")
         ) {
             visitBinOperationHelper(
-                operationName = getOperationName(node),
+                operationName = node.getOperationName(),
                 node = node,
                 operationKind = OperationNode.Kind.COMPARE,
                 leftOperand = node.leftExpression,
@@ -249,7 +249,7 @@ class PyFlowGraphBuilder {
             )
         } else {
             visitBinOperationHelper(
-                operationName = getOperationName(node),
+                operationName = node.getOperationName(),
                 node = node,
                 operationKind = OperationNode.Kind.BINARY,
                 leftOperand = node.leftExpression,
@@ -262,7 +262,7 @@ class PyFlowGraphBuilder {
         val params = ArrayList<PyExpression>()
         node.operand?.let { params.add(it) }
         return visitOperationHelper(
-            operationName = getOperationName(node),
+            operationName = node.getOperationName(),
             node = node,
             operationKind = OperationNode.Kind.UNARY,
             params = params
@@ -279,7 +279,7 @@ class PyFlowGraphBuilder {
                 node = node,
                 leftOperand = node.target,
                 rightOperand = node.value!!,
-                operationName = getOperationName(node),
+                operationName = node.getOperationName(),
                 operationKind = OperationNode.Kind.AUG_ASSIGN
             )
             return visitSimpleAssignment(
@@ -309,8 +309,8 @@ class PyFlowGraphBuilder {
     }
 
     private fun visitNonAssignmentVariableDeclaration(node: PyElement): PyFlowGraph {
-        val variableFullName = getNodeFullName(node)
-        val variableKey = getNodeKey(node)
+        val variableFullName = node.getFullName()
+        val variableKey = node.getKey()
         val variableNode = DataNode(
             label = variableFullName,
             psi = node,
@@ -339,9 +339,9 @@ class PyFlowGraphBuilder {
     }
 
     private fun visitCall(node: PyCallExpression): PyFlowGraph {
-        val name = node.callee?.let { getNodeShortName(it) }
+        val name = node.callee?.getShortName()
             ?: throw GraphBuildingException("Unable to get short name of <${node.callee}>")
-        val key = node.callee?.let { getNodeKey(it) }
+        val key = node.callee?.getKey()
             ?: throw GraphBuildingException("Unable to get key of <${node.callee}>")
         return if (node.callee is PyQualifiedExpression && (node.callee as PyQualifiedExpression).isQualified) {
             val calleeFlowGraph = node.callee?.let { visitPyElement(it) }
@@ -567,7 +567,7 @@ class PyFlowGraphBuilder {
             }
         }
         if (argsFlowGraphs.any { it == null }) {
-            val calleeShortName = node.callee?.let { getNodeShortName(it) }
+            val calleeShortName = node.callee?.let { it.getShortName() }
             logger.warn("Function call <$calleeShortName> has unsupported arguments, skipping them...")
         }
         return argsFlowGraphs.filterNotNull()
@@ -623,7 +623,7 @@ class PyFlowGraphBuilder {
         val currentFlowGraph = createGraph()
         currentFlowGraph.parallelMergeGraphs(node.elements.mapNotNull { visitPyElement(it) })
         val operationNode = OperationNode(
-            label = getCollectionLabel(node),
+            label = node.getCollectionLabel(),
             psi = node,
             controlBranchStack = controlBranchStack,
             kind = OperationNode.Kind.COLLECTION

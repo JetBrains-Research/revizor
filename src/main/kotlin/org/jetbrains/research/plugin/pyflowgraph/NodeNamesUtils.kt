@@ -2,12 +2,13 @@ package org.jetbrains.research.plugin.pyflowgraph
 
 import com.jetbrains.python.psi.*
 
-fun getNodeFullName(node: PyElement): String =
-    when (node) {
-        is PyFunction, is PyNamedParameter -> node.name ?: ""
+
+fun PyElement.getFullName(): String =
+    when (this) {
+        is PyFunction, is PyNamedParameter -> this.name ?: ""
         is PyReferenceExpression, is PyTargetExpression -> {
-            var fullName = (node as PyQualifiedExpression).referencedName
-            var currentNode = node.qualifier
+            var fullName = (this as PyQualifiedExpression).referencedName
+            var currentNode = this.qualifier
             while (currentNode is PyReferenceExpression
                 || currentNode is PyCallExpression && currentNode.callee is PyReferenceExpression
             ) {
@@ -23,17 +24,17 @@ fun getNodeFullName(node: PyElement): String =
             fullName ?: ""
         }
         is PySubscriptionExpression -> {
-            val operand = getNodeFullName(node.operand)
-            val index = node.indexExpression?.let { getNodeFullName(it) } ?: ""
+            val operand = this.operand.getFullName()
+            val index = this.indexExpression?.getFullName() ?: ""
             "$operand[$index]"
         }
         is PySliceExpression -> {
-            val operand = getNodeFullName(node.operand)
+            val operand = this.operand.getFullName()
             val sliceItems = arrayListOf<String>()
             // FIXME: getNodeFullName for expressions
-            node.sliceItem?.lowerBound?.let { sliceItems.add(getNodeFullName(it)) }
-            node.sliceItem?.stride?.let { sliceItems.add(getNodeFullName(it)) }
-            node.sliceItem?.upperBound?.let { sliceItems.add(getNodeFullName(it)) }
+            this.sliceItem?.lowerBound?.let { sliceItems.add(it.getFullName()) }
+            this.sliceItem?.stride?.let { sliceItems.add(it.getFullName()) }
+            this.sliceItem?.upperBound?.let { sliceItems.add(it.getFullName()) }
             "$operand[${sliceItems.joinToString(":")}]"
         }
         is PyLiteralExpression -> "."
@@ -41,25 +42,25 @@ fun getNodeFullName(node: PyElement): String =
         else -> throw IllegalArgumentException()
     }
 
-fun getNodeKey(node: PyElement): String =
-    when (node) {
-        is PyFunction, is PyNamedParameter -> node.name ?: ""
+fun PyElement.getKey(): String =
+    when (this) {
+        is PyFunction, is PyNamedParameter -> this.name ?: ""
         is PyReferenceExpression, is PyTargetExpression ->
-            (node as PyQualifiedExpression).asQualifiedName()?.toString() ?: ""
+            (this as PyQualifiedExpression).asQualifiedName()?.toString() ?: ""
         else -> throw IllegalArgumentException()
     }
 
-fun getNodeShortName(node: PyElement): String =
-    when (node) {
-        is PyNamedParameter, is PyFunction -> node.name ?: ""
-        is PyReferenceExpression, is PyTargetExpression -> (node as PyQualifiedExpression).referencedName ?: ""
+fun PyElement.getShortName(): String =
+    when (this) {
+        is PyNamedParameter, is PyFunction -> this.name ?: ""
+        is PyReferenceExpression, is PyTargetExpression -> (this as PyQualifiedExpression).referencedName ?: ""
         else -> throw IllegalArgumentException()
     }
 
-fun getOperationName(node: PyElement): String? =
-    when (node) {
+fun PyElement.getOperationName(): String? =
+    when (this) {
         is PyAugAssignmentStatement -> {
-            when (node.operation?.text) {
+            when (this.operation?.text) {
                 "+=" -> "add"
                 "-=" -> "sub"
                 "*=" -> "mult"
@@ -75,7 +76,7 @@ fun getOperationName(node: PyElement): String? =
             }
         }
         is PyBinaryExpression -> {
-            when (node.psiOperator?.text) {
+            when (this.psiOperator?.text) {
                 "+" -> "add"
                 "-" -> "sub"
                 "*" -> "mult"
@@ -98,7 +99,7 @@ fun getOperationName(node: PyElement): String? =
             }
         }
         is PyPrefixExpression -> {
-            when (node.operator.toString()) {
+            when (this.operator.toString()) {
                 "Py:MINUS" -> "USub"
                 "Py:PLUS" -> "UAdd"
                 "Py:NOT_KEYWORD" -> "Not"
@@ -106,12 +107,12 @@ fun getOperationName(node: PyElement): String? =
             }
         }
         else -> {
-            throw NotImplementedError("Unsupported operation node")
+            throw NotImplementedError("Unsupported operation this")
         }
     }
 
-fun getCollectionLabel(node: PySequenceExpression): String =
-    when (node) {
+fun PySequenceExpression.getCollectionLabel(): String =
+    when (this) {
         is PyListLiteralExpression -> "List"
         is PyTupleExpression -> "Tuple"
         is PySetLiteralExpression -> "Set"

@@ -63,8 +63,8 @@ internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder
     ): Pair<PyFlowGraph, List<DataNode>> {
         when (target) {
             is PyTargetExpression, is PyNamedParameter, is PyReferenceExpression -> {
-                val name = getNodeFullName(target)
-                val key = getNodeKey(target)
+                val name = target.getFullName()
+                val key = target.getKey()
                 val assignmentFlowGraph = (preparedValueGraphs as PreparedAssignmentValue.AssignedValue).value
                 val varNode = DataNode(name, target, key, DataNode.Kind.VARIABLE_DECLARATION)
 
