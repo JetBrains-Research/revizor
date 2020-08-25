@@ -112,6 +112,7 @@ object PatternSpecificGraphFactory {
             PatternSpecificMultipleEdge::class.java
         )
         for (vertexId in importedDAG.vertexSet()) {
+            val vertexColor = vertexAttributes[vertexId]?.get("color")?.toString()
             targetDAG.addVertex(
                 PatternSpecificVertex(
                     id = vertexId,
@@ -122,7 +123,11 @@ object PatternSpecificGraphFactory {
                         ?.substringAfter('(')
                         ?.substringBefore(')')
                         ?.trim(),
-                    color = vertexAttributes[vertexId]?.get("color")?.toString(),
+                    fromPart = if (vertexColor == "red2")
+                        PatternSpecificVertex.ChangeGraphPartIndicator.BEFORE
+                    else
+                        PatternSpecificVertex.ChangeGraphPartIndicator.AFTER,
+                    color = vertexColor,
                     shape = vertexAttributes[vertexId]?.get("shape")?.toString()
                 )
             )

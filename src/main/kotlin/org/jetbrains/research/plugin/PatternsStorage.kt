@@ -43,7 +43,7 @@ object PatternsStorage {
                     val subgraphBefore = AsSubgraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
                         currentGraph,
                         currentGraph.vertexSet()
-                            .filter { vertex -> vertex.color == "red2" }
+                            .filter { it.fromPart == PatternSpecificVertex.ChangeGraphPartIndicator.BEFORE }
                             .toSet()
                     )
                     val variableLabelsGroups = loadVariableLabelsGroups(patternId) ?: arrayListOf()

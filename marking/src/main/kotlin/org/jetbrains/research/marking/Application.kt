@@ -23,7 +23,9 @@ private fun loadFragments(inputPatternsStorage: String): FragmentsByPathMap {
             val currentGraph = PatternSpecificGraphFactory.createGraph(it.inputStream())
             val subgraphBefore = AsSubgraph(
                 currentGraph,
-                currentGraph.vertexSet().filter { vertex -> vertex.color == "red2" }.toSet()
+                currentGraph.vertexSet()
+                    .filter { it.fromPart == PatternSpecificVertex.ChangeGraphPartIndicator.BEFORE }
+                    .toSet()
             )
             fragmentsByDirectory.getOrPut(Paths.get(it.parent)) { ArrayList() }.add(subgraphBefore)
         }

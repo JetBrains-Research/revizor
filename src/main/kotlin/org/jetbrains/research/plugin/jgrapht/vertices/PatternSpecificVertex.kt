@@ -7,11 +7,14 @@ data class PatternSpecificVertex(
     val id: String,
     var label: String? = null,
     var originalLabel: String? = null,
+    var fromPart: ChangeGraphPartIndicator? = null,
     var color: String? = null,
     var shape: String? = null,
     var dataNodeInfo: LabelsGroup? = null,
     var origin: Node? = null
 ) {
+
+    enum class ChangeGraphPartIndicator { BEFORE, AFTER }
 
     data class LabelsGroup(
         val whatMatters: Indicator?,
@@ -44,7 +47,7 @@ data class PatternSpecificVertex(
             }
         }
         this.originalLabel = pfgNode.label
-        this.color = "red2"
+        this.fromPart = ChangeGraphPartIndicator.BEFORE
         this.origin = pfgNode
     }
 }
