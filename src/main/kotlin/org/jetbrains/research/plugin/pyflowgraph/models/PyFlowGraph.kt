@@ -11,7 +11,7 @@ class PyFlowGraph(
     var entryNode: EntryNode? = null
         set(node) {
             if (entryNode != null) {
-                throw GraphBuildingException
+                throw GraphBuildingException("Duplicate entry node")
             }
             if (node != null) {
                 field = node

@@ -2,6 +2,7 @@ package org.jetbrains.research.plugin
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.intellij.openapi.diagnostic.Logger
 import org.jetbrains.research.plugin.common.getWeakSubGraphIsomorphismInspector
 import org.jetbrains.research.plugin.jgrapht.PatternSpecificGraphFactory
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
@@ -48,12 +49,12 @@ object PatternsStorage {
                     val variableLabelsGroups = loadVariableLabelsGroups(patternId) ?: arrayListOf()
                     val targetGraph = PatternSpecificGraphFactory.createGraph(subgraphBefore, variableLabelsGroups)
                     patternById[patternId] = targetGraph
-                    patternDescById[patternId] =
-                        loadDescription(patternId) ?: "No description provided"
+                    patternDescById[patternId] = loadDescription(patternId) ?: "No description provided"
                 }
             }
         } catch (ex: Exception) {
-            ex.printStackTrace()
+            val logger = Logger.getInstance(this::class.java)
+            logger.error(ex) // TODO: implement error reporter
         } finally {
             jar?.close()
         }

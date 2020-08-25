@@ -1,5 +1,6 @@
 package org.jetbrains.research.plugin.pyflowgraph
 
+import com.intellij.openapi.diagnostic.Logger
 import com.jetbrains.python.psi.*
 import org.jetbrains.research.plugin.pyflowgraph.models.*
 import org.jetbrains.research.plugin.pyflowgraph.postprocessing.DependenciesResolver
@@ -15,13 +16,14 @@ class PyFlowGraphBuilder {
         BuildingContext()
     )
     private val helper = PyAssignmentVisitorHelper(this)
+    private val logger = Logger.getInstance(this::class.java)
 
     fun buildForPyFunction(
         node: PyFunction,
         showDependencies: Boolean = false,
         buildClosure: Boolean = true
     ): PyFlowGraph {
-        val fg = visitPyElement(node) ?: throw GraphBuildingException
+        val fg = visitPyElement(node) ?: throw GraphBuildingException("Unable to build pfg for <$node>")
         if (!showDependencies) {
             DependenciesResolver.resolve(flowGraph = fg)
         }
@@ -103,7 +105,7 @@ class PyFlowGraphBuilder {
                     null
                 }
                 if (statementFlowGraph == null) {
-                    println("Unable to build pfg for $statement, skipping...")
+                    logger.warn("Unable to build pfg for $statement, skipping...")
                     continue
                 }
                 flowGraph.mergeGraph(statementFlowGraph)
@@ -143,7 +145,8 @@ class PyFlowGraphBuilder {
         val parametersFlowGraphs = visitFunctionDefParameters(node)
         currentFlowGraph.parallelMergeGraphs(parametersFlowGraphs)
         val lambdaNode = DataNode(OperationNode.Label.LAMBDA, node)
-        val bodyFlowGraph = visitPyElement(node.body) ?: throw GraphBuildingException
+        val bodyFlowGraph = visitPyElement(node.body)
+            ?: throw GraphBuildingException("Unable to build pfg for lambda body <${node.body?.text}>")
         currentFlowGraph.mergeGraph(bodyFlowGraph)
         currentFlowGraph.addNode(lambdaNode, LinkType.PARAMETER, clearSinks = true)
         popContext()
@@ -190,7 +193,8 @@ class PyFlowGraphBuilder {
             kind = DataNode.Kind.VARIABLE_USAGE
         )
         return if (node.isQualified) {
-            val qualifierFlowGraph = visitPyElement(node.qualifier) ?: throw GraphBuildingException
+            val qualifierFlowGraph = visitPyElement(node.qualifier)
+                ?: throw GraphBuildingException("Unable to build pfg for qualifier <${node.qualifier}> of <$node>")
             qualifierFlowGraph.addNode(referenceNode, linkType = LinkType.QUALIFIER, clearSinks = true)
             qualifierFlowGraph
         } else {
@@ -201,15 +205,18 @@ class PyFlowGraphBuilder {
     }
 
     private fun visitSubscript(node: PySubscriptionExpression): PyFlowGraph {
-        val operandFlowGraph = visitPyElement(node.operand) ?: throw GraphBuildingException
-        val indexFlowGraph = visitPyElement(node.indexExpression) ?: throw GraphBuildingException
+        val operandFlowGraph = visitPyElement(node.operand)
+            ?: throw GraphBuildingException("Unable to build pfg for <${node.operand}>")
+        val indexFlowGraph = visitPyElement(node.indexExpression)
+            ?: throw GraphBuildingException("Unable to build pfg for <${node.indexExpression}>")
         val subscriptFullName = getNodeFullName(node)
         val subscriptNode = DataNode(label = subscriptFullName, psi = node, kind = DataNode.Kind.SUBSCRIPT)
         return mergeOperandWithIndexGraphs(operandFlowGraph, indexFlowGraph, subscriptNode)
     }
 
     private fun visitSlice(node: PySliceExpression): PyFlowGraph {
-        val operandFlowGraph = visitPyElement(node.operand) ?: throw GraphBuildingException
+        val operandFlowGraph = visitPyElement(node.operand)
+            ?: throw GraphBuildingException("Unable to build pfg for <${node.operand}>")
         val sliceItemsGraphs = arrayListOf<PyFlowGraph>()
         node.sliceItem?.lowerBound?.let { visitPyElement(it) }?.let { sliceItemsGraphs.add(it) }
         node.sliceItem?.stride?.let { visitPyElement(it) }?.let { sliceItemsGraphs.add(it) }
@@ -228,7 +235,7 @@ class PyFlowGraphBuilder {
                 node = node,
                 operationKind = OperationNode.Kind.BOOL,
                 leftOperand = node.leftExpression,
-                rightOperand = node.rightExpression ?: throw GraphBuildingException
+                rightOperand = node.rightExpression ?: throw GraphBuildingException("Incomplete PSI")
             )
         } else if (node.isOperator("!=") || node.isOperator("==") || node.isOperator("<")
             || node.isOperator("<=") || node.isOperator(">") || node.isOperator(">")
@@ -238,7 +245,7 @@ class PyFlowGraphBuilder {
                 node = node,
                 operationKind = OperationNode.Kind.COMPARE,
                 leftOperand = node.leftExpression,
-                rightOperand = node.rightExpression ?: throw GraphBuildingException
+                rightOperand = node.rightExpression ?: throw GraphBuildingException("Incomplete PSI")
             )
         } else {
             visitBinOperationHelper(
@@ -246,7 +253,7 @@ class PyFlowGraphBuilder {
                 node = node,
                 operationKind = OperationNode.Kind.BINARY,
                 leftOperand = node.leftExpression,
-                rightOperand = node.rightExpression ?: throw GraphBuildingException
+                rightOperand = node.rightExpression ?: throw GraphBuildingException("Incomplete PSI")
             )
         }
     }
@@ -280,7 +287,7 @@ class PyFlowGraphBuilder {
                 preparedValue = PyAssignmentVisitorHelper.PreparedAssignmentValue.AssignedValue(valueFlowGraph)
             )
         } else {
-            throw GraphBuildingException
+            throw GraphBuildingException("Unsupported type of AugAssignment")
         }
     }
 
@@ -326,16 +333,19 @@ class PyFlowGraphBuilder {
             }
         }
         if (parametersFlowGraphs.any { it == null }) {
-            println("Unsupported parameters in function definition, skipping them...")
+            logger.warn("Unsupported parameters in function definition, skipping them...")
         }
         return parametersFlowGraphs.filterNotNull()
     }
 
     private fun visitCall(node: PyCallExpression): PyFlowGraph {
-        val name = node.callee?.let { getNodeShortName(it) } ?: throw GraphBuildingException
-        val key = node.callee?.let { getNodeKey(it) } ?: throw GraphBuildingException
+        val name = node.callee?.let { getNodeShortName(it) }
+            ?: throw GraphBuildingException("Unable to get short name of <${node.callee}>")
+        val key = node.callee?.let { getNodeKey(it) }
+            ?: throw GraphBuildingException("Unable to get key of <${node.callee}>")
         return if (node.callee is PyQualifiedExpression && (node.callee as PyQualifiedExpression).isQualified) {
-            val calleeFlowGraph = node.callee?.let { visitPyElement(it) } ?: throw GraphBuildingException
+            val calleeFlowGraph = node.callee?.let { visitPyElement(it) }
+                ?: throw GraphBuildingException("Unable to build pfg for <${node.callee}>")
             val callFlowGraph = visitFunctionCallHelper(node, name)
             calleeFlowGraph.mergeGraph(
                 callFlowGraph,
@@ -364,7 +374,7 @@ class PyFlowGraphBuilder {
             elsePart = node.elsePart
         )
         ifFlowGraph?.parallelMergeGraphs(listOf(bodyFlowGraph, elseFlowGraph))
-        return ifFlowGraph ?: throw GraphBuildingException
+        return ifFlowGraph ?: throw GraphBuildingException("Unable to build pfg for <${node.ifPart}>")
     }
 
     private fun visitElifPartsHelper(
@@ -407,7 +417,8 @@ class PyFlowGraphBuilder {
             ifPartFlowGraph?.parallelMergeGraphs(listOf(bodyFlowGraph, elseFlowGraph))
 
             // Emulating _visit_control_node_body call for nested elif-s each time
-            ifPartFlowGraph?.let { controlWrapperFlowGraph.mergeGraph(it) } ?: throw GraphBuildingException
+            ifPartFlowGraph?.let { controlWrapperFlowGraph.mergeGraph(it) }
+                ?: throw GraphBuildingException("Unable to build pfg for <${ifPart}>")
             popControlBranch()
 
             return controlWrapperFlowGraph
@@ -423,7 +434,8 @@ class PyFlowGraphBuilder {
     private fun visitFor(node: PyForStatement): PyFlowGraph {
         val controlNode = ControlNode(ControlNode.Label.FOR, node, controlBranchStack)
         val forFlowGraph = visitSimpleAssignment(
-            target = node.forPart.target ?: throw GraphBuildingException,
+            target = node.forPart.target
+                ?: throw GraphBuildingException("Unable to build pfg for <${node.forPart.target}>"),
             preparedValue = helper.prepareAssignmentValues(node.forPart.target, node.forPart.source)
         )
         forFlowGraph.addNode(controlNode, LinkType.CONDITION)
@@ -450,7 +462,7 @@ class PyFlowGraphBuilder {
         // TODO: it's easy to add `else` part, but it's not parsed in original miner
         whileFlowGraph?.parallelMergeGraphs(listOf(whileBodyFlowGraph))
         whileFlowGraph?.statementSinks?.clear()
-        return whileFlowGraph ?: throw GraphBuildingException
+        return whileFlowGraph ?: throw GraphBuildingException("Unable to build pfg for <${node.text}>")
     }
 
     private fun visitTry(node: PyTryExceptStatement): PyFlowGraph {
@@ -556,7 +568,7 @@ class PyFlowGraphBuilder {
         }
         if (argsFlowGraphs.any { it == null }) {
             val calleeShortName = node.callee?.let { getNodeShortName(it) }
-            println("Function call <$calleeShortName> has unsupported arguments, skipping them...")
+            logger.warn("Function call <$calleeShortName> has unsupported arguments, skipping them...")
         }
         return argsFlowGraphs.filterNotNull()
     }
@@ -576,7 +588,7 @@ class PyFlowGraphBuilder {
                 statementFlowGraph = visitPyElement(statement)
             } finally {
                 if (statementFlowGraph == null) {
-                    println("Unable to build graph for $statement inside ${controlNode.psi}, skipping...")
+                    logger.warn("Unable to build graph for $statement inside ${controlNode.psi}, skipping...")
                     continue
                 }
                 currentFlowGraph.mergeGraph(statementFlowGraph)

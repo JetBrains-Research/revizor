@@ -119,4 +119,4 @@ fun getCollectionLabel(node: PySequenceExpression): String =
         else -> throw IllegalArgumentException()
     }
 
-object GraphBuildingException : Exception()
+class GraphBuildingException(message: String) : Exception(message)

@@ -2,6 +2,7 @@ package org.jetbrains.research.plugin.localization
 
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyElementVisitor
 import com.jetbrains.python.psi.PyFunction
@@ -37,7 +38,8 @@ class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor()
                     )
                 }
             } catch (exception: GraphBuildingException) {
-                println("Unable to build PyFlowGraph for method <${node.name}>")
+                val logger = Logger.getInstance(this::class.java)
+                logger.warn("Unable to build PyFlowGraph for method <${node.name}>")
             }
         }
     }

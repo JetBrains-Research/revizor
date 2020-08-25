@@ -50,7 +50,7 @@ fun buildPyFlowGraphBySubprocess(inputFile: File): File {
     val process = builder.start()
     val exitCode = process.waitFor()
     if (exitCode != 0) {
-        throw GraphBuildingException
+        throw GraphBuildingException("Failed to build pfg using Python subprocess")
     }
     val dotFile = File(outputFilePath)
     val dotPdfFile = File(dotFile.absolutePath.plus(".pdf"))

@@ -51,7 +51,7 @@ internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder
                 (target as PySequenceExpression).elements.forEach { group.addAll(getAssignGroup(it)) }
             }
             is PyStarExpression -> target.expression?.let { group.add(it) }
-            else -> throw GraphBuildingException
+            else -> throw GraphBuildingException("Unsupported assignment target to group")
         }
         return group
     }
@@ -119,11 +119,11 @@ internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder
                 getAssignFlowGraphWithVars(
                     operationNode, it, preparedValueGraphs
                 )
-            } ?: throw GraphBuildingException
+            } ?: throw GraphBuildingException("Incomplete PSI in PyStarExpression")
             is PyParenthesizedExpression -> return target.containedExpression?.let {
                 getAssignFlowGraphWithVars(operationNode, it, preparedValueGraphs)
-            } ?: throw GraphBuildingException
-            else -> throw GraphBuildingException
+            } ?: throw GraphBuildingException("Incomplete PSI in PyParenthesizedExpression")
+            else -> throw GraphBuildingException("Unsupported assignment target <$target>")
         }
     }
 
@@ -134,7 +134,8 @@ internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder
         when (target) {
             is PyTargetExpression, is PyNamedParameter ->
                 return PreparedAssignmentValue.AssignedValue(
-                    builder.visitPyElement(value) ?: throw GraphBuildingException
+                    builder.visitPyElement(value)
+                        ?: throw GraphBuildingException("Unable to build pfg for <$value>")
                 )
             is PyParenthesizedExpression ->
                 return prepareAssignmentValues(target.containedExpression, value)
@@ -142,7 +143,8 @@ internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder
                 when (value) {
                     is PyCallExpression, is PyReferenceExpression ->
                         return PreparedAssignmentValue.AssignedValue(
-                            builder.visitPyElement(value) ?: throw GraphBuildingException
+                            builder.visitPyElement(value)
+                                ?: throw GraphBuildingException("Unable to build pfg for <$value>")
                         )
                     is PyListLiteralExpression, is PyTupleExpression -> {
                         val preparedSubAssignments = PreparedAssignmentValue.AssignedValues(mutableListOf())
@@ -199,10 +201,10 @@ internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder
                             return preparedSubAssignments
                         }
                     }
-                    else -> throw GraphBuildingException
+                    else -> throw GraphBuildingException("Unsupported assignment value: <$value>")
                 }
             }
-            else -> throw GraphBuildingException
+            else -> throw GraphBuildingException("Unsupported assignment target: <$target>")
         }
     }
 }
