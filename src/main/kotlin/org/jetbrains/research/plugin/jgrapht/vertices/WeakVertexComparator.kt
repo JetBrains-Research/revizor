@@ -12,7 +12,7 @@ class WeakVertexComparator : Comparator<PatternSpecificVertex> {
                     if (fromPattern.dataNodeInfo!!.labels.contains(fromTarget.originalLabel)) 0 else 1
                 LONGEST_COMMON_SUFFIX ->
                     if (fromTarget.originalLabel!!.endsWith(fromPattern.dataNodeInfo!!.longestCommonSuffix)) 0 else 1
-                NOTHING, null -> 0
+                NOTHING, UNKNOWN, null -> 0
             }
         }
         if (fromPattern?.originalLabel?.matches("""^.*?\[.*?\]$""".toRegex()) == true

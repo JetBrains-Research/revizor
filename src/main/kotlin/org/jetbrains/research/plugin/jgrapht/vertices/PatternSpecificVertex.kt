@@ -17,11 +17,16 @@ data class PatternSpecificVertex(
     enum class ChangeGraphPartIndicator { BEFORE, AFTER }
 
     data class LabelsGroup(
-        val whatMatters: Indicator?,
+        val whatMatters: Indicator,
         val labels: HashSet<String>,
         val longestCommonSuffix: String
     ) {
-        enum class Indicator { LONGEST_COMMON_SUFFIX, VALUABLE_ORIGINAL_LABEL, NOTHING }
+        enum class Indicator {
+            LONGEST_COMMON_SUFFIX,
+            VALUABLE_ORIGINAL_LABEL,
+            NOTHING,
+            UNKNOWN
+        }
     }
 
     object CommonLabel {

@@ -27,7 +27,7 @@ fun createPatternSpecificGraph(
         if (vertex.label?.startsWith("var") == true) {
             newVertex.dataNodeInfo = variableLabelsGroups.getOrNull(variableVerticesCounter)
                 ?: PatternSpecificVertex.LabelsGroup(
-                    whatMatters = null,
+                    whatMatters = PatternSpecificVertex.LabelsGroup.Indicator.UNKNOWN,
                     labels = hashSetOf(),
                     longestCommonSuffix = ""
                 )

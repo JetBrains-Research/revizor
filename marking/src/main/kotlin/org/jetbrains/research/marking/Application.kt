@@ -43,7 +43,7 @@ private fun getVarsGroups(fragments: List<Graph<PatternSpecificVertex, PatternSp
                 if (varsCnt >= labelsGroups.size) {
                     labelsGroups.add(
                         PatternSpecificVertex.LabelsGroup(
-                            whatMatters = null,
+                            whatMatters = PatternSpecificVertex.LabelsGroup.Indicator.UNKNOWN,
                             labels = hashSetOf(vertex.originalLabel!!),
                             longestCommonSuffix = ""
                         )
