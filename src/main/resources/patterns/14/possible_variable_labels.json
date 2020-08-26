@@ -1,0 +1,22 @@
+[
+  {
+    "whatMatters": "LONGEST_COMMON_SUFFIX",
+    "labels": [
+      "failed_imports.add",
+      "self._dedup_set.add",
+      "names.add",
+      "fontfiles.add"
+    ],
+    "longestCommonSuffix": ".add"
+  },
+  {
+    "whatMatters": "NOTHING",
+    "labels": [
+      "name",
+      "package",
+      "f",
+      "object"
+    ],
+    "longestCommonSuffix": ""
+  }
+]

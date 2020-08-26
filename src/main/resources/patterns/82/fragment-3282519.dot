@@ -1,0 +1,18 @@
+digraph "fragment-3282519.dot" {
+	subgraph "subgraph: 21849 to 21850" {
+		graph [rank=same]
+		21849 [label="array (array) [21849]" color=red2 shape=box]
+		21850 [label="arange (arange) [21850]" color=green4 shape=box]
+	}
+	subgraph "subgraph: 21848 to 21847" {
+		graph [rank=same]
+		21848 [label="var (numpy.arange) [21848]" color=green4 shape=ellipse]
+		21847 [label="var (numpy.array) [21847]" color=red2 shape=ellipse]
+	}
+	21851 [label="range (range) [21851]" color=red2 shape=box]
+	21851 -> 21849 [xlabel=para from_closure=False]
+	21847 -> 21849 [xlabel=recv from_closure=False]
+	21848 -> 21850 [xlabel=recv from_closure=False]
+	21849 -> 21850 [xlabel=map from_closure=False]
+	21847 -> 21848 [xlabel=map from_closure=False]
+}

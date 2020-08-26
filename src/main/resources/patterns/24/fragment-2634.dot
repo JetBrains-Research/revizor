@@ -1,0 +1,20 @@
+digraph "fragment-2634.dot" {
+	subgraph "subgraph: 1832 to 1833" {
+		graph [rank=same]
+		1832 [label="sorted (sorted) [1832]" color=red2 shape=box]
+		1833 [label="sorted (sorted) [1833]" color=green4 shape=box]
+	}
+	1831 [label="keys (keys) [1831]" color=red2 shape=box]
+	1834 [label="var (counts.keys) [1834]" color=red2 shape=ellipse]
+	subgraph "subgraph: 1836 to 1835" {
+		graph [rank=same]
+		1836 [label="var (counts) [1836]" color=red2 shape=ellipse]
+		1835 [label="var (counts) [1835]" color=green4 shape=ellipse]
+	}
+	1831 -> 1832 [xlabel=para from_closure=False]
+	1835 -> 1833 [xlabel=para from_closure=True]
+	1832 -> 1833 [xlabel=map from_closure=False]
+	1834 -> 1831 [xlabel=recv from_closure=False]
+	1836 -> 1834 [xlabel=qual from_closure=True]
+	1836 -> 1835 [xlabel=map from_closure=False]
+}

@@ -1,0 +1,12 @@
+digraph "fragment-121.dot" {
+	subgraph "subgraph: 1347 to 1346" {
+		graph [rank=same]
+		1347 [label="keys (keys) [1347]" color=red2 shape=box]
+		1346 [label="len (len) [1346]" color=green4 shape=box]
+	}
+	1353 [label="var (test_feature.qualifiers.keys) [1353]" color=red2 shape=ellipse]
+	1349 [label="len (len) [1349]" color=red2 shape=box]
+	1353 -> 1347 [xlabel=recv from_closure=False]
+	1347 -> 1346 [xlabel=map from_closure=False]
+	1347 -> 1349 [xlabel=para from_closure=False]
+}

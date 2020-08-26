@@ -1,0 +1,1 @@
+Maybe use os.path.isfile()?

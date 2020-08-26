@@ -1,0 +1,21 @@
+digraph "fragment-1079.dot" {
+	subgraph "subgraph: 256 to 257" {
+		graph [rank=same]
+		256 [label="log (log) [256]" color=red2 shape=box]
+		257 [label="log1p (log1p) [257]" color=green4 shape=box]
+	}
+	subgraph "subgraph: 259 to 258" {
+		graph [rank=same]
+		259 [label="var (np.log1p) [259]" color=green4 shape=ellipse]
+		258 [label="var (np.log) [258]" color=red2 shape=ellipse]
+	}
+	263 [label="lit (1) [263]" color=red2 shape=ellipse]
+	262 [label="add (add) [262]" color=red2 shape=box]
+	258 -> 256 [xlabel=recv from_closure=False]
+	262 -> 256 [xlabel=para from_closure=False]
+	263 -> 256 [xlabel=para from_closure=False]
+	256 -> 257 [xlabel=map from_closure=False]
+	259 -> 257 [xlabel=recv from_closure=False]
+	258 -> 259 [xlabel=map from_closure=False]
+	263 -> 262 [xlabel=para from_closure=False]
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "whatMatters": "LONGEST_COMMON_SUFFIX",
+    "labels": [
+      "val_b.keys",
+      "tagpos.keys",
+      "counts.keys",
+      "prob_wheel.keys",
+      "new_sum_dict.keys",
+      "target_options.keys",
+      "val_a.keys"
+    ],
+    "longestCommonSuffix": ".keys"
+  },
+  {
+    "whatMatters": "NOTHING",
+    "labels": [
+      "tagpos",
+      "counts",
+      "target_options",
+      "val_b",
+      "new_sum_dict",
+      "prob_wheel",
+      "val_a"
+    ],
+    "longestCommonSuffix": ""
+  }
+]

@@ -1,0 +1,21 @@
+digraph "fragment-16798949.dot" {
+	subgraph "subgraph: 13528 to 13527" {
+		graph [rank=same]
+		13528 [label="array (array) [13528]" color=red2 shape=box]
+		13527 [label="zeros (zeros) [13527]" color=green4 shape=box]
+	}
+	subgraph "subgraph: 13525 to 13524" {
+		graph [rank=same]
+		13525 [label="var (np.zeros) [13525]" color=green4 shape=ellipse]
+		13524 [label="var (np.array) [13524]" color=red2 shape=ellipse]
+	}
+	13520 [label="lit (0) [13520]" color=red2 shape=ellipse]
+	13526 [label="List (List) [13526]" color=red2 shape=box]
+	13526 -> 13528 [xlabel=para from_closure=False]
+	13524 -> 13528 [xlabel=recv from_closure=False]
+	13520 -> 13528 [xlabel=para from_closure=False]
+	13528 -> 13527 [xlabel=map from_closure=False]
+	13525 -> 13527 [xlabel=recv from_closure=False]
+	13524 -> 13525 [xlabel=map from_closure=False]
+	13520 -> 13526 [xlabel=para from_closure=False]
+}

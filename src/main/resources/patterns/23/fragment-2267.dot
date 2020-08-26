@@ -1,0 +1,19 @@
+digraph "fragment-2267.dot" {
+	subgraph "subgraph: 1868 to 1867" {
+		graph [rank=same]
+		1868 [label="keys (keys) [1868]" color=red2 shape=box]
+		1867 [label="sorted (sorted) [1867]" color=green4 shape=box]
+	}
+	1871 [label="var (self._adjacency_list.keys) [1871]" color=red2 shape=ellipse]
+	1870 [label="sorted (sorted) [1870]" color=red2 shape=box]
+	1865 [label="= (=) [1865]" color=red2 shape=box]
+	1866 [label="var (keys) [1866]" color=red2 shape=ellipse]
+	1871 -> 1868 [xlabel=recv from_closure=False]
+	1868 -> 1867 [xlabel=map from_closure=False]
+	1868 -> 1870 [xlabel=para from_closure=False]
+	1868 -> 1865 [xlabel=para from_closure=True]
+	1870 -> 1865 [xlabel=para from_closure=False]
+	1865 -> 1866 [xlabel=def from_closure=False]
+	1870 -> 1866 [xlabel=def from_closure=False]
+	1868 -> 1866 [xlabel=def from_closure=True]
+}
