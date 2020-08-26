@@ -1,5 +1,9 @@
 package org.jetbrains.research.plugin.jgrapht.edges
 
+/**
+ * An edges needed for the JGraphtT interlayer.
+ */
+
 data class PatternSpecificMultipleEdge(
     private val id: Int,
     val embeddedEdgeByXlabel: MutableMap<String?, PatternSpecificEdge>

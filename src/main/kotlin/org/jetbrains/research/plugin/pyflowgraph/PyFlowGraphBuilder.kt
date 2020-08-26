@@ -6,7 +6,12 @@ import org.jetbrains.research.plugin.pyflowgraph.models.*
 import org.jetbrains.research.plugin.pyflowgraph.postprocessing.DependenciesResolver
 import org.jetbrains.research.plugin.pyflowgraph.postprocessing.TransitiveClosureBuilder
 
-
+/**
+ * The main class for building PyFlowGraph.
+ *
+ * This class provides methods Python PSI traversal in the
+ * depth-first order and building control flow graph on the fly.
+ */
 class PyFlowGraphBuilder {
     internal val controlBranchStack: ControlBranchStack = mutableListOf()
     private val flowGraph: PyFlowGraph = createGraph()
@@ -567,7 +572,7 @@ class PyFlowGraphBuilder {
             }
         }
         if (argsFlowGraphs.any { it == null }) {
-            val calleeShortName = node.callee?.let { it.getShortName() }
+            val calleeShortName = node.callee?.getShortName()
             logger.warn("Function call <$calleeShortName> has unsupported arguments, skipping them...")
         }
         return argsFlowGraphs.filterNotNull()

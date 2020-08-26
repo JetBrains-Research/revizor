@@ -4,6 +4,13 @@ import com.google.gson.Gson
 import java.nio.file.Path
 import java.nio.file.Paths
 
+/**
+ * A singleton class for storing configuration settings.
+ *
+ * This class parses information from `src/main/resources/config.json`.
+ * It is used only within `PyFlowGraphIsomorphismTest` class for calling
+ * Python subprocess.
+ */
 object Config {
     val CODE_CHANGE_MINER_PATH: Path
     val TEMP_DIRECTORY_PATH: Path

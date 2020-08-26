@@ -13,6 +13,13 @@ import org.jgrapht.nio.dot.DOTImporter
 import java.io.InputStream
 
 
+/**
+ * These utilities provides functionality for building `DirectedAcyclicGraph` of pattern
+ * from raw existing `.dot` files, from base graph with variable nodes generalization and
+ * from original `PyFlowGraph`. The provided DAG is something like an interlayer, because
+ * it is needed only for locating isomorphic subgraphs using JGraphT library methods.
+ */
+
 fun createPatternSpecificGraph(
     baseGraph: Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>,
     variableLabelsGroups: ArrayList<PatternSpecificVertex.LabelsGroup>

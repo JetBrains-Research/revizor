@@ -11,6 +11,12 @@ import org.jetbrains.research.plugin.common.buildPyFlowGraphForMethod
 import org.jetbrains.research.plugin.ide.PatternsSuggestions
 import org.jetbrains.research.plugin.pyflowgraph.GraphBuildingException
 
+/**
+ * A class for running inspection on particular methods.
+ *
+ * This class provides Python PSI visitor which tries to find isomorphic patterns
+ * for each PyFunction element in the code.
+ */
 class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor() {
 
     override fun visitPyFunction(node: PyFunction?) {

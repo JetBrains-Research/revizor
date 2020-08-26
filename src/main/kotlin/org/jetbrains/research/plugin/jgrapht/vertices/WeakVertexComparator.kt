@@ -2,6 +2,9 @@ package org.jetbrains.research.plugin.jgrapht.vertices
 
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex.LabelsGroup.Indicator.*
 
+/**
+ * A vertices comparator needed for the JGraphT `VF2SubgraphIsomorphismInspector`.
+ */
 class WeakVertexComparator : Comparator<PatternSpecificVertex> {
     override fun compare(fromTarget: PatternSpecificVertex?, fromPattern: PatternSpecificVertex?): Int {
         if (fromTarget?.label?.startsWith("var") == true

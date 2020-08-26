@@ -12,9 +12,12 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import kotlinx.cli.*
 
+/**
+ * An utility that provides CLI interface for marking and processing patterns used by the main plugin.
+ */
+
 typealias FragmentsByPathMap = HashMap<Path, ArrayList<Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>>
 typealias PatternGraphByPathMap = HashMap<Path, Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>
-
 
 private fun loadFragments(inputPatternsStorage: String): FragmentsByPathMap {
     val fragmentsByDirectory = FragmentsByPathMap()

@@ -3,6 +3,9 @@ package org.jetbrains.research.plugin.jgrapht.vertices
 import org.jetbrains.research.plugin.pyflowgraph.models.DataNode
 import org.jetbrains.research.plugin.pyflowgraph.models.Node
 
+/**
+ * A vertex needed for the JGraphT interlayer.
+ */
 data class PatternSpecificVertex(
     val id: String,
     var label: String? = null,

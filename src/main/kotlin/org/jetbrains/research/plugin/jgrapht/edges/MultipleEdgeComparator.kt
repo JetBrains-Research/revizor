@@ -1,5 +1,8 @@
 package org.jetbrains.research.plugin.jgrapht.edges
 
+/**
+ * An edge comparator needed for the JGraphT `VF2SubgraphIsomorphismInspector`.
+ */
 class MultipleEdgeComparator : Comparator<PatternSpecificMultipleEdge> {
 
     private val edgeComparator: Comparator<PatternSpecificEdge?> =

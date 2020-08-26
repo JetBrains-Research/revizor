@@ -15,6 +15,13 @@ import java.net.URL
 import java.nio.file.Paths
 import java.util.jar.JarFile
 
+/**
+ * A singleton class for storing graph patterns.
+ *
+ * This class provides functionality for retrieving patterns from JAR file,
+ * extracting descriptions and common variables' labels for each pattern. Also,
+ * it has `getIsomorphicPatterns` method which is used for patterns localization.
+ */
 object PatternsStorage {
     private val patternDescById = HashMap<String, String>()
     private val patternById =

@@ -7,6 +7,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
 
+/**
+ * A class for providing fix suggestions based on the found patterns in the IDE.
+ */
 class PatternsSuggestions(private val patternsDescriptions: HashSet<String>) : LocalQuickFix {
 
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {

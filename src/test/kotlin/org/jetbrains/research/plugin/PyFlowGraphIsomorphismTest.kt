@@ -6,7 +6,14 @@ import junit.framework.TestCase
 import org.jetbrains.research.plugin.common.buildPyFlowGraphForMethod
 import org.jetbrains.research.plugin.common.getStrictGraphIsomorphismInspector
 
-
+/**
+ *  A group of unit tests.
+ *
+ *  This class provides test cases for proving correctness of
+ *  PyFlowGraph building algorithm in Kotlin using isomorphism checks
+ *  between actual graph, that is built on PSI, and expected graph, that is
+ *  built from Python AST via subprocess.
+ */
 class PyFlowGraphIsomorphismTest : BasePlatformTestCase() {
 
     override fun getTestDataPath() = "src/test/resources/testData"

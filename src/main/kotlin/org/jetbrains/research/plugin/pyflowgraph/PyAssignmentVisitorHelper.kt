@@ -6,11 +6,15 @@ import org.jetbrains.research.plugin.pyflowgraph.models.LinkType
 import org.jetbrains.research.plugin.pyflowgraph.models.OperationNode
 import org.jetbrains.research.plugin.pyflowgraph.models.PyFlowGraph
 
-
+/**
+ * An internal class for visiting assignment nodes in Python PSI.
+ *
+ * This class provides methods for parsing complicated assignment targets and values in Python.
+ * It needs to be refined and tested for extreme cases.
+ */
 internal class PyAssignmentVisitorHelper(private val builder: PyFlowGraphBuilder) {
 
-    // Helps to emulate dynamically-typed lists from python
-    // TODO: fix it later
+    // Helps to emulate dynamically-typed lists from Python, needed for pattern matching
     sealed class PreparedAssignmentValue {
         data class AssignedValue(val value: PyFlowGraph) : PreparedAssignmentValue()
         data class AssignedValues(val values: MutableList<PreparedAssignmentValue>) : PreparedAssignmentValue()
