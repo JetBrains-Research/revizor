@@ -4,7 +4,7 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.jetbrains.python.psi.PyFunction
 import junit.framework.TestCase
 import org.jetbrains.research.plugin.common.buildPyFlowGraphForMethod
-import org.jetbrains.research.plugin.common.getStrictGraphIsomorphismInspector
+import org.jetbrains.research.plugin.jgrapht.getStrictGraphIsomorphismInspector
 
 /**
  *  A group of unit tests.

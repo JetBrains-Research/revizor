@@ -3,9 +3,9 @@ package org.jetbrains.research.plugin
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.intellij.openapi.diagnostic.Logger
-import org.jetbrains.research.plugin.common.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
+import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.GraphMapping
 import org.jgrapht.graph.AsSubgraph

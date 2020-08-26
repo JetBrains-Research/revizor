@@ -1,7 +1,6 @@
 package org.jetbrains.research.marking
 
 import com.google.gson.Gson
-import org.jetbrains.research.plugin.common.getLongestCommonSuffix
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
@@ -130,6 +129,16 @@ private fun markPatterns(patternsGraphs: PatternGraphByPathMap, addDescription: 
         varLabelsFile.writeText(varLabelsJsonString)
     }
     println("Finish marking")
+}
+
+private fun getLongestCommonSuffix(strings: Collection<String?>?): String {
+    if (strings == null || strings.isEmpty())
+        return ""
+    var lcs = strings.first()
+    for (string in strings) {
+        lcs = lcs?.commonSuffixWith(string ?: "")
+    }
+    return lcs ?: ""
 }
 
 private fun copyUsefulFiles(from: String, dest: String) {

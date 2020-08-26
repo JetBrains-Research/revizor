@@ -1,4 +1,4 @@
-package org.jetbrains.research.plugin.common
+package org.jetbrains.research.plugin.jgrapht
 
 import org.jetbrains.research.plugin.jgrapht.edges.MultipleEdgeComparator
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
@@ -9,15 +9,6 @@ import org.jgrapht.alg.isomorphism.VF2GraphIsomorphismInspector
 import org.jgrapht.alg.isomorphism.VF2SubgraphIsomorphismInspector
 import org.jgrapht.graph.DirectedAcyclicGraph
 
-fun getLongestCommonSuffix(strings: Collection<String?>?): String {
-    if (strings == null || strings.isEmpty())
-        return ""
-    var lcs = strings.first()
-    for (string in strings) {
-        lcs = lcs?.commonSuffixWith(string ?: "")
-    }
-    return lcs ?: ""
-}
 
 fun getWeakSubgraphIsomorphismInspector(
     target: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>,
@@ -30,7 +21,6 @@ fun getWeakSubgraphIsomorphismInspector(
         MultipleEdgeComparator(),
         false
     )
-
 
 fun getStrictGraphIsomorphismInspector(
     graph1: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>,
