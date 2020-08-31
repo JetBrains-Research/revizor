@@ -9,7 +9,9 @@ which were gathered by
 tool. For real, this plugin runs an inspection which 
 aims to build mappings between isomorphic subgraphs 
 of patterns and control flow graph of your code, 
-which is built automatically on the fly.  
+which is built automatically on the fly. 
+
+<img src="https://bit.ly/351i1HB" width="700" alt="Plugin demo">
 
 ## Installation
 
