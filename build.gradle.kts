@@ -28,6 +28,7 @@ allprojects {
         compileOnly(kotlin("stdlib"))
         compileOnly(kotlin("stdlib-jdk8"))
         implementation(group = "com.google.code.gson", name = "gson", version = "2.8.6")
+        implementation(group = "com.github.gumtreediff", name = "core", version = "2.1.2")
         implementation(group = "org.jgrapht", name = "jgrapht-core", version = "1.5.0")
         implementation(group = "org.jgrapht", name = "jgrapht-io", version = "1.5.0")
         implementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.6.2")
