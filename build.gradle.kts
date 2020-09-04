@@ -39,7 +39,8 @@ allprojects {
     }
 
     tasks.withType<Test> {
-        useJUnit()
+        useJUnitPlatform()
+        jvmArgs = mutableListOf("--enable-preview")
     }
 }
 

@@ -3,14 +3,12 @@ package org.jetbrains.research.preprocessing
 import com.github.gumtreediff.tree.ITree
 import com.github.gumtreediff.tree.TreeContext
 import com.github.gumtreediff.tree.TreeUtils
-import com.intellij.ide.impl.ProjectUtil
-import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyElement
 import java.lang.IllegalStateException
 import kotlin.collections.ArrayDeque
 
 
-class PyPSITree(private val pyElement: PyElement) : ITree {
+class PyPSIGumTree(private val pyElement: PyElement) : ITree {
     private var id: Int = 0
     private var type: Int = 0
     private var label: String? = null
@@ -29,7 +27,7 @@ class PyPSITree(private val pyElement: PyElement) : ITree {
     init {
         children = pyElement.children
             .filterIsInstance<PyElement>()
-            .map { PyPSITree(it) }
+            .map { PyPSIGumTree(it) }
             .toMutableList()
         metadata = mutableMapOf("origin" to pyElement)
     }
@@ -192,7 +190,7 @@ class PyPSITree(private val pyElement: PyElement) : ITree {
     }
 
     override fun deepCopy(): ITree {
-        val clone = PyPSITree(this.pyElement.copy() as PyElement)
+        val clone = PyPSIGumTree(this.pyElement.copy() as PyElement)
         clone.id = this.id
         clone.type = this.type
         clone.label = this.label
