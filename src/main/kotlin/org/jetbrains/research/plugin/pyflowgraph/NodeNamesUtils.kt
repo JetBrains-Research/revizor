@@ -1,5 +1,6 @@
 package org.jetbrains.research.plugin.pyflowgraph
 
+import com.intellij.psi.util.elementType
 import com.jetbrains.python.psi.*
 
 
@@ -39,8 +40,10 @@ fun PyElement.getFullName(): String =
         }
         is PyLiteralExpression -> "."
         is PyEmptyExpression -> ""
-        else -> throw IllegalArgumentException()
+        else -> this.toString()
     }
+
+fun PyElement.getType(): Int = this.elementType?.index?.toInt() ?: -1
 
 fun PyElement.getKey(): String =
     when (this) {

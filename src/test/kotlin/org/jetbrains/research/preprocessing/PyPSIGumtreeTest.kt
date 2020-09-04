@@ -11,12 +11,12 @@ class PyPSIGumtreeTest : BasePlatformTestCase() {
     override fun getTestDataPath() = "src/main/resources/patterns/2"
 
     fun `test gumtree matching on python psi`() {
-        val psiFileBefore = myFixture.configureByFile("before.py")
-        val psiFileAfter = myFixture.configureByFile("after.py")
-        val gumtreeBefore = PyPSIGumTree(psiFileBefore.children[0] as PyElement)
-        val gumtreeAfter = PyPSIGumTree(psiFileAfter.children[0] as PyElement)
-        val matcher = Matchers.getInstance().getMatcher(gumtreeBefore, gumtreeAfter)
+        val rootNodeBefore = myFixture.configureByFile("before.py").children.first() as PyElement
+        val rootNodeAfter = myFixture.configureByFile("after.py").children.first() as PyElement
+        val gumtreeBefore = PyPSIGumTreeGenerator().generate(rootNodeBefore)
+        val gumtreeAfter = PyPSIGumTreeGenerator().generate(rootNodeAfter)
+        val matcher = Matchers.getInstance().getMatcher(gumtreeBefore.root, gumtreeAfter.root)
         matcher.match()
-        UsefulTestCase.assertNotEmpty(matcher.mappingsAsSet)
+        UsefulTestCase.assertSize(7, matcher.mappingsAsSet)
     }
 }
