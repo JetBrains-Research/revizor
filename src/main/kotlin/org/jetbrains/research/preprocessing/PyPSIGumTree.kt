@@ -6,4 +6,13 @@ import org.jetbrains.research.plugin.pyflowgraph.getFullName
 import org.jetbrains.research.plugin.pyflowgraph.getType
 
 
-class PyPSIGumTree(private val rootElement: PyElement) : Tree(rootElement.getType(), rootElement.getFullName())
+class PyPSIGumTree(private val rootElement: PyElement) : Tree(rootElement.getType(), rootElement.getFullName()) {
+
+    private val fieldNames: MutableList<String> = arrayListOf()
+
+    fun addChildWithField(t: PyPSIGumTree, fieldName: String) {
+        children.add(t)
+        t.parent = this
+        fieldNames.add(fieldName)
+    }
+}

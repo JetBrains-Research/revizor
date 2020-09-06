@@ -1,5 +1,6 @@
 package org.jetbrains.research.preprocessing
 
+import com.github.gumtreediff.actions.ActionGenerator
 import com.github.gumtreediff.matchers.Matchers
 import com.intellij.testFramework.UsefulTestCase
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
@@ -13,10 +14,13 @@ class PyPSIGumtreeTest : BasePlatformTestCase() {
     fun `test gumtree matching on python psi`() {
         val rootNodeBefore = myFixture.configureByFile("before.py").children.first() as PyElement
         val rootNodeAfter = myFixture.configureByFile("after.py").children.first() as PyElement
-        val gumtreeBefore = PyPSIGumTreeGenerator().generate(rootNodeBefore)
-        val gumtreeAfter = PyPSIGumTreeGenerator().generate(rootNodeAfter)
-        val matcher = Matchers.getInstance().getMatcher(gumtreeBefore.root, gumtreeAfter.root)
+        val src = PyPSIGumTreeGenerator().generate(rootNodeBefore)
+        val dst = PyPSIGumTreeGenerator().generate(rootNodeAfter)
+        val matcher = Matchers.getInstance().getMatcher(src.root, dst.root)
         matcher.match()
-        UsefulTestCase.assertSize(7, matcher.mappingsAsSet)
+        val mappings = matcher.mappings
+        val generator = ActionGenerator(src.root, dst.root, mappings)
+        val actions = generator.generate()
+        UsefulTestCase.assertSize(2, actions)
     }
 }
