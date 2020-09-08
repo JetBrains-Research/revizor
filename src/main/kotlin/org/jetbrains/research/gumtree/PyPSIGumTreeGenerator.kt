@@ -1,4 +1,4 @@
-package org.jetbrains.research.preprocessing
+package org.jetbrains.research.gumtree
 
 import com.github.gumtreediff.tree.TreeContext
 import com.jetbrains.python.psi.PyElement
@@ -21,7 +21,7 @@ class PyPSIGumTreeGenerator {
         gumtree.parent = parent
         gumtree.id = nodeId++
         val children = psiNode.children.toSet()
-        val methods = psiNode.javaClass.declaredMethods
+        val methods = psiNode.javaClass.methods
             .filter { Modifier.isPublic(it.modifiers) }
             .filter {
                 PyElement::class.java.isAssignableFrom(it.returnType)

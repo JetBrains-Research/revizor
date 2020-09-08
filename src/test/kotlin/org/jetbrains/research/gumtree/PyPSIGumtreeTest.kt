@@ -1,4 +1,4 @@
-package org.jetbrains.research.preprocessing
+package org.jetbrains.research.gumtree
 
 import com.github.gumtreediff.actions.ActionGenerator
 import com.github.gumtreediff.matchers.Matchers
@@ -21,6 +21,6 @@ class PyPSIGumtreeTest : BasePlatformTestCase() {
         val mappings = matcher.mappings
         val generator = ActionGenerator(src.root, dst.root, mappings)
         val actions = generator.generate()
-        UsefulTestCase.assertSize(4, actions)
+        UsefulTestCase.assertSize(22, actions)
     }
 }
