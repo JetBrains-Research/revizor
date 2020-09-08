@@ -3,6 +3,12 @@ package org.jetbrains.research.plugin
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiFileFactory
+import com.jetbrains.python.PythonLanguage
+import com.jetbrains.python.psi.PyElement
+import com.jetbrains.python.psi.PyFunction
+import org.jetbrains.research.plugin.common.buildPyFlowGraphForMethod
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
@@ -15,6 +21,8 @@ import java.net.URL
 import java.nio.file.Paths
 import java.util.jar.JarFile
 
+typealias PatternGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>
+
 /**
  * A singleton class for storing graph patterns.
  *
@@ -24,8 +32,10 @@ import java.util.jar.JarFile
  */
 object PatternsStorage {
     private val patternDescById = HashMap<String, String>()
-    private val patternById =
-        HashMap<String, DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
+    private val patternById = HashMap<String, PatternGraph>()
+    private val psiNodeMappingById = HashMap<String, HashMap<PatternSpecificVertex, PyElement?>>()
+    private val logger = Logger.getInstance(this::class.java)
+    lateinit var project: Project
 
     init {
         var jar: JarFile? = null
@@ -58,20 +68,22 @@ object PatternsStorage {
                 }
             }
         } catch (ex: Exception) {
-            val logger = Logger.getInstance(this::class.java)
-            logger.error(ex) // TODO: implement error reporter
+            logger.warn("Failed to load patterns resources from JAR file")
         } finally {
             jar?.close()
         }
     }
 
-    fun getPatternById(patternId: String): DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>? =
+    fun getPatternById(patternId: String): PatternGraph? =
         patternById[patternId]
 
     fun getPatternDescriptionById(patternId: String): String =
         patternDescById[patternId] ?: "Unnamed pattern: $patternId"
 
-    fun getIsomorphicPatterns(targetGraph: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>)
+    fun getPatternPsiNodesMappingById(patternId: String, vertex: PatternSpecificVertex): PyElement? =
+        psiNodeMappingById[patternId]?.get(vertex)
+
+    fun getIsomorphicPatterns(targetGraph: PatternGraph)
             : HashMap<String, ArrayList<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>> {
         val suitablePatterns =
             HashMap<String, ArrayList<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>>()
@@ -114,5 +126,35 @@ object PatternsStorage {
         } catch (ex: Exception) {
             null
         }
+    }
+
+    private fun loadPsiPattern(
+        patternId: String,
+        patternGraph: PatternGraph
+    ): Map<PyElement, PatternSpecificVertex> {
+        val vertexByPyElement: HashMap<PyElement, PatternSpecificVertex> = hashMapOf()
+        try {
+            val filePath = "/patterns/$patternId/before.py"
+            val fileContent = this::class.java.getResource(filePath).readText()
+            val psiFile = PsiFileFactory.getInstance(project)
+                .createFileFromText(PythonLanguage.getInstance(), fileContent)
+            val mainFunctionPsi = psiFile.children.first() as PyFunction
+            val mainFunctionJGraph = buildPyFlowGraphForMethod(mainFunctionPsi, builder = "kotlin")
+            val inspector = getWeakSubgraphIsomorphismInspector(mainFunctionJGraph, patternGraph)
+            if (inspector.isomorphismExists()) {
+                val mapping = inspector.mappings.asSequence().first()
+                for (vertex in patternGraph.vertexSet()) {
+                    val mappedVertex = mapping.getVertexCorrespondence(vertex, false)
+                    if (mappedVertex.origin?.psi != null) {
+                        vertexByPyElement[mappedVertex.origin?.psi!!] = vertex
+                    }
+                }
+            } else {
+                logger.error("Pattern's graph doesn't match pattern's function code snippet (before.py)")
+            }
+        } catch (ex: Exception) {
+            logger.error(ex)
+        }
+        return vertexByPyElement
     }
 }
