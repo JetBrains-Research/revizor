@@ -21,21 +21,24 @@ class PyPsiGumTreeGenerator {
         gumtree.parent = parent
         gumtree.id = nodeId++
         val childContainerByName: Map<String, PyElementChild> = extractChildrenByFieldName(element)
-        for ((name, childContainer) in childContainerByName) {
+        for ((fieldName, childContainer) in childContainerByName) {
             when (childContainer) {
                 is EmptyChildContainer -> {
-                    gumtree.addChildWithName(child = Tree(-1, "EmptyStub"), fieldName = name)
+                    val emptyChildStub = Tree(-1, "EmptyStub")
+                    emptyChildStub.id = nodeId++
+                    gumtree.addChildWithName(child = emptyChildStub, fieldName = fieldName)
                 }
                 is OneChildContainer -> {
                     val childGumtree = visit(element = childContainer.element, parent = gumtree)
-                    gumtree.addChildWithName(child = childGumtree, fieldName = name)
+                    gumtree.addChildWithName(child = childGumtree, fieldName = fieldName)
                 }
                 is ManyChildrenContainer -> {
-                    val arrayGumTreeStub = Tree(-2, "$element->$name")
-                    gumtree.addChildWithName(child = arrayGumTreeStub, fieldName = name)
+                    val arrayOfChildrenStub = Tree(-2, "$element->$fieldName")
+                    arrayOfChildrenStub.id = nodeId++
+                    gumtree.addChildWithName(child = arrayOfChildrenStub, fieldName = fieldName)
                     for (subChild: PyElement in childContainer.elements) {
                         val subChildGumtree = visit(element = subChild, parent = gumtree)
-                        arrayGumTreeStub.addChild(subChildGumtree)
+                        arrayOfChildrenStub.addChild(subChildGumtree)
                     }
                 }
             }

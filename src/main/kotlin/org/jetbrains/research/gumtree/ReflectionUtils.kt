@@ -25,16 +25,14 @@ internal fun extractChildrenByFieldName(element: PyElement): Map<String, PyEleme
         } catch (ex: Exception) {
             continue
         }
-        if (potentialChild == null) {
-            childByMethodName[method.name] = EmptyChildContainer()
-        } else if (potentialChild is PyElement && psiChildren.contains(potentialChild)) {
+        if (potentialChild is PyElement && psiChildren.contains(potentialChild)) {
             childByMethodName[method.name] = OneChildContainer(potentialChild)
         } else if (potentialChild is Array<*>
             && potentialChild.all { it is PyElement && psiChildren.contains(it) }
         ) {
             childByMethodName[method.name] = ManyChildrenContainer(potentialChild as Array<PyElement>)
         } else {
-            continue
+            childByMethodName[method.name] = EmptyChildContainer()
         }
     }
     return childByMethodName

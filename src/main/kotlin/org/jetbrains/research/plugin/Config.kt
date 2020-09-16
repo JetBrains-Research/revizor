@@ -1,6 +1,7 @@
 package org.jetbrains.research.plugin
 
 import com.google.gson.Gson
+import com.jetbrains.python.psi.LanguageLevel
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -15,6 +16,7 @@ object Config {
     val CODE_CHANGE_MINER_PATH: Path
     val TEMP_DIRECTORY_PATH: Path
     val PYTHON_EXECUTABLE_PATH: Path?
+    val LANGUAGE_LEVEL = LanguageLevel.PYTHON38
 
     init {
         val configJson = this::class.java.getResource("/config.json").readText()
