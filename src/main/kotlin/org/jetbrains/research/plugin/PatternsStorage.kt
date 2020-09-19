@@ -1,5 +1,8 @@
 package org.jetbrains.research.plugin
 
+import com.github.gumtreediff.actions.ActionGenerator
+import com.github.gumtreediff.actions.model.Action
+import com.github.gumtreediff.matchers.Matchers
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.intellij.openapi.diagnostic.Logger
@@ -8,6 +11,7 @@ import com.intellij.psi.PsiFileFactory
 import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.psi.PyElement
 import com.jetbrains.python.psi.PyFunction
+import org.jetbrains.research.gumtree.PyPsiGumTreeGenerator
 import org.jetbrains.research.plugin.common.buildPyFlowGraphForMethod
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
@@ -33,11 +37,15 @@ typealias PatternGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpec
 object PatternsStorage {
     private val patternDescById = HashMap<String, String>()
     private val patternById = HashMap<String, PatternGraph>()
-    private val psiNodeMappingById = HashMap<String, HashMap<PatternSpecificVertex, PyElement?>>()
+    private val patternPsiMappingById = HashMap<String, Map<PatternSpecificVertex, PyElement?>>()
+    private val patternEditActionsById = HashMap<String, List<Action>>()
+    private val patternPsiBeforeById = HashMap<String, PyFunction?>()
+    private val patternPsiAfterById = HashMap<String, PyFunction?>()
     private val logger = Logger.getInstance(this::class.java)
     lateinit var project: Project
 
-    init {
+    fun init(project: Project) {
+        this.project = project
         var jar: JarFile? = null
         try {
             val resourceFile = File(this::class.java.getResource("").path)
@@ -54,17 +62,21 @@ object PatternsStorage {
                     && jarEntryPathParts.last().endsWith(".dot")
                 ) {
                     val dotSrcStream = this::class.java.getResourceAsStream("/${je.name}")
-                    val currentGraph = createPatternSpecificGraph(dotSrcStream)
+                    val fullGraph = createPatternSpecificGraph(dotSrcStream)
                     val subgraphBefore = AsSubgraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
-                        currentGraph,
-                        currentGraph.vertexSet()
+                        fullGraph,
+                        fullGraph.vertexSet()
                             .filter { it.fromPart == PatternSpecificVertex.ChangeGraphPartIndicator.BEFORE }
                             .toSet()
                     )
                     val variableLabelsGroups = loadVariableLabelsGroups(patternId) ?: arrayListOf()
-                    val targetGraph = createPatternSpecificGraph(subgraphBefore, variableLabelsGroups)
+                    val targetGraph: PatternGraph = createPatternSpecificGraph(subgraphBefore, variableLabelsGroups)
                     patternById[patternId] = targetGraph
                     patternDescById[patternId] = loadDescription(patternId) ?: "No description provided"
+                    patternPsiBeforeById[patternId] = loadPsiMethodFromPattern(patternId, "before.py")
+                    patternPsiAfterById[patternId] = loadPsiMethodFromPattern(patternId, "after.py")
+                    patternPsiMappingById[patternId] = loadPsiMappingFromPattern(patternId, targetGraph)
+                    patternEditActionsById[patternId] = loadEditActionsFromPattern(patternId)
                 }
             }
         } catch (ex: Exception) {
@@ -80,15 +92,24 @@ object PatternsStorage {
     fun getPatternDescriptionById(patternId: String): String =
         patternDescById[patternId] ?: "Unnamed pattern: $patternId"
 
-    fun getPatternPsiNodesMappingById(patternId: String, vertex: PatternSpecificVertex): PyElement? =
-        psiNodeMappingById[patternId]?.get(vertex)
+    fun getPatternPsiElementByIdAndVertex(patternId: String, vertex: PatternSpecificVertex): PyElement? =
+        patternPsiMappingById[patternId]?.get(vertex)
+
+    fun getPatternEditActionsById(patternId: String): List<Action> =
+        patternEditActionsById[patternId] ?: arrayListOf()
+
+    fun getPatternPsiBeforeById(patternId: String): PyFunction? =
+        patternPsiBeforeById[patternId] ?: loadPsiMethodFromPattern(patternId, "before.py")
+
+    fun getPatternPsiAfterById(patternId: String): PyFunction? =
+        patternPsiAfterById[patternId] ?: loadPsiMethodFromPattern(patternId, "after.py")
 
     fun getIsomorphicPatterns(targetGraph: PatternGraph)
             : HashMap<String, ArrayList<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>> {
         val suitablePatterns =
             HashMap<String, ArrayList<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>>()
-        for ((patternId, graph) in patternById) {
-            val inspector = getWeakSubgraphIsomorphismInspector(targetGraph, graph)
+        for ((patternId, patternGraph) in patternById) {
+            val inspector = getWeakSubgraphIsomorphismInspector(targetGraph, patternGraph)
             if (inspector.isomorphismExists()) {
                 for (mapping in inspector.mappings) {
                     suitablePatterns.getOrPut(patternId) { arrayListOf() }.add(mapping)
@@ -128,33 +149,60 @@ object PatternsStorage {
         }
     }
 
-    private fun loadPsiPattern(
+    private fun loadPsiMappingFromPattern(
         patternId: String,
         patternGraph: PatternGraph
-    ): Map<PyElement, PatternSpecificVertex> {
-        val vertexByPyElement: HashMap<PyElement, PatternSpecificVertex> = hashMapOf()
+    ): Map<PatternSpecificVertex, PyElement> {
+        val psiNodeByPatternSpecificVertex: HashMap<PatternSpecificVertex, PyElement> = hashMapOf()
         try {
-            val filePath = "/patterns/$patternId/before.py"
-            val fileContent = this::class.java.getResource(filePath).readText()
-            val psiFile = PsiFileFactory.getInstance(project)
-                .createFileFromText(PythonLanguage.getInstance(), fileContent)
-            val mainFunctionPsi = psiFile.children.first() as PyFunction
-            val mainFunctionJGraph = buildPyFlowGraphForMethod(mainFunctionPsi, builder = "kotlin")
-            val inspector = getWeakSubgraphIsomorphismInspector(mainFunctionJGraph, patternGraph)
+            val samplePsi = patternPsiBeforeById[patternId]!!
+            val sampleGraph = buildPyFlowGraphForMethod(samplePsi, builder = "kotlin")
+            val inspector = getWeakSubgraphIsomorphismInspector(sampleGraph, patternGraph)
             if (inspector.isomorphismExists()) {
                 val mapping = inspector.mappings.asSequence().first()
-                for (vertex in patternGraph.vertexSet()) {
-                    val mappedVertex = mapping.getVertexCorrespondence(vertex, false)
-                    if (mappedVertex.origin?.psi != null) {
-                        vertexByPyElement[mappedVertex.origin?.psi!!] = vertex
+                for (patternVertex in patternGraph.vertexSet()) {
+                    val sampleVertex = mapping.getVertexCorrespondence(patternVertex, false)
+                    if (sampleVertex.origin?.psi != null) {
+                        psiNodeByPatternSpecificVertex[patternVertex] = sampleVertex.origin?.psi!!
                     }
                 }
             } else {
-                logger.error("Pattern's graph doesn't match pattern's function code snippet (before.py)")
+                logger.error("Pattern's graph doesn't match to pattern's code sample (before.py)")
             }
         } catch (ex: Exception) {
             logger.error(ex)
         }
-        return vertexByPyElement
+        return psiNodeByPatternSpecificVertex
+    }
+
+    private fun loadEditActionsFromPattern(patternId: String): List<Action> {
+        var actions: List<Action> = arrayListOf()
+        try {
+            val pyFunctionBefore = patternPsiBeforeById[patternId]!!
+            val pyFunctionAfter = patternPsiAfterById[patternId]!!
+            val srcGumtree = PyPsiGumTreeGenerator().generate(pyFunctionBefore).root
+            val dstGumtree = PyPsiGumTreeGenerator().generate(pyFunctionAfter).root
+            val matcher = Matchers.getInstance().getMatcher(srcGumtree, dstGumtree)
+                .also { it.match() }
+            val mappings = matcher.mappings
+            val generator = ActionGenerator(srcGumtree, dstGumtree, mappings)
+            actions = generator.generate()
+        } catch (ex: Exception) {
+            logger.error(ex)
+        }
+        return actions
+    }
+
+    private fun loadPsiMethodFromPattern(patternId: String, fileName: String): PyFunction? {
+        return try {
+            val pathToSampleBefore = "/patterns/$patternId/$fileName"
+            val sampleSrc: String = this::class.java.getResource(pathToSampleBefore).readText()
+            PsiFileFactory.getInstance(project)
+                .createFileFromText(PythonLanguage.getInstance(), sampleSrc)
+                .children.first() as PyFunction
+        } catch (ex: Exception) {
+            logger.error(ex)
+            null
+        }
     }
 }

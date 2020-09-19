@@ -10,7 +10,7 @@ class BugFinderStartupActivity : StartupActivity {
 
     override fun runActivity(project: Project) {
         try {
-            PatternsStorage.project = project
+            PatternsStorage.init(project)
         } catch (ex: Exception) {
             logger.error("Failed to initialize PatternsStorage")
         }
