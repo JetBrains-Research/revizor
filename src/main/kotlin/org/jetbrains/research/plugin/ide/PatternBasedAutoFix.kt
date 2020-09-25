@@ -6,15 +6,12 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.openapi.ui.popup.util.BaseListPopupStep
-import com.intellij.psi.SmartPsiElementPointer
-import com.intellij.util.IncorrectOperationException
 import com.jetbrains.python.psi.PyElement
-import org.jetbrains.research.plugin.PatternsStorage
+import org.jetbrains.research.plugin.localization.PyMethodsAnalyzer
 
 class PatternBasedAutoFix(
-    private val patternId: String,
-    val patternPsiElementPointer: SmartPsiElementPointer<PyElement>
+    private val token: PyElement,
+    private val holder: PyMethodsAnalyzer.PatternBasedProblemsHolder
 ) : LocalQuickFix {
     private val logger = Logger.getInstance(this::class.java)
 
@@ -22,19 +19,13 @@ class PatternBasedAutoFix(
 
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         try {
-            val targetPsiElement = descriptor.psiElement
-            val patternPsiElement = patternPsiElementPointer.element
-            val actions = PatternsStorage.getPatternEditActionsById(patternId)
-            val editor = FileEditorManager.getInstance(project).selectedTextEditor
             val suggestionsPopup = JBPopupFactory.getInstance().createListPopup(
-                object : BaseListPopupStep<String>("Patterns", actions.map { it.toString() }) {
-                    override fun getTextFor(description: String) = description
-                }
+                PatternsSuggestionsListPopupStep(token, holder)
             )
-            if (editor != null) {
+            FileEditorManager.getInstance(project).selectedTextEditor?.let { editor ->
                 suggestionsPopup.showInBestPositionFor(editor)
             }
-        } catch (ex: IncorrectOperationException) {
+        } catch (ex: Exception) {
             logger.error(ex)
         }
     }

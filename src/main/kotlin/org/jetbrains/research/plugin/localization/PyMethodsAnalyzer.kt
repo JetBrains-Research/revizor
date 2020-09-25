@@ -3,8 +3,6 @@ package org.jetbrains.research.plugin.localization
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.psi.PsiElement
-import com.intellij.psi.SmartPointerManager
 import com.jetbrains.python.psi.PyElement
 import com.jetbrains.python.psi.PyElementVisitor
 import com.jetbrains.python.psi.PyFunction
@@ -21,47 +19,41 @@ import org.jetbrains.research.plugin.pyflowgraph.GraphBuildingException
  */
 class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor() {
 
-    data class ProblemDescription(
-        val patternId: String,
-        val patternPsiElement: PyElement
-    )
+    class PatternBasedProblemsHolder {
+        val elementsByPatternId: MutableMap<String, MutableList<PyElement>> = hashMapOf()
+        val patternsIdsByElement: MutableMap<PyElement, MutableSet<String>> = hashMapOf()
+    }
 
     override fun visitPyFunction(node: PyFunction?) {
         if (node != null) {
             try {
                 val methodGraph = buildPyFlowGraphForMethod(node, builder = "kotlin")
                 val patternsMappings = PatternsStorage.getIsomorphicPatterns(targetGraph = methodGraph)
-                val registeredProblemsByProblematicToken = HashMap<PsiElement, HashSet<ProblemDescription>>()
+                val problems = PatternBasedProblemsHolder()
                 for ((patternId, mappings) in patternsMappings) {
                     val patternGraph = PatternsStorage.getPatternById(patternId)!!
                     for (mapping in mappings) {
                         for (patternVertex in patternGraph.vertexSet()) {
                             val targetVertex = mapping.getVertexCorrespondence(patternVertex, false)
-                            if (targetVertex.origin?.psi != null) {
-                                val problematicToken = targetVertex.origin!!.psi!!.originalElement
-                                val patternPsiElement = PatternsStorage
-                                    .getPatternPsiElementByIdAndVertex(patternId, patternVertex)
-                                if (patternPsiElement != null) {
-                                    registeredProblemsByProblematicToken
-                                        .getOrPut(problematicToken) { hashSetOf() }
-                                        .add(ProblemDescription(patternId, patternPsiElement))
-                                }
+                            val problematicToken = targetVertex.origin?.psi
+                            if (problematicToken != null) {
+                                problems.elementsByPatternId
+                                    .getOrPut(patternId) { arrayListOf() }
+                                    .add(problematicToken)
+                                problems.patternsIdsByElement
+                                    .getOrPut(problematicToken) { hashSetOf() }
+                                    .add(patternId)
                             }
                         }
                     }
                 }
-                for ((token, problems) in registeredProblemsByProblematicToken) {
-                    for (problem in problems) {
-                        holder.registerProblem(
-                            token,
-                            "Found relevant patterns in method <${node.name}>",
-                            ProblemHighlightType.WARNING,
-                            PatternBasedAutoFix(
-                                problem.patternId,
-                                SmartPointerManager.createPointer(problem.patternPsiElement)
-                            )
-                        )
-                    }
+                for (token in problems.patternsIdsByElement.keys) {
+                    holder.registerProblem(
+                        token,
+                        "Found relevant patterns in method <${node.name}>",
+                        ProblemHighlightType.WARNING,
+                        PatternBasedAutoFix(token, problems)
+                    )
                 }
             } catch (exception: GraphBuildingException) {
                 val logger = Logger.getInstance(this::class.java)

@@ -8,20 +8,19 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
 
 /**
- * A class for providing fix suggestions based on the found patterns in the IDE.
+ * A class for providing fix suggestions based on the found patterns in the IDE, without autofixes.
  */
-class PatternsSuggestions(private val patternsDescriptions: HashSet<String>) : LocalQuickFix {
+class PatternsDescriptionsHolder(private val patternsDescriptions: HashSet<String>) : LocalQuickFix {
 
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
-        val editor = FileEditorManager.getInstance(project).selectedTextEditor
         val suggestionsPopup = JBPopupFactory.getInstance().createListPopup(
             object : BaseListPopupStep<String>("Patterns", patternsDescriptions.toList()) {
                 override fun getTextFor(description: String) = description
             }
         )
-        if (editor != null) {
-            suggestionsPopup.showInBestPositionFor(editor)
-        }
+        FileEditorManager.getInstance(project)
+            .selectedTextEditor
+            ?.let { suggestionsPopup.showInBestPositionFor(it) }
     }
 
     override fun getFamilyName(): String = "BugFinder: show relevant patterns"

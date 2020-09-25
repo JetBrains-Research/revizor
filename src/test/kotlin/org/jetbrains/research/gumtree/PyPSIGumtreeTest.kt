@@ -2,7 +2,6 @@ package org.jetbrains.research.gumtree
 
 import com.github.gumtreediff.actions.ActionGenerator
 import com.github.gumtreediff.matchers.Matchers
-import com.intellij.testFramework.UsefulTestCase
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.jetbrains.python.psi.PyElement
 
@@ -21,9 +20,6 @@ class PyPSIGumtreeTest : BasePlatformTestCase() {
         val mappings = matcher.mappings
         val generator = ActionGenerator(src, dst, mappings)
         val actions = generator.generate()
-        UsefulTestCase.assertSize(2, actions)
-        val transformer = PyPsiGumTreeTransformer()
-        transformer.applyAction(actions[0].node as PyPsiGumTree, actions[0])
-        print(src)
+        print(actions)
     }
 }

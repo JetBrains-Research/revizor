@@ -2,6 +2,7 @@ package org.jetbrains.research.plugin
 
 import com.github.gumtreediff.actions.ActionGenerator
 import com.github.gumtreediff.actions.model.Action
+import com.github.gumtreediff.matchers.Matcher
 import com.github.gumtreediff.matchers.Matchers
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -41,6 +42,7 @@ object PatternsStorage {
     private val patternEditActionsById = HashMap<String, List<Action>>()
     private val patternPsiBeforeById = HashMap<String, PyFunction?>()
     private val patternPsiAfterById = HashMap<String, PyFunction?>()
+    private val patternGumtreeMatcherById = HashMap<String, Matcher>()
     private val logger = Logger.getInstance(this::class.java)
     lateinit var project: Project
 
@@ -103,6 +105,9 @@ object PatternsStorage {
 
     fun getPatternPsiAfterById(patternId: String): PyFunction? =
         patternPsiAfterById[patternId] ?: loadPsiMethodFromPattern(patternId, "after.py")
+
+    fun getPatternGumtreeMatcherById(patternId: String): Matcher? =
+        patternGumtreeMatcherById[patternId]
 
     fun getIsomorphicPatterns(targetGraph: PatternGraph)
             : HashMap<String, ArrayList<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>> {
@@ -182,8 +187,8 @@ object PatternsStorage {
             val pyFunctionAfter = patternPsiAfterById[patternId]!!
             val srcGumtree = PyPsiGumTreeGenerator().generate(pyFunctionBefore).root
             val dstGumtree = PyPsiGumTreeGenerator().generate(pyFunctionAfter).root
-            val matcher = Matchers.getInstance().getMatcher(srcGumtree, dstGumtree)
-                .also { it.match() }
+            val matcher = Matchers.getInstance().getMatcher(srcGumtree, dstGumtree).also { it.match() }
+            patternGumtreeMatcherById[patternId] = matcher
             val mappings = matcher.mappings
             val generator = ActionGenerator(srcGumtree, dstGumtree, mappings)
             actions = generator.generate()
