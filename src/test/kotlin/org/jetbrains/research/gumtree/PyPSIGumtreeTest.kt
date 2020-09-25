@@ -8,7 +8,7 @@ import com.jetbrains.python.psi.PyElement
 
 class PyPSIGumtreeTest : BasePlatformTestCase() {
 
-    override fun getTestDataPath() = "src/main/resources/patterns/2"
+    override fun getTestDataPath() = "src/main/resources/patterns/9"
 
     fun `test gumtree matching on python psi`() {
         val rootNodeBefore = myFixture.configureByFile("before.py").children.first() as PyElement

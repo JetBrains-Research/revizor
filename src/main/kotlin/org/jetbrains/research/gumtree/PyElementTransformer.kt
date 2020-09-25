@@ -26,8 +26,8 @@ class PyElementTransformer(var project: Project) {
     private fun applyUpdate(element: PyElement, action: Update) {
         val newClassname: String = action.value.substringBefore(":").trim()
         val newValue: String = action.value.substringAfter(":").trim()
-        val patternOldNode: PyElement? = (action.node as PyPsiGumTree).rootElement
-        if (element.toString() == patternOldNode.toString()) {
+        val patternElement: PyElement? = (action.node as PyPsiGumTree).rootElement
+        if (element.toString() == patternElement.toString()) {
             when (element) {
                 is PyCallExpression -> {
                     val newElement: PyCallExpression =
@@ -58,7 +58,12 @@ class PyElementTransformer(var project: Project) {
     }
 
     private fun applyDelete(element: PyElement, action: Delete) {
-        TODO("Not yet implemented")
+        val patternElement: PyElement? = (action.node as PyPsiGumTree).rootElement
+        if (element.toString() == patternElement.toString()) {
+            execute { element.delete() }
+        } else {
+            throw IllegalStateException("Current node doesn't match to a node from an action")
+        }
     }
 
     private fun execute(command: () -> Unit) {

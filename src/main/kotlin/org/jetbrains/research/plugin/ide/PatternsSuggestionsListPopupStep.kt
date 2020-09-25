@@ -9,7 +9,7 @@ import org.jetbrains.research.plugin.PatternsStorage
 import org.jetbrains.research.plugin.localization.PyMethodsAnalyzer
 
 class PatternsSuggestionsListPopupStep(
-    private val token: PyElement,
+    token: PyElement,
     private val holder: PyMethodsAnalyzer.PatternBasedProblemsHolder
 ) : BaseListPopupStep<String>(
     "Patterns",
@@ -32,12 +32,12 @@ class PatternsSuggestionsListPopupStep(
 
     private fun applyEditFromPattern(patternId: String) {
         val actions = PatternsStorage.getPatternEditActionsById(patternId)
+        val transformer = PyElementTransformer(PatternsStorage.project)
         for (element in holder.elementsByPatternId[patternId]!!) {
-            val transformer = PyElementTransformer(PatternsStorage.project)
             for (action in actions) {
                 try {
                     transformer.applyAction(element, action)
-                } catch (ex: Exception) {
+                } catch (ex: Throwable) {
                     logger.warn("Can't apply action $action to element $element")
                     logger.warn(ex)
                     continue
