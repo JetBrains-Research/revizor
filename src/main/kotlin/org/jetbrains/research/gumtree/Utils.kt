@@ -1,7 +1,5 @@
 package org.jetbrains.research.gumtree
 
-import com.github.gumtreediff.actions.model.Action
-import com.github.gumtreediff.actions.model.Update
 import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyElement
 import java.lang.reflect.Method
@@ -38,27 +36,4 @@ internal fun extractChildrenByFieldName(element: PyElement): Map<String, PyEleme
         }
     }
     return childByMethodName
-}
-
-fun getActionsCorrespondingToPsiElement(element: PyElement, actions: List<Action>): List<Action> {
-    val result = arrayListOf<Action>()
-    for (action in actions) {
-        if ((action.node as PyPsiGumTree).rootElement?.isEquivalentTo(element) == true) {
-            result.add(action)
-        }
-    }
-    return result
-}
-
-fun PyElement.isEquivalentAsStringTo(other: PyElement): Boolean {
-    return this.toString() == other.toString()
-}
-
-fun Action.contains(element: PyElement): Boolean {
-    return when (this) {
-        is Update -> {
-            (this.node as PyPsiGumTree).rootElement?.isEquivalentAsStringTo(element) ?: false
-        }
-        else -> throw IllegalStateException()
-    }
 }

@@ -2,6 +2,7 @@ package org.jetbrains.research.plugin
 
 import com.github.gumtreediff.actions.ActionGenerator
 import com.github.gumtreediff.actions.model.Action
+import com.github.gumtreediff.actions.model.Insert
 import com.github.gumtreediff.matchers.Matcher
 import com.github.gumtreediff.matchers.Matchers
 import com.google.gson.Gson
@@ -12,12 +13,16 @@ import com.intellij.psi.PsiFileFactory
 import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.psi.PyElement
 import com.jetbrains.python.psi.PyFunction
+import org.jetbrains.research.gumtree.PyPsiGumTree
 import org.jetbrains.research.gumtree.PyPsiGumTreeGenerator
 import org.jetbrains.research.plugin.common.buildPyFlowGraphForMethod
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
+import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificEdge
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
+import org.jetbrains.research.plugin.pyflowgraph.getFullName
+import org.jetbrains.research.plugin.pyflowgraph.models.Node
 import org.jgrapht.GraphMapping
 import org.jgrapht.graph.AsSubgraph
 import org.jgrapht.graph.DirectedAcyclicGraph
@@ -38,7 +43,7 @@ typealias PatternGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpec
 object PatternsStorage {
     private val patternDescById = HashMap<String, String>()
     private val patternById = HashMap<String, PatternGraph>()
-    private val patternPsiMappingById = HashMap<String, Map<PatternSpecificVertex, PyElement?>>()
+    private val patternPsiMappingById = HashMap<String, Map<PyElement, PatternSpecificVertex>>()
     private val patternEditActionsById = HashMap<String, List<Action>>()
     private val patternPsiBeforeById = HashMap<String, PyFunction?>()
     private val patternPsiAfterById = HashMap<String, PyFunction?>()
@@ -77,8 +82,9 @@ object PatternsStorage {
                     patternDescById[patternId] = loadDescription(patternId) ?: "No description provided"
                     patternPsiBeforeById[patternId] = loadPsiMethodFromPattern(patternId, "before.py")
                     patternPsiAfterById[patternId] = loadPsiMethodFromPattern(patternId, "after.py")
-                    patternPsiMappingById[patternId] = loadPsiMappingFromPattern(patternId, targetGraph)
+                    patternPsiMappingById[patternId] = loadPsiStructureMappingFromPattern(patternId, targetGraph)
                     patternEditActionsById[patternId] = loadEditActionsFromPattern(patternId)
+                    createHangers(patternId)
                 }
             }
         } catch (ex: Exception) {
@@ -93,9 +99,6 @@ object PatternsStorage {
 
     fun getPatternDescriptionById(patternId: String): String =
         patternDescById[patternId] ?: "Unnamed pattern: $patternId"
-
-    fun getPatternPsiElementByIdAndVertex(patternId: String, vertex: PatternSpecificVertex): PyElement? =
-        patternPsiMappingById[patternId]?.get(vertex)
 
     fun getPatternEditActionsById(patternId: String): List<Action> =
         patternEditActionsById[patternId] ?: arrayListOf()
@@ -154,11 +157,11 @@ object PatternsStorage {
         }
     }
 
-    private fun loadPsiMappingFromPattern(
+    private fun loadPsiStructureMappingFromPattern(
         patternId: String,
         patternGraph: PatternGraph
-    ): Map<PatternSpecificVertex, PyElement> {
-        val psiNodeByPatternSpecificVertex: HashMap<PatternSpecificVertex, PyElement> = hashMapOf()
+    ): Map<PyElement, PatternSpecificVertex> {
+        val vertexByPyElement: HashMap<PyElement, PatternSpecificVertex> = hashMapOf()
         try {
             val samplePsi = patternPsiBeforeById[patternId]!!
             val sampleGraph = buildPyFlowGraphForMethod(samplePsi, builder = "kotlin")
@@ -168,7 +171,7 @@ object PatternsStorage {
                 for (patternVertex in patternGraph.vertexSet()) {
                     val sampleVertex = mapping.getVertexCorrespondence(patternVertex, false)
                     if (sampleVertex.origin?.psi != null) {
-                        psiNodeByPatternSpecificVertex[patternVertex] = sampleVertex.origin?.psi!!
+                        vertexByPyElement[sampleVertex.origin?.psi!!] = patternVertex
                     }
                 }
             } else {
@@ -177,7 +180,35 @@ object PatternsStorage {
         } catch (ex: Exception) {
             logger.error(ex)
         }
-        return psiNodeByPatternSpecificVertex
+        return vertexByPyElement
+    }
+
+    private fun createHangers(patternId: String) {
+        try {
+            val graph = patternById[patternId]!!
+            val actions = patternEditActionsById[patternId] ?: listOf()
+            val vertexByPyElement = patternPsiMappingById[patternId] ?: hashMapOf()
+            var edgeGlobalId: Int = graph.edgeSet().map { it.id }.max()!!
+            for (action in actions.filterIsInstance<Insert>()) {
+                // FIXME: don't focus in hanger elements which also were added previously
+                val hangerElement: PyElement = (action.parent as PyPsiGumTree).rootElement ?: continue
+                val hangerVertex = PatternSpecificVertex(object :
+                    Node(label = hangerElement.getFullName(), psi = hangerElement) {})
+                graph.addVertex(hangerVertex)
+                val edgeToHanger = PatternSpecificMultipleEdge(
+                    id = edgeGlobalId++,
+                    embeddedEdgeByXlabel = hashMapOf(
+                        "hanger" to PatternSpecificEdge(id = edgeGlobalId++, xlabel = "hanger")
+                    )
+                )
+                for (child in hangerElement.children.filterIsInstance<PyElement>()) {
+                    val existingVertex = vertexByPyElement[child] ?: continue
+                    graph.addEdge(hangerVertex, existingVertex, edgeToHanger)
+                }
+            }
+        } catch (ex: Exception) {
+            logger.error(ex)
+        }
     }
 
     private fun loadEditActionsFromPattern(patternId: String): List<Action> {

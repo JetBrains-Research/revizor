@@ -3,10 +3,8 @@ package org.jetbrains.research.gumtree
 import com.github.gumtreediff.actions.model.*
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.project.Project
-import com.jetbrains.python.psi.PyCallExpression
-import com.jetbrains.python.psi.PyElement
-import com.jetbrains.python.psi.PyElementGenerator
-import com.jetbrains.python.psi.PyReferenceExpression
+import com.intellij.psi.util.PsiTreeUtil
+import com.jetbrains.python.psi.*
 import org.jetbrains.research.plugin.Config
 
 class PyElementTransformer(var project: Project) {
@@ -54,7 +52,24 @@ class PyElementTransformer(var project: Project) {
     }
 
     private fun applyInsert(element: PyElement, action: Insert) {
-        TODO("Not yet implemented")
+        val patternElement: PyElement? = (action.node as PyPsiGumTree).rootElement
+        val parent: PyPsiGumTree = action.parent as PyPsiGumTree                                    // FIXME
+        val typeOfPrevSibling = parent.getTypeOfPrevSibling(action.position)
+        val prevSibling = typeOfPrevSibling?.let { PsiTreeUtil.getChildOfType(parent.rootElement, it) }
+        if (element.toString() == patternElement.toString()) {
+            when (element) {
+                is PyTupleExpression -> {
+                    val newElement = generator.createExpressionFromText(Config.LANGUAGE_LEVEL, "(None, None)")
+                    execute {
+                        if (prevSibling == null) {
+                            parent.rootElement?.addBefore(newElement, parent.rootElement?.firstChild)
+                        } else {
+                            parent.rootElement?.addAfter(newElement, prevSibling)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun applyDelete(element: PyElement, action: Delete) {
