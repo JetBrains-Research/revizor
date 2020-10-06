@@ -129,36 +129,6 @@ object PatternsStorage {
         return suitablePatterns
     }
 
-    private fun loadDescription(patternId: String): String? {
-        return try {
-            this::class.java.getResource("/patterns/$patternId/description.txt").readText()
-        } catch (ex: Exception) {
-            null
-        }
-    }
-
-    private fun loadVariableLabelsGroups(patternId: String): ArrayList<PatternSpecificVertex.LabelsGroup>? {
-        return try {
-            val filePath = "/patterns/$patternId/possible_variable_labels.json"
-            val fileContent = this::class.java.getResource(filePath).readText()
-            val type = object : TypeToken<ArrayList<PatternSpecificVertex.LabelsGroup>>() {}.type
-            val json = Gson().fromJson<ArrayList<PatternSpecificVertex.LabelsGroup>>(fileContent, type)
-            val labelsGroups = ArrayList<PatternSpecificVertex.LabelsGroup>()
-            json.forEach {
-                labelsGroups.add(
-                    PatternSpecificVertex.LabelsGroup(
-                        whatMatters = it.whatMatters,
-                        labels = it.labels.toHashSet(),
-                        longestCommonSuffix = it.longestCommonSuffix
-                    )
-                )
-            }
-            labelsGroups
-        } catch (ex: Exception) {
-            null
-        }
-    }
-
     private fun loadFragmentToPatternMapping(
         patternId: String,
         patternGraph: PatternGraph
@@ -186,7 +156,7 @@ object PatternsStorage {
 
     private fun createHangers(patternId: String) {
         try {
-            // Load pattern and fragment graph (with psi)
+            // Load pattern graph, fragment graph, its psi, and edit actions for pattern
             val patternGraph = patternById[patternId]!!
             val fragmentGraph = fragmentById[patternId]!!
             val fragmentToPatternMapping = fragmentToPatternMappingById[patternId]!!
@@ -207,25 +177,58 @@ object PatternsStorage {
             // Add corresponding hanger vertices to pattern graph and connect them to all its neighbours,
             // because VF2SubgraphIsomorphismMatcher will match only among the induced subgraphs
             for (hangerElement in hangerElements) {
-                val hangerVertex = fragmentGraph.vertexSet().find { it.origin?.psi == hangerElement } ?: continue
-                hangerVertex.metadata = "hanger"
-                // FIXME: check if hangerVertex is already in patternGraph.vertexSet()
+                val originalHangerVertex = fragmentGraph.vertexSet().find { it.origin?.psi == hangerElement }
+                if (originalHangerVertex == null ||
+                    fragmentToPatternMapping.containsKey(originalHangerVertex)
+                    && patternGraph.containsVertex(fragmentToPatternMapping[originalHangerVertex])
+                ) {
+                    continue
+                }
+                val hangerVertex = originalHangerVertex.copy().also { it.metadata = "hanger" }
                 patternGraph.addVertex(hangerVertex)
-                for (incomingEdge in fragmentGraph.incomingEdgesOf(hangerVertex)) {
+                for (incomingEdge in fragmentGraph.incomingEdgesOf(originalHangerVertex)) {
                     val fragmentEdgeSource = fragmentGraph.getEdgeSource(incomingEdge)
                     val patternEdgeSource = fragmentToPatternMapping[fragmentEdgeSource] ?: continue
-                    val edgeToHanger = incomingEdge.copy().also { it.metadata = "hanger" }
-                    patternGraph.addEdge(patternEdgeSource, hangerVertex, edgeToHanger)
+                    patternGraph.addEdge(patternEdgeSource, hangerVertex, incomingEdge)
                 }
-                for (outgoingEdge in fragmentGraph.outgoingEdgesOf(hangerVertex)) {
+                for (outgoingEdge in fragmentGraph.outgoingEdgesOf(originalHangerVertex)) {
                     val fragmentEdgeTarget = fragmentGraph.getEdgeTarget(outgoingEdge)
                     val patternEdgeTarget = fragmentToPatternMapping[fragmentEdgeTarget] ?: continue
-                    val edgeFromHanger = outgoingEdge.copy().also { it.metadata = "hanger" }
-                    patternGraph.addEdge(hangerVertex, patternEdgeTarget, edgeFromHanger)
+                    patternGraph.addEdge(hangerVertex, patternEdgeTarget, outgoingEdge)
                 }
             }
         } catch (ex: Exception) {
             logger.error(ex)
+        }
+    }
+
+    private fun loadDescription(patternId: String): String? {
+        return try {
+            this::class.java.getResource("/patterns/$patternId/description.txt").readText()
+        } catch (ex: Exception) {
+            null
+        }
+    }
+
+    private fun loadVariableLabelsGroups(patternId: String): ArrayList<PatternSpecificVertex.LabelsGroup>? {
+        return try {
+            val filePath = "/patterns/$patternId/possible_variable_labels.json"
+            val fileContent = this::class.java.getResource(filePath).readText()
+            val type = object : TypeToken<ArrayList<PatternSpecificVertex.LabelsGroup>>() {}.type
+            val json = Gson().fromJson<ArrayList<PatternSpecificVertex.LabelsGroup>>(fileContent, type)
+            val labelsGroups = ArrayList<PatternSpecificVertex.LabelsGroup>()
+            json.forEach {
+                labelsGroups.add(
+                    PatternSpecificVertex.LabelsGroup(
+                        whatMatters = it.whatMatters,
+                        labels = it.labels.toHashSet(),
+                        longestCommonSuffix = it.longestCommonSuffix
+                    )
+                )
+            }
+            labelsGroups
+        } catch (ex: Exception) {
+            null
         }
     }
 

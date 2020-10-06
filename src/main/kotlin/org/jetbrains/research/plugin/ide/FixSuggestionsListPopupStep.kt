@@ -3,17 +3,16 @@ package org.jetbrains.research.plugin.ide
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
-import com.jetbrains.python.psi.PyElement
 import org.jetbrains.research.gumtree.PyElementTransformer
 import org.jetbrains.research.plugin.PatternsStorage
+import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jetbrains.research.plugin.localization.PyMethodsAnalyzer
 
-class PatternsSuggestionsListPopupStep(
-    token: PyElement,
-    private val holder: PyMethodsAnalyzer.PatternBasedProblemsHolder
+class FixSuggestionsListPopupStep(
+    problematicVertex: PatternSpecificVertex,
+    private val holder: PyMethodsAnalyzer.FoundProblemsHolder
 ) : BaseListPopupStep<String>(
-    "Patterns",
-    holder.patternsIdsByElement[token]?.toList() ?: listOf()
+    "Patterns", holder.patternsIdsByVertex[problematicVertex]?.toList() ?: listOf()
 ) {
 
     private var selectedPatternId: String = ""
@@ -33,7 +32,8 @@ class PatternsSuggestionsListPopupStep(
     private fun applyEditFromPattern(patternId: String) {
         val actions = PatternsStorage.getPatternEditActionsById(patternId)
         val transformer = PyElementTransformer(PatternsStorage.project)
-        for (element in holder.elementsByPatternId[patternId]!!) {
+        for (vertex in holder.verticesByPatternId[patternId]!!) {
+            val element = vertex.origin?.psi ?: continue
             for (action in actions) {
                 try {
                     transformer.applyAction(element, action)

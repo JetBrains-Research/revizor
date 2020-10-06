@@ -12,13 +12,13 @@ class PyPsiGumTree(var rootElement: PyElement?) : Tree(
     rootElement?.toString()
 ) {
 
-    private val typeOfPrevSibling: MutableList<Class<PsiElement>?> = arrayListOf()
+    private val typeOfPrevChildByPosition: MutableList<Class<PsiElement>?> = arrayListOf()
 
     fun addPsiChild(child: ITree) {
         child.parent = this
-        typeOfPrevSibling.add((children.lastOrNull() as PyPsiGumTree?)?.rootElement?.javaClass)
+        typeOfPrevChildByPosition.add((children.lastOrNull() as PyPsiGumTree?)?.rootElement?.javaClass)
         children.add(child)
     }
 
-    fun getTypeOfPrevSibling(pos: Int) = typeOfPrevSibling[pos]
+    fun getTypeOfPrevChildByPosition(pos: Int) = typeOfPrevChildByPosition[pos]
 }
