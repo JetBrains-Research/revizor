@@ -17,12 +17,9 @@ import org.jetbrains.research.gumtree.PyPsiGumTree
 import org.jetbrains.research.gumtree.PyPsiGumTreeGenerator
 import org.jetbrains.research.plugin.common.buildPyFlowGraphForMethod
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
-import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificEdge
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
-import org.jetbrains.research.plugin.pyflowgraph.getFullName
-import org.jetbrains.research.plugin.pyflowgraph.models.Node
 import org.jgrapht.GraphMapping
 import org.jgrapht.graph.AsSubgraph
 import org.jgrapht.graph.DirectedAcyclicGraph
@@ -42,12 +39,17 @@ typealias PatternGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpec
  */
 object PatternsStorage {
     private val patternDescById = HashMap<String, String>()
+
     private val patternById = HashMap<String, PatternGraph>()
-    private val patternPsiMappingById = HashMap<String, Map<PyElement, PatternSpecificVertex>>()
+    private val fragmentById = HashMap<String, PatternGraph>()
+    private val fragmentToPatternMappingById = HashMap<String, Map<PatternSpecificVertex, PatternSpecificVertex>>()
+
     private val patternEditActionsById = HashMap<String, List<Action>>()
+    private val patternGumtreeMatcherById = HashMap<String, Matcher>()
+
     private val patternPsiBeforeById = HashMap<String, PyFunction?>()
     private val patternPsiAfterById = HashMap<String, PyFunction?>()
-    private val patternGumtreeMatcherById = HashMap<String, Matcher>()
+
     private val logger = Logger.getInstance(this::class.java)
     lateinit var project: Project
 
@@ -82,7 +84,7 @@ object PatternsStorage {
                     patternDescById[patternId] = loadDescription(patternId) ?: "No description provided"
                     patternPsiBeforeById[patternId] = loadPsiMethodFromPattern(patternId, "before.py")
                     patternPsiAfterById[patternId] = loadPsiMethodFromPattern(patternId, "after.py")
-                    patternPsiMappingById[patternId] = loadPsiStructureMappingFromPattern(patternId, targetGraph)
+                    fragmentToPatternMappingById[patternId] = loadFragmentToPatternMapping(patternId, targetGraph)
                     patternEditActionsById[patternId] = loadEditActionsFromPattern(patternId)
                     createHangers(patternId)
                 }
@@ -157,22 +159,21 @@ object PatternsStorage {
         }
     }
 
-    private fun loadPsiStructureMappingFromPattern(
+    private fun loadFragmentToPatternMapping(
         patternId: String,
         patternGraph: PatternGraph
-    ): Map<PyElement, PatternSpecificVertex> {
-        val vertexByPyElement: HashMap<PyElement, PatternSpecificVertex> = hashMapOf()
+    ): Map<PatternSpecificVertex, PatternSpecificVertex> {
+        val fragmentToPatternMapping: HashMap<PatternSpecificVertex, PatternSpecificVertex> = hashMapOf()
         try {
-            val samplePsi = patternPsiBeforeById[patternId]!!
-            val sampleGraph = buildPyFlowGraphForMethod(samplePsi, builder = "kotlin")
-            val inspector = getWeakSubgraphIsomorphismInspector(sampleGraph, patternGraph)
+            val fragmentPsi = patternPsiBeforeById[patternId]!!
+            val fragmentGraph = buildPyFlowGraphForMethod(fragmentPsi, builder = "kotlin")
+            fragmentById[patternId] = fragmentGraph
+            val inspector = getWeakSubgraphIsomorphismInspector(fragmentGraph, patternGraph)
             if (inspector.isomorphismExists()) {
                 val mapping = inspector.mappings.asSequence().first()
                 for (patternVertex in patternGraph.vertexSet()) {
-                    val sampleVertex = mapping.getVertexCorrespondence(patternVertex, false)
-                    if (sampleVertex.origin?.psi != null) {
-                        vertexByPyElement[sampleVertex.origin?.psi!!] = patternVertex
-                    }
+                    val fragmentVertex = mapping.getVertexCorrespondence(patternVertex, false)
+                    fragmentToPatternMapping[fragmentVertex] = patternVertex
                 }
             } else {
                 logger.error("Pattern's graph doesn't match to pattern's code sample (before.py)")
@@ -180,30 +181,47 @@ object PatternsStorage {
         } catch (ex: Exception) {
             logger.error(ex)
         }
-        return vertexByPyElement
+        return fragmentToPatternMapping
     }
 
     private fun createHangers(patternId: String) {
         try {
-            val graph = patternById[patternId]!!
-            val actions = patternEditActionsById[patternId] ?: listOf()
-            val vertexByPyElement = patternPsiMappingById[patternId] ?: hashMapOf()
-            var edgeGlobalId: Int = graph.edgeSet().map { it.id }.max()!!
+            // Load pattern and fragment graph (with psi)
+            val patternGraph = patternById[patternId]!!
+            val fragmentGraph = fragmentById[patternId]!!
+            val fragmentToPatternMapping = fragmentToPatternMappingById[patternId]!!
+            val actions = patternEditActionsById[patternId]!!
+
+            // Filter hanger elements to be added (parents of inserted vertices)
+            val addedElements = hashSetOf<PyElement>()
+            val hangerElements = hashSetOf<PyElement>()
             for (action in actions.filterIsInstance<Insert>()) {
-                // FIXME: don't focus in hanger elements which also were added previously
+                val newElement = (action.node as PyPsiGumTree).rootElement ?: continue
+                addedElements.add(newElement)
                 val hangerElement: PyElement = (action.parent as PyPsiGumTree).rootElement ?: continue
-                val hangerVertex = PatternSpecificVertex(object :
-                    Node(label = hangerElement.getFullName(), psi = hangerElement) {})
-                graph.addVertex(hangerVertex)
-                val edgeToHanger = PatternSpecificMultipleEdge(
-                    id = edgeGlobalId++,
-                    embeddedEdgeByXlabel = hashMapOf(
-                        "hanger" to PatternSpecificEdge(id = edgeGlobalId++, xlabel = "hanger")
-                    )
-                )
-                for (child in hangerElement.children.filterIsInstance<PyElement>()) {
-                    val existingVertex = vertexByPyElement[child] ?: continue
-                    graph.addEdge(hangerVertex, existingVertex, edgeToHanger)
+                if (addedElements.contains(hangerElement))
+                    continue
+                hangerElements.add(hangerElement)
+            }
+
+            // Add corresponding hanger vertices to pattern graph and connect them to all its neighbours,
+            // because VF2SubgraphIsomorphismMatcher will match only among the induced subgraphs
+            for (hangerElement in hangerElements) {
+                val hangerVertex = fragmentGraph.vertexSet().find { it.origin?.psi == hangerElement } ?: continue
+                hangerVertex.metadata = "hanger"
+                // FIXME: check if hangerVertex is already in patternGraph.vertexSet()
+                patternGraph.addVertex(hangerVertex)
+                for (incomingEdge in fragmentGraph.incomingEdgesOf(hangerVertex)) {
+                    val fragmentEdgeSource = fragmentGraph.getEdgeSource(incomingEdge)
+                    val patternEdgeSource = fragmentToPatternMapping[fragmentEdgeSource] ?: continue
+                    val edgeToHanger = incomingEdge.copy().also { it.metadata = "hanger" }
+                    patternGraph.addEdge(patternEdgeSource, hangerVertex, edgeToHanger)
+                }
+                for (outgoingEdge in fragmentGraph.outgoingEdgesOf(hangerVertex)) {
+                    val fragmentEdgeTarget = fragmentGraph.getEdgeTarget(outgoingEdge)
+                    val patternEdgeTarget = fragmentToPatternMapping[fragmentEdgeTarget] ?: continue
+                    val edgeFromHanger = outgoingEdge.copy().also { it.metadata = "hanger" }
+                    patternGraph.addEdge(hangerVertex, patternEdgeTarget, edgeFromHanger)
                 }
             }
         } catch (ex: Exception) {

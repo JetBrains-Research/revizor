@@ -120,7 +120,7 @@ fun createPatternSpecificGraph(dotInput: InputStream)
         val vertexColor = vertexAttributes[vertexId]?.get("color")?.toString()
         targetDAG.addVertex(
             PatternSpecificVertex(
-                id = vertexId,
+                id = vertexId.toInt(),
                 label = vertexAttributes[vertexId]?.get("label")?.toString()
                     ?.substringBefore('(')
                     ?.trim(),
@@ -157,8 +157,8 @@ fun createPatternSpecificGraph(dotInput: InputStream)
                 multipleEdge.embeddedEdgeByXlabel[edge.xlabel] = edge
             }
             targetDAG.addEdge(
-                targetDAG.vertexSet().find { it.id == sourceVertexId },
-                targetDAG.vertexSet().find { it.id == targetVertexId },
+                targetDAG.vertexSet().find { it.id == sourceVertexId.toInt() },
+                targetDAG.vertexSet().find { it.id == targetVertexId.toInt() },
                 multipleEdge
             )
         }

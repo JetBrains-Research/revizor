@@ -6,11 +6,12 @@ package org.jetbrains.research.plugin.jgrapht.edges
 
 data class PatternSpecificMultipleEdge(
     val id: Int,
-    val embeddedEdgeByXlabel: MutableMap<String?, PatternSpecificEdge>
+    val embeddedEdgeByXlabel: MutableMap<String?, PatternSpecificEdge>,
+    var metadata: String? = null
 )
 
 data class PatternSpecificEdge(
-    private val id: Int,
+    val id: Int,
     val xlabel: String? = null,
     val fromClosure: Boolean? = null,
     val style: String? = null

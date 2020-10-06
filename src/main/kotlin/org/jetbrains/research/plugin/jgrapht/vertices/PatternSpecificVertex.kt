@@ -7,14 +7,15 @@ import org.jetbrains.research.plugin.pyflowgraph.models.Node
  * A vertex needed for the JGraphT interlayer.
  */
 data class PatternSpecificVertex(
-    val id: String,
+    var id: Int,
     var label: String? = null,
     var originalLabel: String? = null,
     var fromPart: ChangeGraphPartIndicator? = null,
     var color: String? = null,
     var shape: String? = null,
     var dataNodeInfo: LabelsGroup? = null,
-    var origin: Node? = null
+    var origin: Node? = null,
+    var metadata: String = ""
 ) {
 
     enum class ChangeGraphPartIndicator { BEFORE, AFTER }
@@ -37,7 +38,7 @@ data class PatternSpecificVertex(
         const val LITERAL = "lit"
     }
 
-    constructor(pfgNode: Node) : this(pfgNode.statementNum.toString()) {
+    constructor(pfgNode: Node) : this(pfgNode.statementNum) {
         this.label = pfgNode.label
         if (pfgNode is DataNode) {
             val subKind = pfgNode.kind

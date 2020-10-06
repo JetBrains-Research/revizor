@@ -437,7 +437,7 @@ class PyFlowGraphBuilder {
     }
 
     private fun visitFor(node: PyForStatement): PyFlowGraph {
-        val controlNode = ControlNode(ControlNode.Label.FOR, node, controlBranchStack)
+        val controlNode = ControlNode(ControlNode.Label.FOR, node.forPart, controlBranchStack)
         val forFlowGraph = visitSimpleAssignment(
             target = node.forPart.target
                 ?: throw GraphBuildingException("Unable to build pfg for <${node.forPart.target}>"),

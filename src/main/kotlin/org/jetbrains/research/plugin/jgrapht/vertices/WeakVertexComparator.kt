@@ -6,7 +6,10 @@ import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex.Labe
  * A vertices comparator needed for the JGraphT `VF2SubgraphIsomorphismInspector`.
  */
 class WeakVertexComparator : Comparator<PatternSpecificVertex> {
+
     override fun compare(fromTarget: PatternSpecificVertex?, fromPattern: PatternSpecificVertex?): Int {
+
+        // Smart check for the variable names correspondence
         if (fromTarget?.label?.startsWith("var") == true
             && fromPattern?.label?.startsWith("var") == true
         ) {
@@ -18,11 +21,15 @@ class WeakVertexComparator : Comparator<PatternSpecificVertex> {
                 NOTHING, UNKNOWN, null -> 0
             }
         }
+
+        // PySubscriptionExpressions always match
         if (fromPattern?.originalLabel?.matches("""^.*?\[.*?\]$""".toRegex()) == true
             && fromTarget?.originalLabel?.matches("""^.*?\[.*?\]$""".toRegex()) == true
         ) {
             return 0
         }
+
+        // Otherwise check only labels and original labels
         if (fromTarget?.originalLabel?.toLowerCase() == fromPattern?.originalLabel?.toLowerCase()
             && fromTarget?.label?.toLowerCase() == fromPattern?.label?.toLowerCase()
         ) {
@@ -30,4 +37,5 @@ class WeakVertexComparator : Comparator<PatternSpecificVertex> {
         }
         return 1
     }
+
 }

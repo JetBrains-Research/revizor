@@ -12,10 +12,9 @@ class MultipleEdgeComparator : Comparator<PatternSpecificMultipleEdge> {
         if (fromTarget?.embeddedEdgeByXlabel == null || fromPattern?.embeddedEdgeByXlabel == null)
             return 1
         for (xlabel in fromPattern.embeddedEdgeByXlabel.keys) {
-            val comparisonResult = edgeComparator.compare(
-                fromTarget.embeddedEdgeByXlabel[xlabel],
-                fromPattern.embeddedEdgeByXlabel[xlabel]
-            )
+            val edgeFromTarget = fromTarget.embeddedEdgeByXlabel[xlabel]
+            val edgeFromPattern = fromPattern.embeddedEdgeByXlabel[xlabel]
+            val comparisonResult = edgeComparator.compare(edgeFromTarget, edgeFromPattern)
             if (comparisonResult != 0) return comparisonResult else continue
         }
         return 0

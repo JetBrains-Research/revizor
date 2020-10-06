@@ -11,7 +11,7 @@ import java.io.File
 
 
 fun exportDotFile(graph: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificEdge>, file: File) {
-    val exporter = DOTExporter<PatternSpecificVertex, PatternSpecificEdge> { v -> v.id }
+    val exporter = DOTExporter<PatternSpecificVertex, PatternSpecificEdge> { v -> v.id.toString() }
     exporter.setVertexAttributeProvider { v ->
         val map = HashMap<String, Attribute>()
         map["label"] = DefaultAttribute.createAttribute(v.label)
