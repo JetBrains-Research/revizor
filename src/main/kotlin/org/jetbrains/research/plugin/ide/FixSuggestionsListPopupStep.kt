@@ -6,11 +6,10 @@ import com.intellij.openapi.ui.popup.util.BaseListPopupStep
 import org.jetbrains.research.gumtree.PyElementTransformer
 import org.jetbrains.research.plugin.PatternsStorage
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
-import org.jetbrains.research.plugin.localization.PyMethodsAnalyzer
 
 class FixSuggestionsListPopupStep(
     problematicVertex: PatternSpecificVertex,
-    private val holder: PyMethodsAnalyzer.FoundProblemsHolder
+    private val holder: BugFinderInspection.PyMethodsAnalyzer.FoundProblemsHolder
 ) : BaseListPopupStep<String>(
     "Patterns", holder.patternsIdsByVertex[problematicVertex]?.toList() ?: listOf()
 ) {

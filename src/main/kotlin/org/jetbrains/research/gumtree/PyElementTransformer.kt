@@ -3,8 +3,6 @@ package org.jetbrains.research.gumtree
 import com.github.gumtreediff.actions.model.*
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiElement
-import com.intellij.psi.util.PsiTreeUtil
 import com.jetbrains.python.psi.*
 import org.jetbrains.research.plugin.Config
 
@@ -49,24 +47,22 @@ class PyElementTransformer(var project: Project) {
     }
 
     private fun applyMove(element: PyElement, action: Move) {
-        TODO("Not yet implemented")
+        applyInsert(element.copy() as PyElement, Insert(action.node, action.parent, action.position))
+        applyDelete(element, Delete(action.node))
     }
 
     private fun applyInsert(parentElement: PyElement, action: Insert) {
-        val insertedPatternElement: PyElement? = (action.node as PyPsiGumTree).rootElement
         val parentPatternElement: PyElement? = (action.parent as PyPsiGumTree).rootElement
-        val typeOfPrevChild: Class<PsiElement>? =
-            (action.parent as PyPsiGumTree).getTypeOfPrevChildByPosition(action.position)
-        val prevChild: PsiElement? = typeOfPrevChild?.let { PsiTreeUtil.getChildOfType(parentPatternElement, it) }
         if (parentElement.toString() == parentPatternElement.toString()) {
-            when (insertedPatternElement) {
+            val newElementTemplate: PyElement? = (action.node as PyPsiGumTree).rootElement
+            when (newElementTemplate) {
                 is PyTupleExpression -> {
                     val newElement = generator.createExpressionFromText(Config.LANGUAGE_LEVEL, "(None, None)")
                     execute {
-                        if (prevChild == null) {
-                            parentElement.addBefore(newElement, parentPatternElement?.firstChild)
+                        if (action.position < parentElement.children.size) {
+                            parentElement.children[action.position].replace(newElement)
                         } else {
-                            parentElement.addAfter(newElement, prevChild)
+                            parentElement.addAfter(newElement, parentElement.lastChild)
                         }
                     }
                 }

@@ -7,11 +7,10 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
-import org.jetbrains.research.plugin.localization.PyMethodsAnalyzer
 
 class PatternBasedAutoFix(
     private val problematicVertex: PatternSpecificVertex,
-    private val holder: PyMethodsAnalyzer.FoundProblemsHolder
+    private val holder: BugFinderInspection.PyMethodsAnalyzer.FoundProblemsHolder
 ) : LocalQuickFix {
     private val logger = Logger.getInstance(this::class.java)
 
