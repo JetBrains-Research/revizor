@@ -1,6 +1,9 @@
 package org.jetbrains.research.gumtree
 
-import com.github.gumtreediff.actions.model.*
+import com.github.gumtreediff.actions.model.Delete
+import com.github.gumtreediff.actions.model.Insert
+import com.github.gumtreediff.actions.model.Move
+import com.github.gumtreediff.actions.model.Update
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.project.Project
 import com.jetbrains.python.psi.*
@@ -10,17 +13,7 @@ class PyElementTransformer(var project: Project) {
 
     private val generator = PyElementGenerator.getInstance(project)
 
-    fun applyAction(element: PyElement, action: Action) {
-        when (action) {
-            is Update -> applyUpdate(element, action)
-            is Delete -> applyDelete(element, action)
-            is Insert -> applyInsert(element, action)
-            is Move -> applyMove(element, action)
-            else -> throw IllegalStateException()
-        }
-    }
-
-    private fun applyUpdate(element: PyElement, action: Update) {
+    fun applyUpdate(element: PyElement, action: Update) {
         val newClassname: String = action.value.substringBefore(":").trim()
         val newValue: String = action.value.substringAfter(":").trim()
         val patternElement: PyElement? = (action.node as PyPsiGumTree).rootElement
@@ -42,20 +35,29 @@ class PyElementTransformer(var project: Project) {
                 else -> TODO("Not yet implemented")
             }
         } else {
-            throw IllegalStateException("Current node doesn't match to a node from an action")
+            throw IllegalStateException("The current node does not match the node from the UPDATE action")
         }
     }
 
-    private fun applyMove(element: PyElement, action: Move) {
-        applyInsert(element.copy() as PyElement, Insert(action.node, action.parent, action.position))
-        applyDelete(element, Delete(action.node))
+    fun applyMove(element: PyElement, parentElement: PyElement, action: Move): PyElement {
+        val movedPatternElement: PyElement? = (action.node as PyPsiGumTree).rootElement
+        val parentPatternElement: PyElement? = (action.parent as PyPsiGumTree).rootElement
+        if (movedPatternElement.toString() == element.toString()
+            && parentPatternElement.toString() == parentElement.toString()
+        ) {
+            val insertedElement = applyInsert(parentElement, Insert(action.node, action.parent, action.position))
+            applyUpdate(insertedElement, Update(PyPsiGumTree(insertedElement), element.toString()))
+            applyDelete(element, Delete(action.node))
+            return insertedElement
+        } else {
+            throw IllegalStateException("The current node does not match the node from the MOVE action")
+        }
     }
 
-    private fun applyInsert(parentElement: PyElement, action: Insert) {
+    fun applyInsert(parentElement: PyElement, action: Insert): PyElement {
         val parentPatternElement: PyElement? = (action.parent as PyPsiGumTree).rootElement
         if (parentElement.toString() == parentPatternElement.toString()) {
-            val newElementTemplate: PyElement? = (action.node as PyPsiGumTree).rootElement
-            when (newElementTemplate) {
+            when ((action.node as PyPsiGumTree).rootElement) {
                 is PyTupleExpression -> {
                     val newElement = generator.createExpressionFromText(Config.LANGUAGE_LEVEL, "(None, None)")
                     execute {
@@ -65,17 +67,21 @@ class PyElementTransformer(var project: Project) {
                             parentElement.addAfter(newElement, parentElement.lastChild)
                         }
                     }
+                    return newElement
                 }
+                else -> TODO("Not yet implemented")
             }
+        } else {
+            throw IllegalStateException("The current node does not match the node from the INSERT action")
         }
     }
 
-    private fun applyDelete(element: PyElement, action: Delete) {
+    fun applyDelete(element: PyElement, action: Delete) {
         val patternElement: PyElement? = (action.node as PyPsiGumTree).rootElement
         if (element.toString() == patternElement.toString()) {
             execute { element.delete() }
         } else {
-            throw IllegalStateException("Current node doesn't match to a node from an action")
+            throw IllegalStateException("The current node does not match the node from the DELETE action")
         }
     }
 

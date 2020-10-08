@@ -9,8 +9,10 @@ import com.jetbrains.python.psi.PyElementVisitor
 import com.jetbrains.python.psi.PyFunction
 import org.jetbrains.research.plugin.PatternsStorage
 import org.jetbrains.research.plugin.common.buildPyFlowGraphForMethod
+import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jetbrains.research.plugin.pyflowgraph.GraphBuildingException
+import org.jgrapht.GraphMapping
 
 /**
  * A main class for running inspection on methods.
@@ -25,7 +27,6 @@ class BugFinderInspection : LocalInspectionTool() {
     }
 
     class PyMethodsAnalyzer(private val holder: ProblemsHolder) : PyElementVisitor() {
-
         override fun visitPyFunction(node: PyFunction?) {
             if (node != null) {
                 try {
@@ -44,6 +45,7 @@ class BugFinderInspection : LocalInspectionTool() {
                                 problems.patternsIdsByVertex
                                     .getOrPut(targetVertex) { hashSetOf() }
                                     .add(patternId)
+                                problems.mappingByVertex[targetVertex] = mapping
                             }
                         }
                     }
@@ -67,6 +69,8 @@ class BugFinderInspection : LocalInspectionTool() {
         class FoundProblemsHolder {
             val verticesByPatternId: MutableMap<String, MutableList<PatternSpecificVertex>> = hashMapOf()
             val patternsIdsByVertex: MutableMap<PatternSpecificVertex, MutableSet<String>> = hashMapOf()
+            val mappingByVertex =
+                hashMapOf<PatternSpecificVertex, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
         }
     }
 
