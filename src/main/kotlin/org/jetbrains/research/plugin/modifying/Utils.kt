@@ -1,4 +1,4 @@
-package org.jetbrains.research.gumtree
+package org.jetbrains.research.plugin.modifying
 
 import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyElement

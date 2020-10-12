@@ -12,10 +12,10 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
 import com.jetbrains.python.psi.PyElement
-import org.jetbrains.research.gumtree.PyElementTransformer
-import org.jetbrains.research.gumtree.PyPsiGumTree
 import org.jetbrains.research.plugin.PatternsStorage
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
+import org.jetbrains.research.plugin.modifying.PyElementTransformer
+import org.jetbrains.research.plugin.modifying.PyPsiGumTree
 
 class PatternBasedAutoFix(
     private val problematicVertex: PatternSpecificVertex,

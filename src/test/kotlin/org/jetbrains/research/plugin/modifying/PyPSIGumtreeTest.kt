@@ -1,4 +1,4 @@
-package org.jetbrains.research.gumtree
+package org.jetbrains.research.plugin.modifying
 
 import com.github.gumtreediff.actions.ActionGenerator
 import com.github.gumtreediff.matchers.Matchers
