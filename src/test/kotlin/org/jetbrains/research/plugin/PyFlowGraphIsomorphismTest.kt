@@ -3,7 +3,6 @@ package org.jetbrains.research.plugin
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.jetbrains.python.psi.PyFunction
 import junit.framework.TestCase
-import org.jetbrains.research.plugin.common.buildPyFlowGraphForMethod
 import org.jetbrains.research.plugin.jgrapht.getStrictGraphIsomorphismInspector
 
 /**

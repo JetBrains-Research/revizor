@@ -11,7 +11,6 @@ import com.intellij.psi.PsiFileFactory
 import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.psi.PyElement
 import com.jetbrains.python.psi.PyFunction
-import org.jetbrains.research.plugin.common.buildPyFlowGraphForMethod
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
@@ -41,9 +40,9 @@ object PatternsStorage {
     private val patternGraphById = HashMap<String, PatternGraph>()
     private val fragmentGraphById = HashMap<String, PatternGraph>()
     private val fragmentGraphToPatternGraphMappingById =
-        HashMap<String, Map<PatternSpecificVertex, PatternSpecificVertex>>()
+            HashMap<String, HashMap<PatternSpecificVertex, PatternSpecificVertex>>()
     private val fragmentPsiToPatternGraphMappingById =
-        HashMap<String, HashMap<PyElement, PatternSpecificVertex>>()
+            HashMap<String, HashMap<PyElement, PatternSpecificVertex>>()
 
     private val patternEditActionsById = HashMap<String, List<Action>>()
     private val patternPsiBeforeById = HashMap<String, PyFunction?>()
@@ -65,25 +64,23 @@ object PatternsStorage {
                 val jarEntryPathParts = je.name.split("/")
                 val patternId = jarEntryPathParts.getOrNull(1)
                 if (jarEntryPathParts.size == 3
-                    && jarEntryPathParts.first() == "patterns"
-                    && patternId?.toIntOrNull() != null
-                    && jarEntryPathParts.last().endsWith(".dot")
+                        && jarEntryPathParts.first() == "patterns"
+                        && patternId?.toIntOrNull() != null
+                        && jarEntryPathParts.last().endsWith(".dot")
                 ) {
                     val dotSrcStream = this::class.java.getResourceAsStream("/${je.name}")
                     val fullGraph = createPatternSpecificGraph(dotSrcStream)
                     val subgraphBefore = AsSubgraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
-                        fullGraph,
-                        fullGraph.vertexSet()
-                            .filter { it.fromPart == PatternSpecificVertex.ChangeGraphPartIndicator.BEFORE }
-                            .toSet()
+                            fullGraph,
+                            fullGraph.vertexSet()
+                                    .filter { it.fromPart == PatternSpecificVertex.ChangeGraphPartIndicator.BEFORE }
+                                    .toSet()
                     )
                     val variableLabelsGroups = loadVariableLabelsGroups(patternId) ?: arrayListOf()
                     val patternGraph: PatternGraph = createPatternSpecificGraph(subgraphBefore, variableLabelsGroups)
                     patternGraphById[patternId] = patternGraph
-
                     loadFragment(patternId, patternGraph)
-                    createHangers(patternId)
-                    propagatePatternVerticesToActions(patternId)
+                    finalizePatternGraphUsingEditActions(patternId)
                 }
             }
         } catch (ex: Exception) {
@@ -94,26 +91,26 @@ object PatternsStorage {
     }
 
     fun getPatternById(patternId: String): PatternGraph? =
-        patternGraphById[patternId]
+            patternGraphById[patternId]
 
     fun getPatternDescriptionById(patternId: String): String =
-        patternDescriptionById.getOrPut(patternId) {
-            loadDescription(patternId) ?: "Unnamed pattern: $patternId"
-        }
+            patternDescriptionById.getOrPut(patternId) {
+                loadDescription(patternId) ?: "Unnamed pattern: $patternId"
+            }
 
     fun getPatternEditActionsById(patternId: String): List<Action> =
-        patternEditActionsById.getOrPut(patternId) { loadEditActionsFromPattern(patternId) }
+            patternEditActionsById.getOrPut(patternId) { loadEditActionsFromPattern(patternId) }
 
     fun getPatternPsiBeforeById(patternId: String): PyFunction? =
-        patternPsiBeforeById.getOrPut(patternId) { loadPsiMethodFromPattern(patternId, "before.py") }
+            patternPsiBeforeById.getOrPut(patternId) { loadPsiMethodFromPattern(patternId, "before.py") }
 
     fun getPatternPsiAfterById(patternId: String): PyFunction? =
-        patternPsiAfterById.getOrPut(patternId) { loadPsiMethodFromPattern(patternId, "after.py") }
+            patternPsiAfterById.getOrPut(patternId) { loadPsiMethodFromPattern(patternId, "after.py") }
 
     fun getIsomorphicPatterns(targetGraph: PatternGraph)
             : HashMap<String, ArrayList<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>> {
         val suitablePatterns =
-            HashMap<String, ArrayList<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>>()
+                HashMap<String, ArrayList<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>>()
         for ((patternId, patternGraph) in patternGraphById) {
             val inspector = getWeakSubgraphIsomorphismInspector(targetGraph, patternGraph)
             if (inspector.isomorphismExists()) {
@@ -126,8 +123,8 @@ object PatternsStorage {
     }
 
     private fun loadFragment(
-        patternId: String,
-        patternGraph: PatternGraph
+            patternId: String,
+            patternGraph: PatternGraph
     ) {
         try {
             val fragmentPsi = getPatternPsiBeforeById(patternId)!!
@@ -153,28 +150,7 @@ object PatternsStorage {
         }
     }
 
-    private fun createHangers(patternId: String) {
-        val actions = getPatternEditActionsById(patternId)
-        val addedElements = hashSetOf<PyElement>()
-        val hangerElements = hashSetOf<PyElement>()
-        val suitableActions = actions.filter { it is Insert || it is Move }
-        for (action in suitableActions) {
-            val newElement = (action.node as PyPsiGumTree).rootElement ?: continue
-            addedElements.add(newElement)
-            val parent = (action as? Insert)?.parent ?: (action as? Move)?.parent
-            val hangerElement = (parent as PyPsiGumTree).rootElement ?: continue
-            if (addedElements.contains(hangerElement))
-                continue
-            hangerElements.add(hangerElement)
-        }
-        extendPatternGraphWithElements(patternId, hangerElements)
-        for (element in hangerElements) {
-            val vertex = fragmentPsiToPatternGraphMappingById[patternId]?.get(element)
-            vertex?.metadata = "hanger"
-        }
-    }
-
-    private fun extendPatternGraphWithElements(patternId: String, elements: Set<PyElement>) {
+    private fun extendPatternGraphWithElements(patternId: String, elements: Set<PyElement>, areHangers: Boolean = false) {
         try {
             // Load pattern graph, fragment graph and its psi
             val patternGraph = getPatternById(patternId)!!
@@ -182,17 +158,28 @@ object PatternsStorage {
             val fragmentToPatternMapping = fragmentGraphToPatternGraphMappingById[patternId]!!
 
             // Add corresponding vertices to pattern graph and connect them to all its neighbours,
-            // because VF2SubgraphIsomorphismMatcher will match only among the induced subgraphs
+            // because VF2SubgraphIsomorphismMatcher will match only among induced subgraphs
             for (element in elements) {
                 val originalVertex = fragmentGraph.vertexSet().find { it.origin?.psi == element }
-                if (originalVertex == null ||
-                    fragmentToPatternMapping.containsKey(originalVertex)
-                    && patternGraph.containsVertex(fragmentToPatternMapping[originalVertex])
+                if (originalVertex == null
+                        || fragmentToPatternMapping.containsKey(originalVertex)
+                        && patternGraph.containsVertex(fragmentToPatternMapping[originalVertex])
                 ) {
                     continue
                 }
                 val newVertex = originalVertex.copy()
                 fragmentPsiToPatternGraphMappingById[patternId]?.put(element, newVertex)
+                fragmentToPatternMapping[originalVertex] = newVertex
+                if (newVertex.label?.startsWith("var") == true) {
+                    newVertex.dataNodeInfo = PatternSpecificVertex.LabelsGroup(
+                            whatMatters = PatternSpecificVertex.LabelsGroup.Indicator.NOTHING,
+                            labels = hashSetOf(),
+                            longestCommonSuffix = ""
+                    )
+                }
+                if (areHangers) {
+                    newVertex.metadata = "hanger"
+                }
                 patternGraph.addVertex(newVertex)
                 for (incomingEdge in fragmentGraph.incomingEdgesOf(originalVertex)) {
                     val fragmentEdgeSource = fragmentGraph.getEdgeSource(incomingEdge)
@@ -210,29 +197,37 @@ object PatternsStorage {
         }
     }
 
-    private fun propagatePatternVerticesToActions(patternId: String) {
+    private fun finalizePatternGraphUsingEditActions(patternId: String) {
         try {
             val actions = getPatternEditActionsById(patternId)
             val psiToPatternVertex = fragmentPsiToPatternGraphMappingById[patternId]!!
 
             // Collect elements which are involved in edit actions but are not contained in pattern graph
-            val elementsToBeAdded = hashSetOf<PyElement>()
+            val insertedElements = hashSetOf<PyElement>()
+            val hangerElements = hashSetOf<PyElement>()
             for (action in actions) {
                 val element = (action.node as PyPsiGumTree).rootElement!!
                 if (action is Update || action is Delete || action is Move) {
                     if (!psiToPatternVertex.containsKey(element))
-                        elementsToBeAdded.add(element)
+                        hangerElements.add(element)
+                }
+                if (action is Insert) {
+                    val newElement = (action.node as PyPsiGumTree).rootElement ?: continue
+                    insertedElements.add(newElement)
                 }
                 if (action is Insert || action is Move) {
                     val parent = (action as? Insert)?.parent ?: (action as? Move)?.parent
                     val parentElement = (parent as PyPsiGumTree).rootElement!!
+                    if (insertedElements.contains(parentElement))
+                        continue
+                    hangerElements.add(parentElement)
                     if (!psiToPatternVertex.containsKey(parentElement))
-                        elementsToBeAdded.add(parentElement)
+                        hangerElements.add(parentElement)
                 }
             }
 
             // Add them to the pattern graph
-            extendPatternGraphWithElements(patternId, elementsToBeAdded)
+            extendPatternGraphWithElements(patternId, hangerElements, areHangers = true)
 
             // Propagate links to pattern vertices in each edit action
             for (action in actions) {
@@ -279,8 +274,8 @@ object PatternsStorage {
             val pathToSampleBefore = "/patterns/$patternId/$fileName"
             val sampleSrc: String = this::class.java.getResource(pathToSampleBefore).readText()
             PsiFileFactory.getInstance(project)
-                .createFileFromText(PythonLanguage.getInstance(), sampleSrc)
-                .children.first() as PyFunction
+                    .createFileFromText(PythonLanguage.getInstance(), sampleSrc)
+                    .children.first() as PyFunction
         } catch (ex: Exception) {
             logger.error(ex)
             null
@@ -304,11 +299,11 @@ object PatternsStorage {
             val labelsGroups = ArrayList<PatternSpecificVertex.LabelsGroup>()
             json.forEach {
                 labelsGroups.add(
-                    PatternSpecificVertex.LabelsGroup(
-                        whatMatters = it.whatMatters,
-                        labels = it.labels.toHashSet(),
-                        longestCommonSuffix = it.longestCommonSuffix
-                    )
+                        PatternSpecificVertex.LabelsGroup(
+                                whatMatters = it.whatMatters,
+                                labels = it.labels.toHashSet(),
+                                longestCommonSuffix = it.longestCommonSuffix
+                        )
                 )
             }
             labelsGroups

@@ -60,7 +60,7 @@ class PatternBasedAutoFix(
                 supportElements.find { it.toString() == tree.toString() }
                     ?: throw IllegalStateException("Mismatched node $tree}")
             } else {
-                val mapping = holder.mappingByVertex[tree.rootVertex!!]!!
+                val mapping = holder.mappingByPatternVertex[tree.rootVertex!!]!!
                 val targetVertex = mapping.getVertexCorrespondence(tree.rootVertex, false)
                 targetVertex.origin?.psi!!
             }
@@ -68,13 +68,13 @@ class PatternBasedAutoFix(
         private fun applyEditFromPattern(patternId: String) {
             val actions = PatternsStorage.getPatternEditActionsById(patternId)
             val transformer = PyElementTransformer(PatternsStorage.project)
-            val addedElements = hashSetOf<PyElement>()
+            val insertedElements = hashSetOf<PyElement>()
             for (action in actions) {
                 try {
                     if (action is Update || action is Delete) {
                         val targetElement = extractPsiElementFromPyPsiGumTree(
                             tree = action.node as PyPsiGumTree,
-                            supportElements = addedElements
+                                supportElements = insertedElements
                         )
                         when (action) {
                             is Update -> transformer.applyUpdate(targetElement, action)
@@ -83,10 +83,10 @@ class PatternBasedAutoFix(
                     } else if (action is Insert) {
                         val targetParentElement = extractPsiElementFromPyPsiGumTree(
                             tree = action.parent as PyPsiGumTree,
-                            supportElements = addedElements
+                                supportElements = insertedElements
                         )
                         val newElement = transformer.applyInsert(targetParentElement, action)
-                        addedElements.add(newElement)
+                        insertedElements.add(newElement)
                     }
                 } catch (ex: Throwable) {
                     logger.warn("Can not apply the action $action")

@@ -1,7 +1,6 @@
-package org.jetbrains.research.plugin.common
+package org.jetbrains.research.plugin
 
 import com.jetbrains.python.psi.PyFunction
-import org.jetbrains.research.plugin.Config
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex

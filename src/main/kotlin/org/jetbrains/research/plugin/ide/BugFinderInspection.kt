@@ -8,7 +8,7 @@ import com.intellij.psi.PsiElementVisitor
 import com.jetbrains.python.psi.PyElementVisitor
 import com.jetbrains.python.psi.PyFunction
 import org.jetbrains.research.plugin.PatternsStorage
-import org.jetbrains.research.plugin.common.buildPyFlowGraphForMethod
+import org.jetbrains.research.plugin.buildPyFlowGraphForMethod
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jetbrains.research.plugin.pyflowgraph.GraphBuildingException
@@ -45,7 +45,7 @@ class BugFinderInspection : LocalInspectionTool() {
                                 problems.patternsIdsByVertex
                                     .getOrPut(targetVertex) { hashSetOf() }
                                     .add(patternId)
-                                problems.mappingByVertex[targetVertex] = mapping
+                                problems.mappingByPatternVertex[patternVertex] = mapping
                             }
                         }
                     }
@@ -69,8 +69,8 @@ class BugFinderInspection : LocalInspectionTool() {
         class FoundProblemsHolder {
             val verticesByPatternId: MutableMap<String, MutableList<PatternSpecificVertex>> = hashMapOf()
             val patternsIdsByVertex: MutableMap<PatternSpecificVertex, MutableSet<String>> = hashMapOf()
-            val mappingByVertex =
-                hashMapOf<PatternSpecificVertex, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
+            val mappingByPatternVertex =
+                    hashMapOf<PatternSpecificVertex, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
         }
     }
 

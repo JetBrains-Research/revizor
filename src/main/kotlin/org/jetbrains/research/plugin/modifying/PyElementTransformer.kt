@@ -14,7 +14,6 @@ class PyElementTransformer(var project: Project) {
     private val generator = PyElementGenerator.getInstance(project)
 
     fun applyUpdate(element: PyElement, action: Update) {
-        val newClassname: String = action.value.substringBefore(":").trim()
         val newValue: String = action.value.substringAfter(":").trim()
         val patternElement: PyElement? = (action.node as PyPsiGumTree).rootElement
         if (element.toString() == patternElement.toString()) {
