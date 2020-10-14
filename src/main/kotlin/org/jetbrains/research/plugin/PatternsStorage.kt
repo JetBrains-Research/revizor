@@ -23,7 +23,10 @@ import org.jgrapht.graph.DirectedAcyclicGraph
 import java.io.File
 import java.net.URL
 import java.nio.file.Paths
+import java.util.*
 import java.util.jar.JarFile
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 typealias PatternGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>
 
@@ -245,6 +248,19 @@ object PatternsStorage {
                         (action.parent as PyPsiGumTree).rootVertex = psiToPatternVertex[parentElement]
                         (action.node as PyPsiGumTree).rootVertex = psiToPatternVertex[element]
                     }
+                }
+            }
+
+            // Swap connected Updates and Moves
+            val updates = arrayListOf<Pair<Int, Update>>()
+            for ((i, action) in actions.withIndex()) {
+                if (action is Update) {
+                    updates.add(Pair(i, action))
+                    continue
+                }
+                if (action is Move) {
+                    val item = updates.find { it.second.node.hasSameTypeAndLabel(action.node) } ?: continue
+                    Collections.swap(actions, i, item.first)
                 }
             }
         } catch (ex: Exception) {

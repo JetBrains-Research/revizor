@@ -13,80 +13,74 @@ class PyElementTransformer(var project: Project) {
 
     private val generator = PyElementGenerator.getInstance(project)
 
-    fun applyUpdate(element: PyElement, action: Update) {
+    fun applyUpdate(element: PyElement, action: Update): PyElement {
         val newValue: String = action.value.substringAfter(":").trim()
-        val patternElement: PyElement? = (action.node as PyPsiGumTree).rootElement
-        if (element.toString() == patternElement.toString()) {
-            when (element) {
-                is PyCallExpression -> {
-                    val newElement: PyCallExpression =
+        when (element) {
+            is PyCallExpression -> {
+                val newElement: PyCallExpression =
                         generator.createCallExpression(Config.LANGUAGE_LEVEL, newValue)
-                    for (argument in element.arguments) {
-                        newElement.argumentList?.addArgument(argument)
-                    }
-                    execute { element.replace(newElement) }
+                for (argument in element.arguments) {
+                    newElement.argumentList?.addArgument(argument)
                 }
-                is PyReferenceExpression -> {
-                    val newElement: PyReferenceExpression =
-                        generator.createExpressionFromText(Config.LANGUAGE_LEVEL, newValue) as PyReferenceExpression
-                    execute { element.replace(newElement) }
-                }
-                else -> TODO("Not yet implemented")
+                execute { element.replace(newElement) }
+                return newElement
             }
-        } else {
-            throw IllegalStateException("The current node does not match the node from the UPDATE action")
+            is PyReferenceExpression -> {
+                val newElement: PyReferenceExpression =
+                        generator.createExpressionFromText(Config.LANGUAGE_LEVEL, newValue) as PyReferenceExpression
+                execute { element.replace(newElement) }
+                return newElement
+            }
+            else -> TODO("Not yet implemented")
         }
     }
 
     fun applyMove(element: PyElement, parentElement: PyElement, action: Move): PyElement {
-        val movedPatternElement: PyElement? = (action.node as PyPsiGumTree).rootElement
-        val parentPatternElement: PyElement? = (action.parent as PyPsiGumTree).rootElement
-        if (movedPatternElement.toString() == element.toString()
-            && parentPatternElement.toString() == parentElement.toString()
-        ) {
-            val insertedElement = applyInsert(parentElement, Insert(action.node, action.parent, action.position))
-            applyUpdate(insertedElement, Update(PyPsiGumTree(insertedElement), element.toString()))
-            applyDelete(element, Delete(action.node))
-            return insertedElement
-        } else {
-            throw IllegalStateException("The current node does not match the node from the MOVE action")
-        }
+        val elementCopy = element.copy() as PyElement
+        execute { element.delete() }
+        executeInsert(elementCopy, parentElement, action.position)
+        return parentElement.children[action.position] as PyElement
     }
 
     fun applyInsert(parentElement: PyElement, action: Insert): PyElement {
-        val parentPatternElement: PyElement? = (action.parent as PyPsiGumTree).rootElement
-        if (parentElement.toString() == parentPatternElement.toString()) {
-            when ((action.node as PyPsiGumTree).rootElement) {
-                is PyTupleExpression -> {
-                    val newElement = generator.createExpressionFromText(Config.LANGUAGE_LEVEL, "(None, None)")
-                    execute {
-                        if (action.position < parentElement.children.size) {
-                            parentElement.children[action.position].replace(newElement)
-                        } else {
-                            parentElement.addAfter(newElement, parentElement.lastChild)
-                        }
-                    }
-                    return newElement
-                }
-                else -> TODO("Not yet implemented")
+        val newNodeClassName = action.node.label.substringBefore(":", "").trim()
+        val newNodeValue = action.node.label.substringAfter(":", "").trim()
+        when (newNodeClassName) {
+            "PyTupleExpression" -> {
+                val newElement = generator.createExpressionFromText(Config.LANGUAGE_LEVEL, "(None, None)")
+                        .let { (it as PyParenthesizedExpression).containedExpression!! }
+                executeInsert(newElement, parentElement, action.position)
             }
-        } else {
-            throw IllegalStateException("The current node does not match the node from the INSERT action")
+            "PyCallExpression" -> {
+                val newElement = generator.createCallExpression(Config.LANGUAGE_LEVEL, newNodeValue)
+                executeInsert(newElement, parentElement, action.position)
+            }
+            "PyStatementList" -> {
+                val newElement = (action.node as PyPsiGumTree).rootElement!!.copy() as PyElement // FIXME: rootElement call
+                executeInsert(newElement, parentElement, action.position)
+            }
+            else -> TODO("Not yet implemented")
         }
+        return parentElement.children[action.position] as PyElement
     }
 
     fun applyDelete(element: PyElement, action: Delete) {
-        val patternElement: PyElement? = (action.node as PyPsiGumTree).rootElement
-        if (element.toString() == patternElement.toString()) {
-            execute { element.delete() }
-        } else {
-            throw IllegalStateException("The current node does not match the node from the DELETE action")
-        }
+        execute { element.delete() }
     }
 
     private fun execute(command: () -> Unit) {
         WriteCommandAction.runWriteCommandAction(project) {
             command()
+        }
+    }
+
+    private fun executeInsert(element: PyElement, parent: PyElement, position: Int) {
+        execute {
+            if (position < parent.children.size) {
+                parent.children[position].replace(element)
+            } else {
+                parent.addAfter(element, parent.lastChild)
+            }
         }
     }
 }

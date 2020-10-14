@@ -2,6 +2,7 @@ package org.jetbrains.research.plugin.ide
 
 import com.github.gumtreediff.actions.model.Delete
 import com.github.gumtreediff.actions.model.Insert
+import com.github.gumtreediff.actions.model.Move
 import com.github.gumtreediff.actions.model.Update
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemDescriptor
@@ -18,8 +19,8 @@ import org.jetbrains.research.plugin.modifying.PyElementTransformer
 import org.jetbrains.research.plugin.modifying.PyPsiGumTree
 
 class PatternBasedAutoFix(
-    private val problematicVertex: PatternSpecificVertex,
-    private val holder: BugFinderInspection.PyMethodsAnalyzer.FoundProblemsHolder
+        private val problematicVertex: PatternSpecificVertex,
+        private val holder: BugFinderInspection.PyMethodsAnalyzer.FoundProblemsHolder
 ) : LocalQuickFix {
 
     private val logger = Logger.getInstance(this::class.java)
@@ -29,7 +30,7 @@ class PatternBasedAutoFix(
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         try {
             val suggestionsPopup = JBPopupFactory.getInstance()
-                .createListPopup(FixSuggestionsListPopupStep())
+                    .createListPopup(FixSuggestionsListPopupStep())
             FileEditorManager.getInstance(project).selectedTextEditor?.let { editor ->
                 suggestionsPopup.showInBestPositionFor(editor)
             }
@@ -39,7 +40,7 @@ class PatternBasedAutoFix(
     }
 
     inner class FixSuggestionsListPopupStep : BaseListPopupStep<String>(
-        "Patterns", holder.patternsIdsByVertex[problematicVertex]?.toList() ?: listOf()
+            "Patterns", holder.patternsIdsByVertex[problematicVertex]?.toList() ?: listOf()
     ) {
 
         private var selectedPatternId: String = ""
@@ -55,38 +56,54 @@ class PatternBasedAutoFix(
             return Runnable { applyEditFromPattern(selectedPatternId) }
         }
 
-        private fun extractPsiElementFromPyPsiGumTree(tree: PyPsiGumTree, supportElements: Set<PyElement>) =
-            if (tree.rootVertex == null) {
-                supportElements.find { it.toString() == tree.toString() }
-                    ?: throw IllegalStateException("Mismatched node $tree}")
-            } else {
-                val mapping = holder.mappingByPatternVertex[tree.rootVertex!!]!!
-                val targetVertex = mapping.getVertexCorrespondence(tree.rootVertex, false)
-                targetVertex.origin?.psi!!
-            }
-
         private fun applyEditFromPattern(patternId: String) {
             val actions = PatternsStorage.getPatternEditActionsById(patternId)
             val transformer = PyElementTransformer(PatternsStorage.project)
             val insertedElements = hashSetOf<PyElement>()
+            val updatedElementsByVertex = HashMap<PatternSpecificVertex, PyElement>()
             for (action in actions) {
                 try {
-                    if (action is Update || action is Delete) {
-                        val targetElement = extractPsiElementFromPyPsiGumTree(
-                            tree = action.node as PyPsiGumTree,
-                                supportElements = insertedElements
-                        )
-                        when (action) {
-                            is Update -> transformer.applyUpdate(targetElement, action)
-                            is Delete -> transformer.applyDelete(targetElement, action)
+                    when (action) {
+                        is Update -> {
+                            val targetElement = extractPsiElementFromPyPsiGumTree(
+                                    tree = action.node as PyPsiGumTree,
+                                    insertedElements = insertedElements,
+                                    updatedElements = updatedElementsByVertex
+                            )
+                            val updatedElement = transformer.applyUpdate(targetElement, action)
+                            updatedElementsByVertex[(action.node as PyPsiGumTree).rootVertex!!] = updatedElement
                         }
-                    } else if (action is Insert) {
-                        val targetParentElement = extractPsiElementFromPyPsiGumTree(
-                            tree = action.parent as PyPsiGumTree,
-                                supportElements = insertedElements
-                        )
-                        val newElement = transformer.applyInsert(targetParentElement, action)
-                        insertedElements.add(newElement)
+                        is Delete -> {
+                            val targetElement = extractPsiElementFromPyPsiGumTree(
+                                    tree = action.node as PyPsiGumTree,
+                                    insertedElements = insertedElements,
+                                    updatedElements = updatedElementsByVertex
+                            )
+                            transformer.applyDelete(targetElement, action)
+                        }
+                        is Insert -> {
+                            val targetParentElement = extractPsiElementFromPyPsiGumTree(
+                                    tree = action.parent as PyPsiGumTree,
+                                    insertedElements = insertedElements,
+                                    updatedElements = updatedElementsByVertex
+                            )
+                            val newElement = transformer.applyInsert(targetParentElement, action)
+                            insertedElements.add(newElement)
+                        }
+                        is Move -> {
+                            val targetParentElement = extractPsiElementFromPyPsiGumTree(
+                                    tree = action.parent as PyPsiGumTree,
+                                    insertedElements = insertedElements,
+                                    updatedElements = updatedElementsByVertex
+                            )
+                            val targetElement = extractPsiElementFromPyPsiGumTree(
+                                    tree = action.node as PyPsiGumTree,
+                                    insertedElements = insertedElements,
+                                    updatedElements = updatedElementsByVertex
+                            )
+                            val movedElement = transformer.applyMove(targetElement, targetParentElement, action)
+                            updatedElementsByVertex[(action.node as PyPsiGumTree).rootVertex!!] = movedElement
+                        }
                     }
                 } catch (ex: Throwable) {
                     logger.warn("Can not apply the action $action")
@@ -95,6 +112,22 @@ class PatternBasedAutoFix(
                 }
             }
         }
+
+        private fun extractPsiElementFromPyPsiGumTree(tree: PyPsiGumTree,
+                                                      insertedElements: Set<PyElement>,
+                                                      updatedElements: Map<PatternSpecificVertex, PyElement>) =
+                if (tree.rootVertex == null) {
+                    insertedElements.find { it.toString() == tree.toString() }
+                            ?: throw IllegalStateException("Mismatched node $tree}")
+                } else {
+                    if (updatedElements.containsKey(tree.rootVertex!!)) {
+                        updatedElements[tree.rootVertex!!]!!
+                    } else {
+                        val mapping = holder.mappingByPatternVertex[tree.rootVertex!!]!!
+                        val targetVertex = mapping.getVertexCorrespondence(tree.rootVertex, false)
+                        targetVertex.origin?.psi!!
+                    }
+                }
     }
 
 }
