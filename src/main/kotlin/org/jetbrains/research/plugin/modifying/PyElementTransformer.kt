@@ -43,24 +43,34 @@ class PyElementTransformer(var project: Project) {
     }
 
     fun applyInsert(parentElement: PyElement, action: Insert): PyElement {
-        val newNodeClassName = action.node.label.substringBefore(":", "").trim()
-        val newNodeValue = action.node.label.substringAfter(":", "").trim()
+        val newNodeClassName = action.node.label.substringBefore(":").trim()
+        val newNodeValue = action.node.label.substringAfter(":").trim()
+        val newElement: PyElement
         when (newNodeClassName) {
             "PyTupleExpression" -> {
-                val newElement = generator.createExpressionFromText(Config.LANGUAGE_LEVEL, "(None, None)")
+                newElement = generator.createExpressionFromText(Config.LANGUAGE_LEVEL, "(_,)")
                         .let { (it as PyParenthesizedExpression).containedExpression!! }
-                executeInsert(newElement, parentElement, action.position)
             }
             "PyCallExpression" -> {
-                val newElement = generator.createCallExpression(Config.LANGUAGE_LEVEL, newNodeValue)
-                executeInsert(newElement, parentElement, action.position)
+                newElement = generator.createCallExpression(Config.LANGUAGE_LEVEL, newNodeValue)
             }
             "PyStatementList" -> {
-                val newElement = (action.node as PyPsiGumTree).rootElement!!.copy() as PyElement // FIXME: rootElement call
-                executeInsert(newElement, parentElement, action.position)
+                newElement = generator
+                        .createFromText(Config.LANGUAGE_LEVEL, PyFunction::class.java, "def foo():\n\tpass\n")
+                        .statementList
+                newElement.children[0].delete()
+            }
+            "PyTargetExpression" -> {
+                newElement = generator
+                        .createFromText(Config.LANGUAGE_LEVEL, PyAssignmentStatement::class.java, "$newNodeValue = None")
+                        .targets[0] as PyTargetExpression
+            }
+            "PyPassStatement" -> {
+                newElement = generator.createPassStatement()
             }
             else -> TODO("Not yet implemented")
         }
+        executeInsert(newElement, parentElement, action.position)
         return parentElement.children[action.position] as PyElement
     }
 
