@@ -15,24 +15,21 @@ class PyElementTransformer(var project: Project) {
 
     fun applyUpdate(element: PyElement, action: Update): PyElement {
         val newValue: String = action.value.substringAfter(":").trim()
+        val newElement: PyElement
         when (element) {
             is PyCallExpression -> {
-                val newElement: PyCallExpression =
-                        generator.createCallExpression(Config.LANGUAGE_LEVEL, newValue)
+                newElement = generator.createCallExpression(Config.LANGUAGE_LEVEL, newValue)
                 for (argument in element.arguments) {
                     newElement.argumentList?.addArgument(argument)
                 }
-                execute { element.replace(newElement) }
-                return newElement
             }
             is PyReferenceExpression -> {
-                val newElement: PyReferenceExpression =
-                        generator.createExpressionFromText(Config.LANGUAGE_LEVEL, newValue) as PyReferenceExpression
-                execute { element.replace(newElement) }
-                return newElement
+                newElement = generator.createExpressionFromText(Config.LANGUAGE_LEVEL, newValue) as PyReferenceExpression
             }
             else -> TODO("Not yet implemented")
         }
+        execute { element.replace(newElement) }
+        return newElement
     }
 
     fun applyMove(element: PyElement, parentElement: PyElement, action: Move): PyElement {

@@ -32,31 +32,43 @@ class BugFinderInspection : LocalInspectionTool() {
                 try {
                     val methodGraph = buildPyFlowGraphForMethod(node, builder = "kotlin")
                     val patternsMappings = PatternsStorage.getIsomorphicPatterns(targetGraph = methodGraph)
-                    val problems = FoundProblemsHolder()
+                    val problems = DetectedVertexMappingsHolder()
                     for ((patternId, mappings) in patternsMappings) {
                         val patternGraph = PatternsStorage.getPatternById(patternId)!!
                         for (mapping in mappings) {
+                            val patternToTargetVarNamesMapping = hashMapOf<String, String>()
                             for (patternVertex in patternGraph.vertexSet()) {
                                 val targetVertex = mapping.getVertexCorrespondence(patternVertex, false)
                                 targetVertex.metadata = patternVertex.metadata // FIXME: vulnerable
+                                if (patternVertex.label?.startsWith("var") == true
+                                        && patternVertex.originalLabel != null
+                                        && targetVertex.originalLabel != null) {
+                                    patternToTargetVarNamesMapping.put(
+                                            patternVertex.originalLabel!!,
+                                            targetVertex.originalLabel!!
+                                    )
+                                }
                                 problems.verticesByPatternId
-                                    .getOrPut(patternId) { arrayListOf() }
-                                    .add(targetVertex)
+                                        .getOrPut(patternId) { arrayListOf() }
+                                        .add(targetVertex)
                                 problems.patternsIdsByVertex
-                                    .getOrPut(targetVertex) { hashSetOf() }
-                                    .add(patternId)
-                                problems.mappingByPatternVertex[patternVertex] = mapping
+                                        .getOrPut(targetVertex) { hashSetOf() }
+                                        .add(patternId)
+                                problems.vertexMappingsByTargetVertex
+                                        .getOrPut(targetVertex) { hashMapOf() }
+                                        .put(patternId, mapping)
                             }
+                            problems.varNamesMappingByVertexMapping[mapping] = patternToTargetVarNamesMapping
                         }
                     }
                     for (problematicVertex in problems.patternsIdsByVertex.keys) {
                         if (problematicVertex.metadata == "hanger")
                             continue
                         holder.registerProblem(
-                            problematicVertex.origin?.psi!!,
-                            "Found relevant patterns in method <${node.name}>",
-                            ProblemHighlightType.WARNING,
-                            PatternBasedAutoFix(problematicVertex, problems)
+                                problematicVertex.origin?.psi!!,
+                                "Found relevant patterns in method <${node.name}>",
+                                ProblemHighlightType.WARNING,
+                                PatternBasedAutoFix(problematicVertex, problems)
                         )
                     }
                 } catch (exception: GraphBuildingException) {
@@ -66,11 +78,15 @@ class BugFinderInspection : LocalInspectionTool() {
             }
         }
 
-        class FoundProblemsHolder {
+        class DetectedVertexMappingsHolder {
             val verticesByPatternId: MutableMap<String, MutableList<PatternSpecificVertex>> = hashMapOf()
             val patternsIdsByVertex: MutableMap<PatternSpecificVertex, MutableSet<String>> = hashMapOf()
-            val mappingByPatternVertex =
-                    hashMapOf<PatternSpecificVertex, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>()
+            val vertexMappingsByTargetVertex =
+                    hashMapOf<PatternSpecificVertex,
+                            HashMap<String, GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>>()
+            val varNamesMappingByVertexMapping =
+                    hashMapOf<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>,
+                            HashMap<String, String>>()
         }
     }
 

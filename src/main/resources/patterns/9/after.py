@@ -1,5 +1,5 @@
 def func():
-    lst = [1, 2, 3]
-    for i, x in enumerate(lst):
+    static = [1, 2, 3]
+    for i, dim in enumerate(static):
         print()
         print()

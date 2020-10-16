@@ -1,6 +1,6 @@
 def func():
-    lst = [1, 2, 3]
-    for i in range(len(lst)):
+    static = [1, 2, 3]
+    for i in range(len(static)):
         print()
-        x = lst[i]
+        dim = static[i]
         print()
