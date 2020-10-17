@@ -6,7 +6,7 @@ package org.jetbrains.research.plugin.jgrapht.edges
 class MultipleEdgeComparator : Comparator<PatternSpecificMultipleEdge> {
 
     private val edgeComparator: Comparator<PatternSpecificEdge?> =
-        compareBy({ it?.xlabel }, { it?.fromClosure })
+        compareBy { it?.xlabel }
 
     override fun compare(fromTarget: PatternSpecificMultipleEdge?, fromPattern: PatternSpecificMultipleEdge?): Int {
         if (fromTarget?.embeddedEdgeByXlabel == null || fromPattern?.embeddedEdgeByXlabel == null)

@@ -545,15 +545,21 @@ class PyFlowGraphBuilder {
         name: String,
         key: String? = null
     ): PyFlowGraph {
-        val argumentsFlowGraphs = visitFunctionCallArgumentsHelper(node)
+        val argumentsFlowGraphs: List<PyFlowGraph> = visitFunctionCallArgumentsHelper(node)
         val callFlowGraph = createGraph()
         callFlowGraph.parallelMergeGraphs(argumentsFlowGraphs)
+        val argumentListNode = StatementNode(
+                label = "$name.PyArgumentList",
+                psi = node.argumentList,
+                controlBranchStack = controlBranchStack
+        )
+        callFlowGraph.addNode(argumentListNode, LinkType.PARAMETER, clearSinks = true)
         val operationNode = OperationNode(
-            label = name,
-            psi = node,
-            controlBranchStack = controlBranchStack,
-            kind = OperationNode.Kind.FUNC_CALL,
-            key = key
+                label = name,
+                psi = node,
+                controlBranchStack = controlBranchStack,
+                kind = OperationNode.Kind.FUNC_CALL,
+                key = key
         )
         callFlowGraph.addNode(operationNode, LinkType.PARAMETER, clearSinks = true)
         return callFlowGraph

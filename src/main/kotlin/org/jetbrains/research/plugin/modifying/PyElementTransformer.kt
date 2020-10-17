@@ -59,11 +59,15 @@ class PyElementTransformer(var project: Project) {
             }
             "PyTargetExpression" -> {
                 newElement = generator
-                        .createFromText(Config.LANGUAGE_LEVEL, PyAssignmentStatement::class.java, "$newNodeValue = None")
+                        .createFromText(Config.LANGUAGE_LEVEL, PyAssignmentStatement::class.java, "$newNodeValue=None")
                         .targets[0] as PyTargetExpression
             }
             "PyPassStatement" -> {
                 newElement = generator.createPassStatement()
+            }
+            "PyReferenceExpression" -> {
+                newElement = generator.createExpressionFromText(Config.LANGUAGE_LEVEL, newNodeValue)
+                        as PyReferenceExpression
             }
             else -> TODO("Not yet implemented")
         }
