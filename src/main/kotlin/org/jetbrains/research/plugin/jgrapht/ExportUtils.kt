@@ -16,7 +16,7 @@ fun exportDotFile(graph: Graph<PatternSpecificVertex, PatternSpecificEdge>, file
     val exporter = DOTExporter<PatternSpecificVertex, PatternSpecificEdge> { v -> v.id.toString() }
     exporter.setVertexAttributeProvider { v ->
         val map = HashMap<String, Attribute>()
-        map["label"] = DefaultAttribute.createAttribute("${v.label} ${v.originalLabel} []")
+        map["label"] = DefaultAttribute.createAttribute("${v.label} (${v.originalLabel}) []")
         map["color"] = DefaultAttribute.createAttribute(v.color)
         map["shape"] = DefaultAttribute.createAttribute(v.shape)
         map

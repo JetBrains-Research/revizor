@@ -88,13 +88,9 @@ class PatternBasedAutoFix(
                                     action.parent as PyPsiGumTree,
                                     patternId
                             )
-                            // Change the value/name of the inserting node, if it is a variable
-                            val patternVarName = action.node.label
-                                    .substringAfterLast(":", "")
-                                    .trim()
+                            val patternVarName = action.node.label.substringAfterLast(":", "").trim()
                             val targetVarName = namesMapping[patternVarName] ?: patternVarName
                             action.node.label = action.node.label.replaceAfterLast(": ", targetVarName)
-
                             val newElement = transformer.applyInsert(targetParentElement, action)
                             newElementByTree[action.node as PyPsiGumTree] = newElement
                         }
@@ -117,11 +113,10 @@ class PatternBasedAutoFix(
         }
 
         private fun extractPsiElementFromPyPsiGumTree(tree: PyPsiGumTree, patternId: String) =
-                if (newElementByTree.containsKey(tree)) {
+                if (newElementByTree.containsKey(tree))
                     newElementByTree[tree]!!
-                } else {
+                else
                     vertexMapping.getVertexCorrespondence(tree.rootVertex, false).origin?.psi!!
-                }
     }
 
 }
