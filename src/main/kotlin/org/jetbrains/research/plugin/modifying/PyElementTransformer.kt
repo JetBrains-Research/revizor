@@ -18,10 +18,11 @@ class PyElementTransformer(var project: Project) {
         val newElement: PyElement
         when (element) {
             is PyCallExpression -> {
-                newElement = generator.createCallExpression(Config.LANGUAGE_LEVEL, newValue)
-                for (argument in element.arguments) {
-                    newElement.argumentList?.addArgument(argument)
-                }
+//                newElement = generator.createCallExpression(Config.LANGUAGE_LEVEL, newValue)
+//                for (argument in element.arguments) {
+//                    newElement.argumentList?.addArgument(argument)
+//                }
+                return element
             }
             is PyReferenceExpression -> {
                 newElement = generator.createExpressionFromText(Config.LANGUAGE_LEVEL, newValue) as PyReferenceExpression
