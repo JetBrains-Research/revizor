@@ -4,7 +4,6 @@ import com.github.gumtreediff.actions.model.Delete
 import com.github.gumtreediff.actions.model.Insert
 import com.github.gumtreediff.actions.model.Move
 import com.github.gumtreediff.actions.model.Update
-import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.project.Project
 import com.jetbrains.python.psi.*
 import org.jetbrains.research.plugin.Config
@@ -18,24 +17,23 @@ class PyElementTransformer(var project: Project) {
         val newElement: PyElement
         when (element) {
             is PyCallExpression -> {
-//                newElement = generator.createCallExpression(Config.LANGUAGE_LEVEL, newValue)
-//                for (argument in element.arguments) {
-//                    newElement.argumentList?.addArgument(argument)
-//                }
-                return element
+                newElement = generator.createCallExpression(Config.LANGUAGE_LEVEL, newValue)
+                for (argument in element.arguments) {
+                    newElement.argumentList?.addArgument(argument)
+                }
             }
             is PyReferenceExpression -> {
                 newElement = generator.createExpressionFromText(Config.LANGUAGE_LEVEL, newValue) as PyReferenceExpression
             }
             else -> TODO("Not yet implemented")
         }
-        execute { element.replace(newElement) }
+        element.replace(newElement)
         return newElement
     }
 
     fun applyMove(element: PyElement, parentElement: PyElement, action: Move): PyElement {
         val elementCopy = element.copy() as PyElement
-        execute { element.delete() }
+        element.delete()
         executeInsert(elementCopy, parentElement, action.position)
         return parentElement.children[action.position] as PyElement
     }
@@ -77,22 +75,14 @@ class PyElementTransformer(var project: Project) {
     }
 
     fun applyDelete(element: PyElement, action: Delete) {
-        execute { element.delete() }
-    }
-
-    private fun execute(command: () -> Unit) {
-        WriteCommandAction.runWriteCommandAction(project) {
-            command()
-        }
+        element.delete()
     }
 
     private fun executeInsert(element: PyElement, parent: PyElement, position: Int) {
-        execute {
-            if (position < parent.children.size) {
-                parent.children[position].replace(element)
-            } else {
-                parent.addAfter(element, parent.lastChild)
-            }
+        if (position < parent.children.size) {
+            parent.children[position].replace(element)
+        } else {
+            parent.addAfter(element, parent.lastChild)
         }
     }
 }

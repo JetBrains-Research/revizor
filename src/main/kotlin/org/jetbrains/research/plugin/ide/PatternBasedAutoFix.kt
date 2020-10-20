@@ -3,6 +3,7 @@ package org.jetbrains.research.plugin.ide
 import com.github.gumtreediff.actions.model.*
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemDescriptor
+import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
@@ -63,36 +64,38 @@ class PatternBasedAutoFix(
             newElementByTree.clear()
             vertexMapping = mappingsHolder.vertexMappingsByTargetVertex[problematicVertex]!![patternId]!!
             namesMapping = mappingsHolder.varNamesMappingByVertexMapping[vertexMapping]!!
-            for (action in actions) {
-                try {
-                    when (action) {
-                        is Update -> {
-                            val preprocessedUpdate = replaceVarNames(action) as Update
-                            val targetElement = extractPsiElementFromPyPsiGumTree(preprocessedUpdate.node as PyPsiGumTree)
-                            val updatedElement = transformer.applyUpdate(targetElement, preprocessedUpdate)
-                            newElementByTree[preprocessedUpdate.node as PyPsiGumTree] = updatedElement
+            WriteCommandAction.runWriteCommandAction(PatternsStorage.project) {
+                for (action in actions) {
+                    try {
+                        when (action) {
+                            is Update -> {
+                                val preprocessedUpdate = replaceVarNames(action) as Update
+                                val targetElement = extractPsiElementFromPyPsiGumTree(preprocessedUpdate.node as PyPsiGumTree)
+                                val updatedElement = transformer.applyUpdate(targetElement, preprocessedUpdate)
+                                newElementByTree[preprocessedUpdate.node as PyPsiGumTree] = updatedElement
+                            }
+                            is Delete -> {
+                                val targetElement = extractPsiElementFromPyPsiGumTree(action.node as PyPsiGumTree)
+                                transformer.applyDelete(targetElement, action)
+                            }
+                            is Insert -> {
+                                val targetParentElement = extractPsiElementFromPyPsiGumTree(action.parent as PyPsiGumTree)
+                                val preprocessedInsert = replaceVarNames(action) as Insert
+                                val newElement = transformer.applyInsert(targetParentElement, preprocessedInsert)
+                                newElementByTree[preprocessedInsert.node as PyPsiGumTree] = newElement
+                            }
+                            is Move -> {
+                                val targetParentElement = extractPsiElementFromPyPsiGumTree(action.parent as PyPsiGumTree)
+                                val targetElement = extractPsiElementFromPyPsiGumTree(action.node as PyPsiGumTree)
+                                val movedElement = transformer.applyMove(targetElement, targetParentElement, action)
+                                newElementByTree[action.node as PyPsiGumTree] = movedElement
+                            }
                         }
-                        is Delete -> {
-                            val targetElement = extractPsiElementFromPyPsiGumTree(action.node as PyPsiGumTree)
-                            transformer.applyDelete(targetElement, action)
-                        }
-                        is Insert -> {
-                            val targetParentElement = extractPsiElementFromPyPsiGumTree(action.parent as PyPsiGumTree)
-                            val preprocessedInsert = replaceVarNames(action) as Insert
-                            val newElement = transformer.applyInsert(targetParentElement, preprocessedInsert)
-                            newElementByTree[preprocessedInsert.node as PyPsiGumTree] = newElement
-                        }
-                        is Move -> {
-                            val targetParentElement = extractPsiElementFromPyPsiGumTree(action.parent as PyPsiGumTree)
-                            val targetElement = extractPsiElementFromPyPsiGumTree(action.node as PyPsiGumTree)
-                            val movedElement = transformer.applyMove(targetElement, targetParentElement, action)
-                            newElementByTree[action.node as PyPsiGumTree] = movedElement
-                        }
+                    } catch (ex: Throwable) {
+                        logger.warn("Can not apply the action $action")
+                        logger.warn(ex)
+                        continue
                     }
-                } catch (ex: Throwable) {
-                    logger.warn("Can not apply the action $action")
-                    logger.warn(ex)
-                    continue
                 }
             }
         }
