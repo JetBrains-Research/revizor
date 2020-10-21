@@ -113,6 +113,12 @@ class PyFlowGraphBuilder {
             switchControlBranch(entryNode, true)
             val argumentsFlowGraphs = visitFunctionDefParameters(node)
             flowGraph.parallelMergeGraphs(argumentsFlowGraphs)
+            val statementListNode = StatementNode(
+                    label = "PyStatementList",
+                    psi = node.statementList,
+                    controlBranchStack = controlBranchStack
+            )
+            flowGraph.addNode(statementListNode)
             for (statement in node.statementList.statements) {
                 val statementFlowGraph = try {
                     visitPyElement(statement)

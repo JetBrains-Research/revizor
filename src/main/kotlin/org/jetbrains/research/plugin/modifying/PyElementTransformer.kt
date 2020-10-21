@@ -27,8 +27,7 @@ class PyElementTransformer(var project: Project) {
             }
             else -> TODO("Not yet implemented")
         }
-        element.replace(newElement)
-        return newElement
+        return element.replace(newElement) as PyElement
     }
 
     fun applyMove(element: PyElement, parentElement: PyElement, action: Move): PyElement {

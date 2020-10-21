@@ -28,6 +28,11 @@ fun exportDotFile(graph: Graph<PatternSpecificVertex, PatternSpecificEdge>, file
         map
     }
     exporter.exportGraph(graph, file)
+    val builder = ProcessBuilder().also {
+        it.command("dot", "-Tps", file.absolutePath, "-o", "${file.absolutePath}.pdf")
+    }
+    val process = builder.start()
+    process.waitFor()
 }
 
 fun exportDotFileForGraphWithMultipleEdges(

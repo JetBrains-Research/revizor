@@ -43,10 +43,17 @@ class BugFinderInspection : LocalInspectionTool() {
                                 if (patternVertex.label?.startsWith("var") == true
                                         && patternVertex.originalLabel != null
                                         && targetVertex.originalLabel != null) {
-                                    patternToTargetVarNamesMapping.put(
-                                            patternVertex.originalLabel!!,
-                                            targetVertex.originalLabel!!
-                                    )
+                                    // Smart saving of variable names mapping, even in case "name1.attr -> name2.attr"
+                                    val s1 = patternVertex.originalLabel!!
+                                    val s2 = targetVertex.originalLabel!!
+                                    val possiblePatternAttrs = s1.split(".").reversed()
+                                    val possibleTargetAttrs = s2.split(".").reversed()
+                                    for ((attr1, attr2) in possiblePatternAttrs.zip(possibleTargetAttrs)) {
+                                        if (attr1 != attr2) {
+                                            patternToTargetVarNamesMapping[attr1] = attr2
+                                        }
+                                    }
+                                    patternToTargetVarNamesMapping[s1] = s2
                                 }
                                 problems.verticesByPatternId
                                         .getOrPut(patternId) { arrayListOf() }

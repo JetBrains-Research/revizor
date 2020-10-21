@@ -102,14 +102,27 @@ class PatternBasedAutoFix(
 
         private fun replaceVarNames(action: Action): Action {
             val oldVarName = action.node.label.substringAfterLast(":", "").trim()
-            val newVarName = namesMapping[oldVarName] ?: oldVarName
+            val newVarName = getNewNameByMapping(oldVarName)
             action.node.label = action.node.label.replaceAfterLast(": ", newVarName)
             if (action is Update) {
                 val updatedOldVarName = action.value.substringAfterLast(":", "").trim()
-                val updatedNewVarName = namesMapping[updatedOldVarName] ?: updatedOldVarName
+                val updatedNewVarName = getNewNameByMapping(updatedOldVarName)
                 return Update(action.node, action.value.replaceAfterLast(": ", updatedNewVarName))
             }
             return action
+        }
+
+        private fun getNewNameByMapping(oldName: String): String {
+            return if (namesMapping.containsKey(oldName)) {
+                namesMapping.getValue(oldName)
+            } else {
+                var newName = ""
+                for (attrOldName in oldName.split(".")) {
+                    newName += namesMapping[attrOldName] ?: attrOldName
+                    newName += "."
+                }
+                newName.dropLast(1)
+            }
         }
 
         private fun extractPsiElementFromPyPsiGumTree(tree: PyPsiGumTree) =
