@@ -6,7 +6,9 @@ digraph "fragment-1128.dot" {
 	}
 	2248 [label="var (types.FunctionType) [2248]" color=red2 shape=ellipse]
 	2247 [label="var (types) [2247]" color=red2 shape=ellipse]
-	2248 -> 2246 [xlabel=para from_closure=False]
+	43 [label="isinstance.PyArgumentList (isinstance.PyArgumentList) [43]" color=red2 shape=box]
+	2248 -> 43 [xlabel=para from_closure=null]
+	43 -> 2246 [xlabel=para from_closure=null]
 	2246 -> 2245 [xlabel=map from_closure=False]
 	2247 -> 2248 [xlabel=qual from_closure=False]
 }
