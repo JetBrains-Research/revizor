@@ -23,7 +23,10 @@ class PyElementTransformer(var project: Project) {
                 }
             }
             is PyReferenceExpression -> {
-                newElement = generator.createExpressionFromText(Config.LANGUAGE_LEVEL, newValue) as PyReferenceExpression
+                val qualifier = element.asQualifiedName()?.components?.dropLast(1)?.joinToString(".") ?: ""
+                val reference = if (qualifier != "") "$qualifier.$newValue" else newValue
+                newElement = generator.createExpressionFromText(Config.LANGUAGE_LEVEL, reference)
+                        as PyReferenceExpression
             }
             else -> TODO("Not yet implemented")
         }
@@ -31,10 +34,9 @@ class PyElementTransformer(var project: Project) {
     }
 
     fun applyMove(element: PyElement, parentElement: PyElement, action: Move): PyElement {
-        val elementCopy = element.copy() as PyElement
+        val movedElement = executeInsert(element, parentElement, action.position)
         element.delete()
-        executeInsert(elementCopy, parentElement, action.position)
-        return parentElement.children[action.position] as PyElement
+        return movedElement
     }
 
     fun applyInsert(parentElement: PyElement, action: Insert): PyElement {
@@ -69,19 +71,18 @@ class PyElementTransformer(var project: Project) {
             }
             else -> TODO("Not yet implemented")
         }
-        executeInsert(newElement, parentElement, action.position)
-        return parentElement.children[action.position] as PyElement
+        return executeInsert(newElement, parentElement, action.position)
     }
 
     fun applyDelete(element: PyElement, action: Delete) {
         element.delete()
     }
 
-    private fun executeInsert(element: PyElement, parent: PyElement, position: Int) {
-        if (position < parent.children.size) {
-            parent.children[position].replace(element)
+    private fun executeInsert(element: PyElement, parent: PyElement, position: Int): PyElement {
+        return if (position < parent.children.size) {
+            parent.children[position].replace(element) as PyElement
         } else {
-            parent.addAfter(element, parent.lastChild)
+            parent.addAfter(element, parent.lastChild) as PyElement
         }
     }
 }

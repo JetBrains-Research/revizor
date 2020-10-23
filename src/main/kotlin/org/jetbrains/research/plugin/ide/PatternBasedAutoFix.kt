@@ -10,12 +10,14 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
+import com.intellij.psi.util.collectDescendantsOfType
 import com.jetbrains.python.psi.PyElement
 import org.jetbrains.research.plugin.PatternsStorage
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jetbrains.research.plugin.modifying.PyElementTransformer
 import org.jetbrains.research.plugin.modifying.PyPsiGumTree
+import org.jetbrains.research.plugin.modifying.getAllTreesFromActions
 import org.jgrapht.GraphMapping
 
 class PatternBasedAutoFix(
@@ -43,9 +45,10 @@ class PatternBasedAutoFix(
             "Patterns", mappingsHolder.patternsIdsByVertex[problematicVertex]?.toList() ?: listOf()
     ) {
         private var selectedPatternId: String = ""
-        private val newElementByTree = HashMap<PyPsiGumTree, PyElement>()
         private lateinit var vertexMapping: GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>
         private lateinit var namesMapping: Map<String, String>
+        private val elementByTree = hashMapOf<PyPsiGumTree, PyElement>()
+        private val revisions = hashMapOf<PyElement, PyElement>()
 
         override fun getTextFor(patternId: String) = PatternsStorage.getPatternDescriptionById(patternId)
 
@@ -61,34 +64,46 @@ class PatternBasedAutoFix(
         private fun applyEditFromPattern(patternId: String) {
             val actions = PatternsStorage.getPatternEditActionsById(patternId)
             val transformer = PyElementTransformer(PatternsStorage.project)
-            newElementByTree.clear()
             vertexMapping = mappingsHolder.vertexMappingsByTargetVertex[problematicVertex]!![patternId]!!
             namesMapping = mappingsHolder.varNamesMappingByVertexMapping[vertexMapping]!!
+            elementByTree.clear()
+            for (tree in getAllTreesFromActions(actions)) {
+                val pyPsiGumTree = tree as PyPsiGumTree
+                val element = vertexMapping.getVertexCorrespondence(pyPsiGumTree.rootVertex, false)
+                        ?.origin?.psi ?: continue
+                elementByTree[pyPsiGumTree] = element
+            }
+            revisions.clear()
             WriteCommandAction.runWriteCommandAction(PatternsStorage.project) {
                 for (action in actions) {
                     try {
                         when (action) {
                             is Update -> {
-                                val preprocessedUpdate = replaceVarNames(action) as Update
-                                val targetElement = extractPsiElementFromPyPsiGumTree(preprocessedUpdate.node as PyPsiGumTree)
-                                val updatedElement = transformer.applyUpdate(targetElement, preprocessedUpdate)
-                                newElementByTree[preprocessedUpdate.node as PyPsiGumTree] = updatedElement
+                                val update = replaceVarNames(action) as Update
+                                val targetElement =
+                                        findRevision(elementByTree[update.node as PyPsiGumTree]!!, revisions)
+                                val newElement = transformer.applyUpdate(targetElement, update)
+                                updateRevisions(targetElement, newElement, revisions)
                             }
                             is Delete -> {
-                                val targetElement = extractPsiElementFromPyPsiGumTree(action.node as PyPsiGumTree)
+                                val targetElement =
+                                        findRevision(elementByTree[action.node as PyPsiGumTree]!!, revisions)
                                 transformer.applyDelete(targetElement, action)
                             }
                             is Insert -> {
-                                val targetParentElement = extractPsiElementFromPyPsiGumTree(action.parent as PyPsiGumTree)
-                                val preprocessedInsert = replaceVarNames(action) as Insert
-                                val newElement = transformer.applyInsert(targetParentElement, preprocessedInsert)
-                                newElementByTree[preprocessedInsert.node as PyPsiGumTree] = newElement
+                                val targetParentElement =
+                                        findRevision(elementByTree[action.parent as PyPsiGumTree]!!, revisions)
+                                val insert = replaceVarNames(action) as Insert
+                                val newElement = transformer.applyInsert(targetParentElement, insert)
+                                elementByTree[insert.node as PyPsiGumTree] = newElement
                             }
                             is Move -> {
-                                val targetParentElement = extractPsiElementFromPyPsiGumTree(action.parent as PyPsiGumTree)
-                                val targetElement = extractPsiElementFromPyPsiGumTree(action.node as PyPsiGumTree)
+                                val targetParentElement =
+                                        findRevision(elementByTree[action.parent as PyPsiGumTree]!!, revisions)
+                                val targetElement =
+                                        findRevision(elementByTree[action.node as PyPsiGumTree]!!, revisions)
                                 val movedElement = transformer.applyMove(targetElement, targetParentElement, action)
-                                newElementByTree[action.node as PyPsiGumTree] = movedElement
+                                updateRevisions(targetElement, movedElement, revisions)
                             }
                         }
                     } catch (ex: Throwable) {
@@ -98,6 +113,27 @@ class PatternBasedAutoFix(
                     }
                 }
             }
+        }
+
+        private fun updateRevisions(oldElement: PyElement,
+                                    newElement: PyElement,
+                                    revisions: MutableMap<PyElement, PyElement>) {
+            val oldDescendants = oldElement.collectDescendantsOfType<PyElement>()
+            val newDescendants = newElement.collectDescendantsOfType<PyElement>()
+            for ((old, new) in oldDescendants.zip(newDescendants)) {
+                revisions[old] = new
+            }
+            revisions[oldElement] = newElement
+        }
+
+        private fun findRevision(element: PyElement, revisions: MutableMap<PyElement, PyElement>): PyElement {
+            var currentRevision = element
+            while (revisions.containsKey(currentRevision)) {
+                if (currentRevision == revisions[currentRevision])
+                    break
+                currentRevision = revisions[currentRevision]!!
+            }
+            return currentRevision
         }
 
         private fun replaceVarNames(action: Action): Action {
@@ -124,12 +160,6 @@ class PatternBasedAutoFix(
                 newName.dropLast(1)
             }
         }
-
-        private fun extractPsiElementFromPyPsiGumTree(tree: PyPsiGumTree) =
-                if (newElementByTree.containsKey(tree))
-                    newElementByTree[tree]!!
-                else
-                    vertexMapping.getVertexCorrespondence(tree.rootVertex, false).origin?.psi!!
     }
 
 }

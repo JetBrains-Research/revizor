@@ -1,5 +1,9 @@
 package org.jetbrains.research.plugin.modifying
 
+import com.github.gumtreediff.actions.model.Action
+import com.github.gumtreediff.actions.model.Insert
+import com.github.gumtreediff.actions.model.Move
+import com.github.gumtreediff.tree.ITree
 import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyElement
 import java.lang.reflect.Method
@@ -28,7 +32,7 @@ internal fun extractChildrenByFieldName(element: PyElement): Map<String, PyEleme
         if (potentialChild is PyElement && psiChildren.contains(potentialChild)) {
             childByMethodName[method.name] = OneChildContainer(potentialChild)
         } else if (potentialChild is Array<*>
-            && potentialChild.all { it is PyElement && psiChildren.contains(it) }
+                && potentialChild.all { it is PyElement && psiChildren.contains(it) }
         ) {
             childByMethodName[method.name] = ManyChildrenContainer(potentialChild as Array<PyElement>)
         } else {
@@ -36,4 +40,17 @@ internal fun extractChildrenByFieldName(element: PyElement): Map<String, PyEleme
         }
     }
     return childByMethodName
+}
+
+fun getAllTreesFromActions(actions: Collection<Action>): List<ITree> {
+    val result = arrayListOf<ITree>()
+    for (action in actions) {
+        result.add(action.node)
+        if (action is Insert) {
+            result.add(action.parent)
+        } else if (action is Move) {
+            result.add(action.parent)
+        }
+    }
+    return result
 }
