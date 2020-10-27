@@ -2,9 +2,8 @@ group = "org.jetbrains.research.bug-finder"
 version = "1.0-SNAPSHOT"
 
 plugins {
-    id("org.jetbrains.intellij") version "0.4.21"
-    kotlin("jvm") version "1.3.72"
-    java
+    id("org.jetbrains.intellij") version "0.4.21" apply true
+    kotlin("jvm") version "1.4.10" apply true
 }
 
 intellij {
@@ -21,7 +20,7 @@ allprojects {
 
     apply {
         plugin("kotlin")
-        plugin("java")
+        // plugin("org.jetbrains.intellij")
     }
 
     dependencies {
@@ -33,6 +32,7 @@ allprojects {
         implementation(group = "org.jgrapht", name = "jgrapht-core", version = "1.5.0")
         implementation(group = "org.jgrapht", name = "jgrapht-io", version = "1.5.0")
         implementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.6.2")
+        implementation(group = "org.jetbrains.kotlinx", name = "kotlinx-cli", version = "0.3")
     }
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
@@ -41,7 +41,6 @@ allprojects {
 
     tasks.withType<Test> {
         useJUnitPlatform()
-        jvmArgs = mutableListOf("--enable-preview")
     }
 }
 

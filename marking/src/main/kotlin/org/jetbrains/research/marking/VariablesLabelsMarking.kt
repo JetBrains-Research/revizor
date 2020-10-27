@@ -165,18 +165,18 @@ private fun copyUsefulFiles(from: String, dest: String) {
 }
 
 fun main(args: Array<String>) {
-    val parser = ArgParser(programName = "marking")
-    val input by parser.option(
+    val parser: ArgParser = ArgParser(programName = "marking")
+    val input: String by parser.option(
         type = ArgType.String,
         shortName = "i",
         description = "Input directory with patterns mined by code-change-miner tool"
     ).required()
-    val output by parser.option(
+    val output: String by parser.option(
         type = ArgType.String,
         shortName = "o",
         description = "Output directory for processed patterns"
     ).required()
-    val addDescription by parser.option(
+    val addDescription: Boolean by parser.option(
         type = ArgType.Boolean,
         fullName = "add-description",
         shortName = "d",
