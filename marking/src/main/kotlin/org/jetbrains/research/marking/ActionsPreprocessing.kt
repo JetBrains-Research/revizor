@@ -1,10 +1,21 @@
 package org.jetbrains.research.marking
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.jetbrains.research.plugin.Config
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
-class ActionsPreprocessing : BasePlatformTestCase {
+
+@Serializable
+data class Project(val name: String, val language: String)
+
+class ActionsPreprocessing : BasePlatformTestCase() {
     fun test() {
-        println(Config.LANGUAGE_LEVEL)
+        val data = Project("kotlinx.serialization", "Kotlin")
+        val string = Json.encodeToString(data)
+        println(string)
+        val obj = Json.decodeFromString<Project>(string)
+        println(obj)
     }
 }

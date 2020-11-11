@@ -2,46 +2,43 @@ group = "org.jetbrains.research.bug-finder"
 version = "1.0-SNAPSHOT"
 
 plugins {
-    id("org.jetbrains.intellij") version "0.4.21" apply true
-    kotlin("jvm") version "1.4.10" apply true
-}
-
-intellij {
-    version = "2020.2"
-    type = "PY"
-    setPlugins("Pythonid")
+    java
+    kotlin("jvm") version "1.4.10"
+    id("org.jetbrains.intellij") version "0.4.21"
+    kotlin("plugin.serialization") version "1.4.10"
 }
 
 allprojects {
     repositories {
-        mavenCentral()
+        jcenter()
         maven("https://kotlin.bintray.com/kotlinx")
-    }
-
-    apply {
-        plugin("kotlin")
-        // plugin("org.jetbrains.intellij")
-    }
-
-    dependencies {
-        compileOnly(kotlin("stdlib"))
-        compileOnly(kotlin("stdlib-jdk8"))
-        implementation(group = "com.google.code.gson", name = "gson", version = "2.8.6")
-        implementation(group = "com.github.gumtreediff", name = "core", version = "2.1.2")
-        implementation(group = "com.github.gumtreediff", name = "gen.jdt", version = "2.1.2")
-        implementation(group = "org.jgrapht", name = "jgrapht-core", version = "1.5.0")
-        implementation(group = "org.jgrapht", name = "jgrapht-io", version = "1.5.0")
-        implementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.6.2")
-        implementation(group = "org.jetbrains.kotlinx", name = "kotlinx-cli", version = "0.3")
-    }
-
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
-    }
-
-    tasks.withType<Test> {
-        useJUnitPlatform()
     }
 }
 
-tasks.withType<org.jetbrains.intellij.tasks.BuildSearchableOptionsTask>().forEach { it.enabled = false }
+subprojects {
+    apply {
+        plugin("java")
+        plugin("kotlin")
+        plugin("org.jetbrains.kotlin.plugin.serialization")
+        plugin("org.jetbrains.intellij")
+    }
+
+    dependencies {
+        compileOnly(group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version = "1.4.10")
+        implementation(group = "com.github.gumtreediff", name = "core", version = "2.1.2")
+        implementation(group = "org.jgrapht", name = "jgrapht-core", version = "1.5.0")
+        implementation(group = "org.jgrapht", name = "jgrapht-io", version = "1.5.0")
+        implementation("org.jetbrains.kotlinx", "kotlinx-serialization-json-jvm", "1.0.0")
+    }
+
+    tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile> {
+        kotlinOptions {
+            jvmTarget = "1.8"
+            languageVersion = "1.4"
+            apiVersion = "1.4"
+        }
+    }
+
+    tasks.withType<org.jetbrains.intellij.tasks.BuildSearchableOptionsTask>()
+        .forEach { it.enabled = false }
+}

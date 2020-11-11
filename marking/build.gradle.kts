@@ -1,6 +1,17 @@
 group = rootProject.group
 version = rootProject.version
 
+intellij {
+    version = "2020.2"
+    type = "PY"
+    setPlugins("Pythonid")
+}
+
+dependencies {
+    implementation(group = "org.jetbrains.kotlinx", name = "kotlinx-cli-jvm", version = "0.2")
+    implementation(project(":plugin"))
+}
+
 tasks {
     jar {
         manifest {
@@ -8,8 +19,4 @@ tasks {
         }
         from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
     }
-}
-
-dependencies {
-    implementation(project(rootProject.path))
 }
