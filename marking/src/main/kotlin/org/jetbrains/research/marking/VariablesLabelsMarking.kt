@@ -45,7 +45,7 @@ private fun getVarsGroups(fragments: List<Graph<PatternSpecificVertex, PatternSp
                 if (varsCnt >= labelsGroups.size) {
                     labelsGroups.add(
                         PatternSpecificVertex.LabelsGroup(
-                            whatMatters = PatternSpecificVertex.LabelsGroup.Indicator.UNKNOWN,
+                            whatMatters = PatternSpecificVertex.MatchingMode.UNKNOWN,
                             labels = hashSetOf(vertex.originalLabel!!),
                             longestCommonSuffix = ""
                         )
@@ -101,21 +101,21 @@ private fun markPatterns(patternsGraphs: PatternGraphByPathMap, addDescription: 
                     when (ans) {
                         "labels" -> labelsGroups.add(
                             PatternSpecificVertex.LabelsGroup(
-                                whatMatters = PatternSpecificVertex.LabelsGroup.Indicator.VALUABLE_ORIGINAL_LABEL,
+                                whatMatters = PatternSpecificVertex.MatchingMode.VALUABLE_ORIGINAL_LABEL,
                                 labels = vertex.dataNodeInfo!!.labels,
                                 longestCommonSuffix = ""
                             )
                         ).also { exit = true }
                         "lcs" -> labelsGroups.add(
                             PatternSpecificVertex.LabelsGroup(
-                                whatMatters = PatternSpecificVertex.LabelsGroup.Indicator.LONGEST_COMMON_SUFFIX,
+                                whatMatters = PatternSpecificVertex.MatchingMode.LONGEST_COMMON_SUFFIX,
                                 labels = vertex.dataNodeInfo!!.labels,
                                 longestCommonSuffix = getLongestCommonSuffix(vertex.dataNodeInfo?.labels)
                             )
                         ).also { exit = true }
                         "nothing" -> labelsGroups.add(
                             PatternSpecificVertex.LabelsGroup(
-                                whatMatters = PatternSpecificVertex.LabelsGroup.Indicator.NOTHING,
+                                whatMatters = PatternSpecificVertex.MatchingMode.NOTHING,
                                 labels = vertex.dataNodeInfo!!.labels,
                                 longestCommonSuffix = ""
                             )

@@ -1,6 +1,6 @@
 package org.jetbrains.research.plugin.jgrapht.vertices
 
-import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex.LabelsGroup.Indicator.*
+import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex.MatchingMode.*
 import org.jetbrains.research.plugin.pyflowgraph.models.DataNode
 
 /**

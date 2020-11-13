@@ -1,5 +1,6 @@
 package org.jetbrains.research.plugin.jgrapht.vertices
 
+import kotlinx.serialization.Serializable
 import org.jetbrains.research.plugin.pyflowgraph.models.DataNode
 import org.jetbrains.research.plugin.pyflowgraph.models.Node
 
@@ -20,18 +21,19 @@ data class PatternSpecificVertex(
 
     enum class ChangeGraphPartIndicator { BEFORE, AFTER }
 
+    enum class MatchingMode {
+        LONGEST_COMMON_SUFFIX,
+        VALUABLE_ORIGINAL_LABEL,
+        NOTHING,
+        UNKNOWN
+    }
+
+    @Serializable
     data class LabelsGroup(
-        val whatMatters: Indicator,
+        val whatMatters: MatchingMode,
         val labels: HashSet<String>,
         val longestCommonSuffix: String
-    ) {
-        enum class Indicator {
-            LONGEST_COMMON_SUFFIX,
-            VALUABLE_ORIGINAL_LABEL,
-            NOTHING,
-            UNKNOWN
-        }
-    }
+    )
 
     object CommonLabel {
         const val VARIABLE = "var"

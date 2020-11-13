@@ -22,7 +22,7 @@ import java.io.InputStream
 
 fun createPatternSpecificGraph(
     baseGraph: Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>,
-    variableLabelsGroups: ArrayList<PatternSpecificVertex.LabelsGroup>
+    variableLabelsGroups: List<PatternSpecificVertex.LabelsGroup>
 ): DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> {
     val targetGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
         PatternSpecificMultipleEdge::class.java
@@ -34,7 +34,7 @@ fun createPatternSpecificGraph(
         if (vertex.label?.startsWith("var") == true) {
             newVertex.dataNodeInfo = variableLabelsGroups.getOrNull(variableVerticesCounter)
                 ?: PatternSpecificVertex.LabelsGroup(
-                    whatMatters = PatternSpecificVertex.LabelsGroup.Indicator.UNKNOWN,
+                    whatMatters = PatternSpecificVertex.MatchingMode.UNKNOWN,
                     labels = hashSetOf(),
                     longestCommonSuffix = ""
                 )

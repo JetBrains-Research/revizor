@@ -175,9 +175,9 @@ object PatternsStorage {
                 fragmentToPatternMapping[originalVertex] = newVertex
                 if (newVertex.label?.startsWith("var") == true) {
                     newVertex.dataNodeInfo = PatternSpecificVertex.LabelsGroup(
-                            whatMatters = PatternSpecificVertex.LabelsGroup.Indicator.NOTHING,
-                            labels = hashSetOf(),
-                            longestCommonSuffix = ""
+                        whatMatters = PatternSpecificVertex.MatchingMode.NOTHING,
+                        labels = hashSetOf(),
+                        longestCommonSuffix = ""
                     )
                 }
                 if (areHangers) {
