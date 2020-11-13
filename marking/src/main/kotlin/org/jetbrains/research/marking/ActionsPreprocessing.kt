@@ -7,15 +7,21 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.psi.PsiFileFactory
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.jetbrains.python.PythonLanguage
+import com.jetbrains.python.psi.PyElement
 import com.jetbrains.python.psi.PyFunction
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.jetbrains.research.plugin.buildPyFlowGraphForMethod
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
+import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
+import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jetbrains.research.plugin.modifying.PyPsiGumTreeGenerator
 import org.jgrapht.graph.AsSubgraph
+import org.jgrapht.graph.DirectedAcyclicGraph
 import java.io.File
 
+typealias PatternGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>
 
 class ActionsPreprocessing : BasePlatformTestCase() {
 
@@ -24,6 +30,9 @@ class ActionsPreprocessing : BasePlatformTestCase() {
     }
 
     private val logger = Logger.getInstance(this::class.java)
+    private val fragmentToPatternMappingByHash = HashMap<Int, HashMap<PatternSpecificVertex, PatternSpecificVertex>>()
+    private val psiToPatternMappingByHash = HashMap<Int, HashMap<PyElement, PatternSpecificVertex>>()
+    private val patternGraphByHash = HashMap<Int, PatternGraph>()
 
     private fun loadPsi(file: File): PyFunction? {
         val src: String = file.readText()
@@ -50,25 +59,49 @@ class ActionsPreprocessing : BasePlatformTestCase() {
 
     private fun loadVariableLabelsGroups(patternDir: File): List<PatternSpecificVertex.LabelsGroup> {
         val src = patternDir.toPath().resolve("possible_variable_labels.json").toFile().readText()
-        val labelsGroups = Json.decodeFromString<List<PatternSpecificVertex.LabelsGroup>>(src)
-        return labelsGroups
+        return Json.decodeFromString(src)
     }
 
+    private fun loadGraph(patternDir: File) {
+        val dotFiles = patternDir.listFiles { _, name -> name.endsWith(".dot") }!!
+        val inputDotStream = dotFiles[0].inputStream()
+        val changeGraph = createPatternSpecificGraph(inputDotStream)
+        val subgraphBefore = AsSubgraph(
+            changeGraph,
+            changeGraph.vertexSet()
+                .filter { it.fromPart == PatternSpecificVertex.ChangeGraphPartIndicator.BEFORE }
+                .toSet()
+        )
+        val labelsGroups = loadVariableLabelsGroups(patternDir)
+        patternGraphByHash[patternDir.hashCode()] = createPatternSpecificGraph(subgraphBefore, labelsGroups)
+    }
+
+    private fun loadFragmentMappings(patternDir: File) {
+        val fragmentPsi = loadPsi(patternDir.toPath().resolve("before.py").toFile())!!
+        val patternGraph = patternGraphByHash[patternDir.hashCode()]!!
+        val fragmentGraph = buildPyFlowGraphForMethod(fragmentPsi, builder = "kotlin")
+        val fragmentToPatternMapping = HashMap<PatternSpecificVertex, PatternSpecificVertex>()
+        val psiToPatternMapping = HashMap<PyElement, PatternSpecificVertex>()
+        val inspector = getWeakSubgraphIsomorphismInspector(fragmentGraph, patternGraph)
+        if (inspector.isomorphismExists()) {
+            val mapping = inspector.mappings.asSequence().first()
+            for (patternVertex in patternGraph.vertexSet()) {
+                val fragmentVertex = mapping.getVertexCorrespondence(patternVertex, false)
+                fragmentToPatternMapping[fragmentVertex] = patternVertex
+                psiToPatternMapping[fragmentVertex.origin!!.psi!!] = patternVertex
+            }
+            fragmentToPatternMappingByHash[patternDir.hashCode()] = fragmentToPatternMapping
+            psiToPatternMappingByHash[patternDir.hashCode()] = psiToPatternMapping
+        } else {
+            logger.error("Pattern's graph does not match to pattern's code fragment (before.py)")
+        }
+    }
 
     fun test() {
         File(PATH_TO_PATTERNS).listFiles()?.forEach { patternDir ->
             val actions = loadEditActionsFromPattern(patternDir)
-            val dotFiles = patternDir.listFiles { _, name -> name.endsWith(".dot") }!!
-            val inputDotStream = dotFiles[0].inputStream()
-            val changeGraph = createPatternSpecificGraph(inputDotStream)
-            val subgraphBefore = AsSubgraph(
-                changeGraph,
-                changeGraph.vertexSet()
-                    .filter { it.fromPart == PatternSpecificVertex.ChangeGraphPartIndicator.BEFORE }
-                    .toSet()
-            )
-            val labelsGroups = loadVariableLabelsGroups(patternDir)
-            val patternGraph = createPatternSpecificGraph(subgraphBefore, labelsGroups)
+            loadGraph(patternDir)
+            loadFragmentMappings(patternDir)
         }
     }
 }
