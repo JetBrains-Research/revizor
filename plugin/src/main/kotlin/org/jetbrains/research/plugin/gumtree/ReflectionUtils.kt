@@ -1,4 +1,4 @@
-package org.jetbrains.research.plugin.modifying
+package org.jetbrains.research.plugin.gumtree
 
 import com.github.gumtreediff.actions.model.Action
 import com.github.gumtreediff.actions.model.Insert

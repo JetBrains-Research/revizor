@@ -12,11 +12,11 @@ import com.jetbrains.python.psi.PyFunction
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.jetbrains.research.plugin.buildPyFlowGraphForMethod
+import org.jetbrains.research.plugin.gumtree.PyPsiGumTreeGenerator
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
-import org.jetbrains.research.plugin.modifying.PyPsiGumTreeGenerator
 import org.jgrapht.graph.AsSubgraph
 import org.jgrapht.graph.DirectedAcyclicGraph
 import java.io.File
@@ -27,6 +27,7 @@ class ActionsPreprocessing : BasePlatformTestCase() {
 
     companion object {
         const val PATH_TO_PATTERNS = "/home/oleg/prog/data/plugin/jar_patterns/patterns"
+        const val DEST = "/home/oleg/prog/data/plugin/jar_patterns/preprocessed"
     }
 
     private val logger = Logger.getInstance(this::class.java)

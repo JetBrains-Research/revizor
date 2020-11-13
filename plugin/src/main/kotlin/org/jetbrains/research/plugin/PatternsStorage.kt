@@ -11,12 +11,12 @@ import com.intellij.psi.PsiFileFactory
 import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.psi.PyElement
 import com.jetbrains.python.psi.PyFunction
+import org.jetbrains.research.plugin.gumtree.PyPsiGumTree
+import org.jetbrains.research.plugin.gumtree.PyPsiGumTreeGenerator
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
-import org.jetbrains.research.plugin.modifying.PyPsiGumTree
-import org.jetbrains.research.plugin.modifying.PyPsiGumTreeGenerator
 import org.jgrapht.GraphMapping
 import org.jgrapht.graph.AsSubgraph
 import org.jgrapht.graph.DirectedAcyclicGraph

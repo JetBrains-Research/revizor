@@ -13,11 +13,11 @@ import com.intellij.openapi.ui.popup.util.BaseListPopupStep
 import com.intellij.psi.util.collectDescendantsOfType
 import com.jetbrains.python.psi.PyElement
 import org.jetbrains.research.plugin.PatternsStorage
+import org.jetbrains.research.plugin.gumtree.PyElementTransformer
+import org.jetbrains.research.plugin.gumtree.PyPsiGumTree
+import org.jetbrains.research.plugin.gumtree.getAllTreesFromActions
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
-import org.jetbrains.research.plugin.modifying.PyElementTransformer
-import org.jetbrains.research.plugin.modifying.PyPsiGumTree
-import org.jetbrains.research.plugin.modifying.getAllTreesFromActions
 import org.jgrapht.GraphMapping
 
 class PatternBasedAutoFix(

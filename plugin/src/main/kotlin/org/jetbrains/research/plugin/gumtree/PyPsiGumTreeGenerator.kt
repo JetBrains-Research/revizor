@@ -1,4 +1,4 @@
-package org.jetbrains.research.plugin.modifying
+package org.jetbrains.research.plugin.gumtree
 
 import com.github.gumtreediff.tree.TreeContext
 import com.jetbrains.python.psi.PyElement
