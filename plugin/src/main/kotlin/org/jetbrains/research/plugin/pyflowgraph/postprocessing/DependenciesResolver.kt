@@ -6,7 +6,7 @@ import org.jetbrains.research.plugin.pyflowgraph.models.*
 object DependenciesResolver {
 
     fun resolve(flowGraph: PyFlowGraph) {
-        flowGraph.processNodes(processorFunction = this::adjustControls)
+        flowGraph.processNodes { node, processedNodes -> this.adjustControls(node, processedNodes) }
         removeEmptyNodes(flowGraph)
         cleanUpDependencies(flowGraph)
     }

@@ -8,7 +8,7 @@ intellij {
 }
 
 dependencies {
-    implementation(group = "org.jetbrains.kotlinx", name = "kotlinx-cli-jvm", version = "0.2")
+    implementation(group = "org.jetbrains.kotlinx", name = "kotlinx-cli-jvm", version = "0.3")
     implementation(project(":plugin"))
 }
 

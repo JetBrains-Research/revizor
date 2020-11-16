@@ -6,9 +6,9 @@ import org.jetbrains.research.plugin.pyflowgraph.models.*
 object TransitiveClosureBuilder {
 
     fun buildClosure(flowGraph: PyFlowGraph) {
-        flowGraph.processNodes(this::buildDataClosure)
-        flowGraph.processNodes(this::buildControlClosure)
-        flowGraph.processNodes(this::buildControlDataClosure)
+        flowGraph.processNodes { node, processedNodes -> this.buildDataClosure(node, processedNodes) }
+        flowGraph.processNodes { node, processedNodes -> this.buildControlClosure(node, processedNodes) }
+        flowGraph.processNodes { node, processedNodes -> this.buildControlDataClosure(node, processedNodes) }
     }
 
     private fun buildDataClosure(node: Node, processedNodes: MutableSet<Node>) {

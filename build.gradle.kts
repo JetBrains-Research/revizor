@@ -1,11 +1,13 @@
 group = "org.jetbrains.research.bug-finder"
 version = "1.0-SNAPSHOT"
 
+
 plugins {
     java
-    kotlin("jvm") version "1.4.10"
     id("org.jetbrains.intellij") version "0.4.21"
-    kotlin("plugin.serialization") version "1.4.10"
+    val kotlinVersion = "1.4.10"
+    kotlin("jvm") version kotlinVersion
+    kotlin("plugin.serialization") version kotlinVersion
 }
 
 allprojects {
@@ -24,19 +26,16 @@ subprojects {
     }
 
     dependencies {
-        compileOnly(group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version = "1.4.10")
+        compileOnly(kotlin("stdlib-jdk8"))
         implementation(group = "com.github.gumtreediff", name = "core", version = "2.1.2")
         implementation(group = "org.jgrapht", name = "jgrapht-core", version = "1.5.0")
         implementation(group = "org.jgrapht", name = "jgrapht-io", version = "1.5.0")
         implementation("org.jetbrains.kotlinx", "kotlinx-serialization-json-jvm", "1.0.0")
+        // implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc-218")
     }
 
-    tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile> {
-        kotlinOptions {
-            jvmTarget = "1.8"
-            languageVersion = "1.4"
-            apiVersion = "1.4"
-        }
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.jvmTarget = "1.8"
     }
 
     tasks.withType<org.jetbrains.intellij.tasks.BuildSearchableOptionsTask>()
