@@ -11,16 +11,11 @@ class PyPsiGumTree : Tree {
     var rootElement: PyElement? = null
     var rootVertex: PatternSpecificVertex? = null
 
-    constructor(rootElement: PyElement?) {
+    constructor(rootElement: PyElement?) : super(rootElement?.getType() ?: -1, rootElement?.toString()) {
         this.rootElement = rootElement
-        this.type = rootElement?.getType() ?: -1
-        this.label = rootElement?.toString()
     }
 
-    constructor(type: Int, label: String) {
-        this.type = type
-        this.label = label
-    }
+    constructor(type: Int, label: String) : super(type, label)
 
     fun addPsiChild(child: ITree) {
         child.parent = this
