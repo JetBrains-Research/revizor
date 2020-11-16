@@ -1,5 +1,6 @@
 package org.jetbrains.research.plugin.jgrapht
 
+import org.jetbrains.research.plugin.PatternGraph
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificEdge
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
@@ -165,3 +166,6 @@ fun createPatternSpecificGraph(dotInput: InputStream)
     }
     return targetDAG
 }
+
+fun PatternGraph.findVertexById(id: Int): PatternSpecificVertex =
+    this.vertexSet().find { it.id == id } ?: throw NoSuchElementException()
