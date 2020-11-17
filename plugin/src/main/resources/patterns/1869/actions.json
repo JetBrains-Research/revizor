@@ -1,0 +1,25 @@
+[
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 3138,
+      "type": 461,
+      "label": "PyCallExpression: self.assertIs"
+    },
+    "value": "PyCallExpression: self.assertTrue"
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 3140,
+      "type": 448,
+      "label": "PyReferenceExpression: assertIs"
+    },
+    "value": "PyReferenceExpression: assertTrue"
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 3143,
+      "type": 454,
+      "label": "PyBoolLiteralExpression"
+    }
+  }
+]

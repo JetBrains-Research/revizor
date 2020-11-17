@@ -1,0 +1,52 @@
+[
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 21849,
+      "type": 461,
+      "label": "PyCallExpression: np.array"
+    },
+    "value": "PyCallExpression: np.arange"
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 21847,
+      "type": 448,
+      "label": "PyReferenceExpression: array"
+    },
+    "value": "PyReferenceExpression: arange"
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 72,
+      "type": 422,
+      "label": "PyArgumentList"
+    },
+    "parentVertexWrapper": {
+      "rootVertexId": 21849,
+      "type": 461,
+      "label": "PyCallExpression: np.array"
+    },
+    "position": 1
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": null,
+      "type": 448,
+      "label": "PyReferenceExpression: range"
+    }
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 21851,
+      "type": 461,
+      "label": "PyCallExpression: range"
+    }
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 74,
+      "type": 422,
+      "label": "PyArgumentList"
+    }
+  }
+]

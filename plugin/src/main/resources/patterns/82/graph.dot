@@ -1,0 +1,14 @@
+digraph G {
+  21849 [ metadata="" color="red2" shape="box" label="array (array) [21849]" ];
+  21847 [ metadata="" color="red2" shape="ellipse" label="var (numpy.array) [21847]" ];
+  21851 [ metadata="" color="red2" shape="box" label="range (range) [21851]" ];
+  74 [ metadata="hanger" color="null" shape="null" label="array.PyArgumentList (array.PyArgumentList) [74]" ];
+  72 [ metadata="hanger" color="null" shape="null" label="range.PyArgumentList (range.PyArgumentList) [72]" ];
+  21847 -> 21849 [ from_closure="false" xlabel="recv" ];
+  21851 -> 21849 [ from_closure="false" xlabel="para" ];
+  21851 -> 74 [ from_closure="false" xlabel="para" ];
+  74 -> 21849 [ from_closure="false" xlabel="para" ];
+  72 -> 21851 [ from_closure="false" xlabel="para" ];
+  72 -> 74 [ from_closure="true" xlabel="para" ];
+  72 -> 21849 [ from_closure="true" xlabel="para" ];
+}

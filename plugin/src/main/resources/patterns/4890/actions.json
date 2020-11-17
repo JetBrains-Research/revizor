@@ -1,0 +1,52 @@
+[
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 256,
+      "type": 461,
+      "label": "PyCallExpression: np.log"
+    },
+    "value": "PyCallExpression: np.log1p"
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 258,
+      "type": 448,
+      "label": "PyReferenceExpression: log"
+    },
+    "value": "PyReferenceExpression: log1p"
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": null,
+      "type": 448,
+      "label": "PyReferenceExpression: x"
+    },
+    "parentVertexWrapper": {
+      "rootVertexId": 95,
+      "type": 422,
+      "label": "PyArgumentList"
+    },
+    "position": 0
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 263,
+      "type": 449,
+      "label": "PyNumericLiteralExpression"
+    }
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 94,
+      "type": 448,
+      "label": "PyReferenceExpression: x"
+    }
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 262,
+      "type": 459,
+      "label": "PyBinaryExpression"
+    }
+  }
+]

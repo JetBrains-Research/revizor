@@ -1,0 +1,27 @@
+digraph G {
+  1868 [ metadata="" color="red2" shape="box" label="keys (keys) [1868]" ];
+  1871 [ metadata="" color="red2" shape="ellipse" label="var (d.keys) [1871]" ];
+  1870 [ metadata="" color="red2" shape="box" label="sorted (sorted) [1870]" ];
+  1865 [ metadata="" color="red2" shape="box" label="= (=) [1865]" ];
+  1866 [ metadata="" color="red2" shape="ellipse" label="var (keys) [1866]" ];
+  63 [ metadata="hanger" color="null" shape="null" label="sorted.PyArgumentList (sorted.PyArgumentList) [63]" ];
+  60 [ metadata="hanger" color="null" shape="null" label="var (d) [60]" ];
+  61 [ metadata="hanger" color="null" shape="null" label="keys.PyArgumentList (keys.PyArgumentList) [61]" ];
+  1868 -> 1870 [ from_closure="false" xlabel="para" ];
+  1868 -> 1865 [ from_closure="true" xlabel="para" ];
+  1868 -> 1866 [ from_closure="true" xlabel="def" ];
+  1871 -> 1868 [ from_closure="false" xlabel="recv" ];
+  1870 -> 1865 [ from_closure="false" xlabel="para" ];
+  1870 -> 1866 [ from_closure="false" xlabel="def" ];
+  1865 -> 1866 [ from_closure="false" xlabel="def" ];
+  1868 -> 63 [ from_closure="false" xlabel="para" ];
+  63 -> 1865 [ from_closure="true" xlabel="para" ];
+  63 -> 1870 [ from_closure="false" xlabel="para" ];
+  63 -> 1866 [ from_closure="true" xlabel="def" ];
+  60 -> 1871 [ from_closure="false" xlabel="qual" ];
+  61 -> 1870 [ from_closure="true" xlabel="para" ];
+  61 -> 1865 [ from_closure="true" xlabel="para" ];
+  61 -> 63 [ from_closure="true" xlabel="para" ];
+  61 -> 1868 [ from_closure="false" xlabel="para" ];
+  61 -> 1866 [ from_closure="true" xlabel="def" ];
+}

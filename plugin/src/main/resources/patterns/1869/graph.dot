@@ -1,0 +1,9 @@
+digraph G {
+  3138 [ metadata="" color="red2" shape="box" label="assertIs (assertIs) [3138]" ];
+  3140 [ metadata="" color="red2" shape="ellipse" label="var (self.assertIs) [3140]" ];
+  75 [ metadata="" color="red2" shape="box" label="assertIs.PyArgumentList (assertIs.PyArgumentList) [75]" ];
+  3143 [ metadata="" color="red2" shape="ellipse" label="lit (True) [3143]" ];
+  3140 -> 3138 [ from_closure="false" xlabel="recv" ];
+  75 -> 3138 [ from_closure="false" xlabel="para" ];
+  3143 -> 75 [ from_closure="false" xlabel="para" ];
+}

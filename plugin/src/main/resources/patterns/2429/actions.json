@@ -1,0 +1,32 @@
+[
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 2246,
+      "type": 461,
+      "label": "PyCallExpression: isinstance"
+    },
+    "value": "PyCallExpression: callable"
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": null,
+      "type": 448,
+      "label": "PyReferenceExpression: isinstance"
+    },
+    "value": "PyReferenceExpression: callable"
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 2247,
+      "type": 448,
+      "label": "PyReferenceExpression: collections"
+    }
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 2248,
+      "type": 448,
+      "label": "PyReferenceExpression: Callable"
+    }
+  }
+]

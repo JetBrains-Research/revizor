@@ -1,0 +1,18 @@
+[
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 74,
+      "type": 461,
+      "label": "PyCallExpression: os.path.exists"
+    },
+    "value": "PyCallExpression: os.path.isdir"
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 79,
+      "type": 448,
+      "label": "PyReferenceExpression: exists"
+    },
+    "value": "PyReferenceExpression: isdir"
+  }
+]

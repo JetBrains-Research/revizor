@@ -1,0 +1,74 @@
+[
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 25,
+      "type": 425,
+      "label": "PyExpressionStatement"
+    },
+    "parentVertexWrapper": {
+      "rootVertexId": 13,
+      "type": 444,
+      "label": "PyStatementList"
+    },
+    "position": 1
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 124,
+      "type": 461,
+      "label": "PyCallExpression: data.add"
+    },
+    "value": "PyCallExpression: data.update"
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 112,
+      "type": 448,
+      "label": "PyReferenceExpression: add"
+    },
+    "value": "PyReferenceExpression: update"
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 22,
+      "type": 448,
+      "label": "PyReferenceExpression: element"
+    },
+    "value": "PyReferenceExpression: additional_data"
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 125,
+      "type": 421,
+      "label": "PyTargetExpression: element"
+    }
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 16,
+      "type": 448,
+      "label": "PyReferenceExpression: additional_data"
+    }
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": null,
+      "type": 444,
+      "label": "PyStatementList"
+    }
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 118,
+      "type": 482,
+      "label": "PyForPart"
+    }
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": null,
+      "type": 433,
+      "label": "PyForStatement"
+    }
+  }
+]

@@ -264,10 +264,11 @@ class ActionsPreprocessing : BasePlatformTestCase() {
             sortActions(patternDir)
             val dest = File(PATTERNS_DEST).resolve(patternDir.name)
             patternDir.copyRecursively(dest, overwrite = true)
+            dest.listFiles()!!.filter { it.extension == "dot" }.forEach { it.delete() }
             val serializedActions = serializeActions(patternDir)
             dest.resolve("actions.json").writeText(serializedActions)
             val patternGraph = loadPatternGraph(patternDir)
-            patternGraph.export(dest.resolve("new_graph.dot"))
+            patternGraph.export(dest.resolve("graph.dot"))
         }
     }
 }

@@ -1,0 +1,18 @@
+[
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 1065,
+      "type": 461,
+      "label": "PyCallExpression: os.mkdir"
+    },
+    "value": "PyCallExpression: os.makedirs"
+  },
+  {
+    "targetVertexWrapper": {
+      "rootVertexId": 1068,
+      "type": 448,
+      "label": "PyReferenceExpression: mkdir"
+    },
+    "value": "PyReferenceExpression: makedirs"
+  }
+]
