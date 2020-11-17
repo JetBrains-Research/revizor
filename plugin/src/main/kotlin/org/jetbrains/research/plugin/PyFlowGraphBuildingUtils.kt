@@ -3,6 +3,7 @@ package org.jetbrains.research.plugin
 import com.jetbrains.python.psi.PyFunction
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
+import org.jetbrains.research.plugin.jgrapht.loadPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jetbrains.research.plugin.pyflowgraph.GraphBuildingException
 import org.jetbrains.research.plugin.pyflowgraph.PyFlowGraphBuilder
@@ -16,7 +17,7 @@ fun buildPyFlowGraphForMethod(node: PyFunction, builder: String = "kotlin")
         "python" -> {
             val tempFile = createTempFileFromMethodPsi(node)
             val dotFile = buildPyFlowGraphBySubprocess(tempFile)
-            createPatternSpecificGraph(dotFile.inputStream())
+            loadPatternSpecificGraph(dotFile.inputStream())
         }
         "kotlin" -> {
             val methodPyFlowGraph = PyFlowGraphBuilder().buildForPyFunction(node)

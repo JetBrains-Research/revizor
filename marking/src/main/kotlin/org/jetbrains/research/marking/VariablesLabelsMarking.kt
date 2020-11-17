@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
+import org.jetbrains.research.plugin.jgrapht.loadPatternSpecificGraph
 import org.jgrapht.Graph
 import org.jgrapht.graph.AsSubgraph
 import java.io.File
@@ -22,7 +23,7 @@ private fun loadFragments(inputPatternsStorage: String): FragmentsByPathMap {
     val fragmentsByDirectory = FragmentsByPathMap()
     File(inputPatternsStorage).walk().forEach {
         if (it.isFile && it.extension == "dot" && it.name.startsWith("fragment")) {
-            val currentGraph = createPatternSpecificGraph(it.inputStream())
+            val currentGraph = loadPatternSpecificGraph(it.inputStream())
             val subgraphBefore = AsSubgraph(
                 currentGraph,
                 currentGraph.vertexSet()

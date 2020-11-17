@@ -99,7 +99,7 @@ fun createPatternSpecificGraph(pfg: PyFlowGraph):
     return targetDAG
 }
 
-fun createPatternSpecificGraph(dotInput: InputStream)
+fun loadPatternSpecificGraph(dotInput: InputStream)
         : DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> {
     val importer = DOTImporter<String, DefaultEdge>()
     importer.setVertexFactory { id -> id }
