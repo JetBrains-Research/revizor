@@ -21,10 +21,13 @@ import org.jetbrains.research.plugin.gumtree.wrappers.InsertActionWrapper
 import org.jetbrains.research.plugin.gumtree.wrappers.MoveActionWrapper
 import org.jetbrains.research.plugin.gumtree.wrappers.UpdateActionWrapper
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
+import org.jetbrains.research.plugin.jgrapht.export
 import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.graph.AsSubgraph
 import java.io.File
+import java.util.*
+import kotlin.collections.HashMap
 
 
 class ActionsPreprocessing : BasePlatformTestCase() {
@@ -35,10 +38,14 @@ class ActionsPreprocessing : BasePlatformTestCase() {
     }
 
     private val logger = Logger.getInstance(this::class.java)
+
     private val fragmentToPatternMappingByPattern =
         HashMap<String, HashMap<PatternSpecificVertex, PatternSpecificVertex>>()
-    private val psiToPatternMappingByPattern = HashMap<String, HashMap<PyElement, PatternSpecificVertex>>()
-    private val patternGraphByPattern = HashMap<String, PatternGraph>()
+    private val psiToPatternMappingByPattern =
+        HashMap<String, HashMap<PyElement, PatternSpecificVertex>>()
+
+    private val patternGraphCache = HashMap<String, PatternGraph>()
+    private val fragmentGraphCache = HashMap<String, PatternGraph>()
     private val actionsCache = HashMap<String, List<Action>>()
     private val psiCache = HashMap<File, PyElement>()
 
@@ -76,29 +83,37 @@ class ActionsPreprocessing : BasePlatformTestCase() {
         }
     }
 
-    private fun loadVariableLabelsGroups(patternDir: File): List<PatternSpecificVertex.LabelsGroup> {
-        val src = patternDir.toPath().resolve("possible_variable_labels.json").toFile().readText()
-        return Json.decodeFromString(src)
+    private fun loadPatternGraph(patternDir: File): PatternGraph {
+        return if (patternGraphCache.containsKey(patternDir.name)) {
+            patternGraphCache[patternDir.name]!!
+        } else {
+            val dotFiles = patternDir.listFiles { _, name -> name.endsWith(".dot") }!!
+            val inputDotStream = dotFiles[0].inputStream()
+            val changeGraph = createPatternSpecificGraph(inputDotStream)
+            val subgraphBefore = AsSubgraph(
+                changeGraph,
+                changeGraph.vertexSet()
+                    .filter { it.fromPart == PatternSpecificVertex.ChangeGraphPartIndicator.BEFORE }
+                    .toSet()
+            )
+            val labelsGroupsSrc = patternDir.toPath().resolve("possible_variable_labels.json").toFile().readText()
+            val labelsGroups = Json.decodeFromString<List<PatternSpecificVertex.LabelsGroup>>(labelsGroupsSrc)
+            val graph = createPatternSpecificGraph(subgraphBefore, labelsGroups)
+            patternGraphCache[patternDir.name] = graph
+            graph
+        }
     }
 
-    private fun loadGraph(patternDir: File) {
-        val dotFiles = patternDir.listFiles { _, name -> name.endsWith(".dot") }!!
-        val inputDotStream = dotFiles[0].inputStream()
-        val changeGraph = createPatternSpecificGraph(inputDotStream)
-        val subgraphBefore = AsSubgraph(
-            changeGraph,
-            changeGraph.vertexSet()
-                .filter { it.fromPart == PatternSpecificVertex.ChangeGraphPartIndicator.BEFORE }
-                .toSet()
-        )
-        val labelsGroups = loadVariableLabelsGroups(patternDir)
-        patternGraphByPattern[patternDir.name] = createPatternSpecificGraph(subgraphBefore, labelsGroups)
-    }
-
-    private fun loadFragmentMappings(patternDir: File) {
+    /**
+     * Create mapping from fragment's PSI elements to pattern's graph vertices
+     * Also create mapping from fragment's graph vertices to pattern's graph vertices
+     * Also save fragment's graph to cache
+     */
+    private fun createFragmentToPatternMappings(patternDir: File) {
         val fragmentPsi = loadPsi(patternDir.toPath().resolve("before.py").toFile())!!
-        val patternGraph = patternGraphByPattern[patternDir.name]!!
+        val patternGraph = loadPatternGraph(patternDir)
         val fragmentGraph = buildPyFlowGraphForMethod(fragmentPsi, builder = "kotlin")
+        fragmentGraphCache[patternDir.name] = fragmentGraph
         val fragmentToPatternMapping = HashMap<PatternSpecificVertex, PatternSpecificVertex>()
         val psiToPatternMapping = HashMap<PyElement, PatternSpecificVertex>()
         val inspector = getWeakSubgraphIsomorphismInspector(fragmentGraph, patternGraph)
@@ -116,8 +131,10 @@ class ActionsPreprocessing : BasePlatformTestCase() {
         }
     }
 
-    private fun collectAdditionalNodes(patternDir: File): Set<PyElement> {
-        // Collect elements which are involved in edit actions but are not contained in pattern graph
+    /**
+     * Collect PSI elements which are involved in edit actions but are not contained in the pattern's graph
+     */
+    private fun collectAdditionalElementsFromActions(patternDir: File): Set<PyElement> {
         val psiToPatternVertex = psiToPatternMappingByPattern[patternDir.name]!!
         val actions = loadEditActions(patternDir)
         val insertedElements = hashSetOf<PyElement>()
@@ -145,6 +162,70 @@ class ActionsPreprocessing : BasePlatformTestCase() {
         return hangerElements
     }
 
+    /**
+     * Add vertices (containing given PyElements) to pattern graph and connect them to all its neighbours,
+     * because `VF2SubgraphIsomorphismMatcher` will match only among induced subgraphs
+     */
+    private fun extendPatternGraphWithElements(patternDir: File) {
+        val patternGraph = loadPatternGraph(patternDir)
+        val fragmentGraph = fragmentGraphCache[patternDir.name]!!
+        val fragmentToPatternMapping = fragmentToPatternMappingByPattern[patternDir.name]!!
+        val hangerElements = collectAdditionalElementsFromActions(patternDir)
+        for (element in hangerElements) {
+            val originalVertex = fragmentGraph.vertexSet().find { it.origin?.psi == element }
+            if (originalVertex == null
+                || fragmentToPatternMapping.containsKey(originalVertex)
+                && patternGraph.containsVertex(fragmentToPatternMapping[originalVertex])
+            ) {
+                continue
+            }
+            val newVertex = originalVertex.copy()
+            psiToPatternMappingByPattern[patternDir.name]?.put(element, newVertex)
+            fragmentToPatternMapping[originalVertex] = newVertex
+            if (newVertex.label?.startsWith("var") == true) {
+                newVertex.dataNodeInfo = PatternSpecificVertex.LabelsGroup(
+                    whatMatters = PatternSpecificVertex.MatchingMode.NOTHING,
+                    labels = hashSetOf(),
+                    longestCommonSuffix = ""
+                )
+            }
+            newVertex.metadata = "hanger"
+            patternGraph.addVertex(newVertex)
+            for (incomingEdge in fragmentGraph.incomingEdgesOf(originalVertex)) {
+                val fragmentEdgeSource = fragmentGraph.getEdgeSource(incomingEdge)
+                val patternEdgeSource = fragmentToPatternMapping[fragmentEdgeSource] ?: continue
+                patternGraph.addEdge(patternEdgeSource, newVertex, incomingEdge)
+            }
+            for (outgoingEdge in fragmentGraph.outgoingEdgesOf(originalVertex)) {
+                val fragmentEdgeTarget = fragmentGraph.getEdgeTarget(outgoingEdge)
+                val patternEdgeTarget = fragmentToPatternMapping[fragmentEdgeTarget] ?: continue
+                patternGraph.addEdge(newVertex, patternEdgeTarget, outgoingEdge)
+            }
+        }
+    }
+
+    /**
+     * Swap `Update` and `Move` actions which keeps the node with the same type and label,
+     * since it could produce bugs with updating already moved nodes
+     */
+    private fun sortActions(patternDir: File) {
+        val actions = loadEditActions(patternDir)
+        val updates = arrayListOf<Pair<Int, Update>>()
+        for ((i, action) in actions.withIndex()) {
+            if (action is Update) {
+                updates.add(Pair(i, action))
+                continue
+            }
+            if (action is Move) {
+                val item = updates.find { it.second.node.hasSameTypeAndLabel(action.node) } ?: continue
+                Collections.swap(actions, i, item.first)
+            }
+        }
+    }
+
+    /**
+     * Add the corresponding `PatternSpecificVertex` node to each action, and serialize it
+     */
     private fun serializeActions(patternDir: File): String {
         val psiToPatternVertex = psiToPatternMappingByPattern[patternDir.name]!!
         val actions = loadEditActions(patternDir)
@@ -178,14 +259,15 @@ class ActionsPreprocessing : BasePlatformTestCase() {
 
     fun test() {
         File(PATTERNS_SRC).listFiles()?.forEach { patternDir ->
-            loadGraph(patternDir)
-            loadFragmentMappings(patternDir)
-            val hangerElements = collectAdditionalNodes(patternDir)
-
-            val serializedActions = serializeActions(patternDir)
+            createFragmentToPatternMappings(patternDir)
+            extendPatternGraphWithElements(patternDir)
+            sortActions(patternDir)
             val dest = File(PATTERNS_DEST).resolve(patternDir.name)
             patternDir.copyRecursively(dest, overwrite = true)
+            val serializedActions = serializeActions(patternDir)
             dest.resolve("actions.json").writeText(serializedActions)
+            val patternGraph = loadPatternGraph(patternDir)
+            patternGraph.export(dest.resolve("new_graph.dot"))
         }
     }
 }
