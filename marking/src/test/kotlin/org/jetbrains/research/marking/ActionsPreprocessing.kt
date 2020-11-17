@@ -4,7 +4,6 @@ import com.github.gumtreediff.actions.ActionGenerator
 import com.github.gumtreediff.actions.model.*
 import com.github.gumtreediff.matchers.Matchers
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.jetbrains.python.PythonLanguage
@@ -40,7 +39,8 @@ class ActionsPreprocessing : BasePlatformTestCase() {
         HashMap<String, HashMap<PatternSpecificVertex, PatternSpecificVertex>>()
     private val psiToPatternMappingByPattern = HashMap<String, HashMap<PyElement, PatternSpecificVertex>>()
     private val patternGraphByPattern = HashMap<String, PatternGraph>()
-    private val psiCache = HashMap<File, PsiElement>()
+    private val actionsCache = HashMap<String, List<Action>>()
+    private val psiCache = HashMap<File, PyElement>()
 
     private fun loadPsi(file: File): PyFunction? {
         return if (psiCache.containsKey(file)) {
@@ -56,19 +56,24 @@ class ActionsPreprocessing : BasePlatformTestCase() {
     }
 
     private fun loadEditActions(patternDir: File): List<Action> {
-        var actions: List<Action> = arrayListOf()
-        try {
-            val pyFunctionBefore = loadPsi(patternDir.toPath().resolve("before.py").toFile())!!
-            val pyFunctionAfter = loadPsi(patternDir.toPath().resolve("after.py").toFile())!!
-            val srcGumtree = PyPsiGumTreeGenerator().generate(pyFunctionBefore).root
-            val dstGumtree = PyPsiGumTreeGenerator().generate(pyFunctionAfter).root
-            val matcher = Matchers.getInstance().getMatcher(srcGumtree, dstGumtree).also { it.match() }
-            val generator = ActionGenerator(srcGumtree, dstGumtree, matcher.mappings)
-            actions = generator.generate()
-        } catch (ex: Exception) {
-            logger.error(ex)
+        return if (actionsCache.containsKey(patternDir.name)) {
+            actionsCache[patternDir.name]!!
+        } else {
+            var actions: List<Action> = arrayListOf()
+            try {
+                val pyFunctionBefore = loadPsi(patternDir.toPath().resolve("before.py").toFile())!!
+                val pyFunctionAfter = loadPsi(patternDir.toPath().resolve("after.py").toFile())!!
+                val srcGumtree = PyPsiGumTreeGenerator().generate(pyFunctionBefore).root
+                val dstGumtree = PyPsiGumTreeGenerator().generate(pyFunctionAfter).root
+                val matcher = Matchers.getInstance().getMatcher(srcGumtree, dstGumtree).also { it.match() }
+                val generator = ActionGenerator(srcGumtree, dstGumtree, matcher.mappings)
+                actions = generator.generate()
+            } catch (ex: Exception) {
+                logger.error(ex)
+            }
+            actionsCache[patternDir.name] = actions
+            actions
         }
-        return actions
     }
 
     private fun loadVariableLabelsGroups(patternDir: File): List<PatternSpecificVertex.LabelsGroup> {
@@ -111,8 +116,38 @@ class ActionsPreprocessing : BasePlatformTestCase() {
         }
     }
 
-    private fun serializeActions(actions: List<Action>, patternDir: File): String {
+    private fun collectAdditionalNodes(patternDir: File): Set<PyElement> {
+        // Collect elements which are involved in edit actions but are not contained in pattern graph
         val psiToPatternVertex = psiToPatternMappingByPattern[patternDir.name]!!
+        val actions = loadEditActions(patternDir)
+        val insertedElements = hashSetOf<PyElement>()
+        val hangerElements = hashSetOf<PyElement>()
+        for (action in actions) {
+            val element = (action.node as PyPsiGumTree).rootElement!!
+            if (action is Update || action is Delete || action is Move) {
+                if (!psiToPatternVertex.containsKey(element))
+                    hangerElements.add(element)
+            }
+            if (action is Insert) {
+                val newElement = (action.node as PyPsiGumTree).rootElement ?: continue
+                insertedElements.add(newElement)
+            }
+            if (action is Insert || action is Move) {
+                val parent = (action as? Insert)?.parent ?: (action as? Move)?.parent
+                val parentElement = (parent as PyPsiGumTree).rootElement!!
+                if (insertedElements.contains(parentElement))
+                    continue
+                hangerElements.add(parentElement)
+                if (!psiToPatternVertex.containsKey(parentElement))
+                    hangerElements.add(parentElement)
+            }
+        }
+        return hangerElements
+    }
+
+    private fun serializeActions(patternDir: File): String {
+        val psiToPatternVertex = psiToPatternMappingByPattern[patternDir.name]!!
+        val actions = loadEditActions(patternDir)
         val serializedActions = arrayListOf<String>()
         for (action in actions) {
             val element = (action.node as PyPsiGumTree).rootElement!!
@@ -143,11 +178,11 @@ class ActionsPreprocessing : BasePlatformTestCase() {
 
     fun test() {
         File(PATTERNS_SRC).listFiles()?.forEach { patternDir ->
-            val actions = loadEditActions(patternDir)
             loadGraph(patternDir)
             loadFragmentMappings(patternDir)
-            val serializedActions = serializeActions(actions, patternDir)
+            val hangerElements = collectAdditionalNodes(patternDir)
 
+            val serializedActions = serializeActions(patternDir)
             val dest = File(PATTERNS_DEST).resolve(patternDir.name)
             patternDir.copyRecursively(dest, overwrite = true)
             dest.resolve("actions.json").writeText(serializedActions)
