@@ -1,5 +1,6 @@
 [
   {
+    "type": "Update",
     "targetVertexWrapper": {
       "rootVertexId": 3138,
       "type": 461,
@@ -8,6 +9,7 @@
     "value": "PyCallExpression: self.assertTrue"
   },
   {
+    "type": "Update",
     "targetVertexWrapper": {
       "rootVertexId": 3140,
       "type": 448,
@@ -16,6 +18,7 @@
     "value": "PyReferenceExpression: assertTrue"
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 3143,
       "type": 454,

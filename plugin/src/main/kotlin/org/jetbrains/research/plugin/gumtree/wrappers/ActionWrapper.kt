@@ -22,8 +22,10 @@ sealed class ActionWrapper {
             this.targetVertexWrapper = PyPsiGumTreeWrapper(action.node as PyPsiGumTree)
         }
 
-        fun reconstructAction(correspondingGraph: PatternGraph): com.github.gumtreediff.actions.model.Delete {
-            targetVertexWrapper.rootVertex = correspondingGraph.findVertexById(targetVertexWrapper.rootVertexId!!)
+        fun reconstructAction(correspondingGraph: PatternGraph): Delete {
+            targetVertexWrapper.rootVertex = targetVertexWrapper.rootVertexId?.let {
+                correspondingGraph.findVertexById(it)
+            }
             return Delete(targetVertexWrapper.getNode())
         }
     }
@@ -40,7 +42,9 @@ sealed class ActionWrapper {
         }
 
         fun reconstructAction(correspondingGraph: PatternGraph): Update {
-            targetVertexWrapper.rootVertex = correspondingGraph.findVertexById(targetVertexWrapper.rootVertexId!!)
+            targetVertexWrapper.rootVertex = targetVertexWrapper.rootVertexId?.let {
+                correspondingGraph.findVertexById(it)
+            }
             return Update(targetVertexWrapper.getNode(), value)
         }
     }
@@ -59,8 +63,10 @@ sealed class ActionWrapper {
         }
 
         fun reconstructAction(correspondingGraph: PatternGraph): Insert {
-            targetVertexWrapper.rootVertex = correspondingGraph.findVertexById(targetVertexWrapper.rootVertexId!!)
-            parentVertexWrapper?.rootVertex = correspondingGraph.findVertexById(parentVertexWrapper?.rootVertexId!!)
+            targetVertexWrapper.rootVertex = null
+            parentVertexWrapper?.rootVertex = parentVertexWrapper?.rootVertexId?.let {
+                correspondingGraph.findVertexById(it)
+            }
             return Insert(targetVertexWrapper.getNode(), parentVertexWrapper?.getNode(), position)
         }
     }
@@ -79,8 +85,12 @@ sealed class ActionWrapper {
         }
 
         fun reconstructAction(correspondingGraph: PatternGraph): Move {
-            targetVertexWrapper.rootVertex = correspondingGraph.findVertexById(targetVertexWrapper.rootVertexId!!)
-            parentVertexWrapper?.rootVertex = correspondingGraph.findVertexById(parentVertexWrapper?.rootVertexId!!)
+            targetVertexWrapper.rootVertex = targetVertexWrapper.rootVertexId?.let {
+                correspondingGraph.findVertexById(it)
+            }
+            parentVertexWrapper?.rootVertex = parentVertexWrapper?.rootVertexId?.let {
+                correspondingGraph.findVertexById(it)
+            }
             return Move(targetVertexWrapper.getNode(), parentVertexWrapper?.getNode(), position)
         }
     }

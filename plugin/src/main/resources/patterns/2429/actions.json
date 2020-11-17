@@ -1,5 +1,6 @@
 [
   {
+    "type": "Update",
     "targetVertexWrapper": {
       "rootVertexId": 2246,
       "type": 461,
@@ -8,6 +9,7 @@
     "value": "PyCallExpression: callable"
   },
   {
+    "type": "Update",
     "targetVertexWrapper": {
       "rootVertexId": null,
       "type": 448,
@@ -16,6 +18,7 @@
     "value": "PyReferenceExpression: callable"
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 2247,
       "type": 448,
@@ -23,6 +26,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 2248,
       "type": 448,

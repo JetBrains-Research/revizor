@@ -23,7 +23,7 @@ class PyPsiGumTreeWrapper {
 
     fun getNode(): PyPsiGumTree {
         val node = PyPsiGumTree(type, label)
-        node.rootVertex = rootVertex!!
+        node.rootVertex = rootVertex
         return node
     }
 }

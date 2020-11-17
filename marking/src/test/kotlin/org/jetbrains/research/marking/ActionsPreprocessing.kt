@@ -227,32 +227,32 @@ class ActionsPreprocessing : BasePlatformTestCase() {
     private fun serializeActions(patternDir: File): String {
         val psiToPatternVertex = psiToPatternMappingByPattern[patternDir.name]!!
         val actions = loadEditActions(patternDir)
-        val serializedActions = arrayListOf<ActionWrapper>()
+        val actionsWrappers = arrayListOf<ActionWrapper>()
         for (action in actions) {
             val element = (action.node as PyPsiGumTree).rootElement!!
             when (action) {
                 is Update -> {
                     (action.node as PyPsiGumTree).rootVertex = psiToPatternVertex[element]
-                    serializedActions.add(ActionWrapper.UpdateActionWrapper(action))
+                    actionsWrappers.add(ActionWrapper.UpdateActionWrapper(action))
                 }
                 is Delete -> {
                     (action.node as PyPsiGumTree).rootVertex = psiToPatternVertex[element]
-                    serializedActions.add(ActionWrapper.DeleteActionWrapper(action))
+                    actionsWrappers.add(ActionWrapper.DeleteActionWrapper(action))
                 }
                 is Insert -> {
                     val parentElement = (action.parent as PyPsiGumTree).rootElement!!
                     (action.parent as PyPsiGumTree).rootVertex = psiToPatternVertex[parentElement]
-                    serializedActions.add(ActionWrapper.InsertActionWrapper(action))
+                    actionsWrappers.add(ActionWrapper.InsertActionWrapper(action))
                 }
                 is Move -> {
                     val parentElement = (action.parent as PyPsiGumTree).rootElement!!
                     (action.parent as PyPsiGumTree).rootVertex = psiToPatternVertex[parentElement]
                     (action.node as PyPsiGumTree).rootVertex = psiToPatternVertex[element]
-                    serializedActions.add(ActionWrapper.MoveActionWrapper(action))
+                    actionsWrappers.add(ActionWrapper.MoveActionWrapper(action))
                 }
             }
         }
-        return Json.encodeToString(serializedActions)
+        return Json.encodeToString(actionsWrappers)
     }
 
     fun test() {

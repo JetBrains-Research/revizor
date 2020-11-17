@@ -1,5 +1,6 @@
 [
   {
+    "type": "Update",
     "targetVertexWrapper": {
       "rootVertexId": 21849,
       "type": 461,
@@ -8,6 +9,7 @@
     "value": "PyCallExpression: np.arange"
   },
   {
+    "type": "Update",
     "targetVertexWrapper": {
       "rootVertexId": 21847,
       "type": 448,
@@ -16,6 +18,7 @@
     "value": "PyReferenceExpression: arange"
   },
   {
+    "type": "Move",
     "targetVertexWrapper": {
       "rootVertexId": 72,
       "type": 422,
@@ -29,6 +32,7 @@
     "position": 1
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": null,
       "type": 448,
@@ -36,6 +40,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 21851,
       "type": 461,
@@ -43,6 +48,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 74,
       "type": 422,

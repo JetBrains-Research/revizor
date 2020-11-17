@@ -1,5 +1,6 @@
 [
   {
+    "type": "Update",
     "targetVertexWrapper": {
       "rootVertexId": 256,
       "type": 461,
@@ -8,6 +9,7 @@
     "value": "PyCallExpression: np.log1p"
   },
   {
+    "type": "Update",
     "targetVertexWrapper": {
       "rootVertexId": 258,
       "type": 448,
@@ -16,6 +18,7 @@
     "value": "PyReferenceExpression: log1p"
   },
   {
+    "type": "Insert",
     "targetVertexWrapper": {
       "rootVertexId": null,
       "type": 448,
@@ -29,6 +32,7 @@
     "position": 0
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 263,
       "type": 449,
@@ -36,6 +40,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 94,
       "type": 448,
@@ -43,6 +48,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 262,
       "type": 459,

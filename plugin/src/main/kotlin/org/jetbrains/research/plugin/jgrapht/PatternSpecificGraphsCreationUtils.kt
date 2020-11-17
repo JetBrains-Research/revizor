@@ -121,7 +121,10 @@ fun loadPatternSpecificGraph(dotInput: InputStream)
         val vertexColor = vertexAttributes[vertexId]?.get("color")?.toString()
         targetDAG.addVertex(
             PatternSpecificVertex(
-                id = vertexId.toInt(),
+                id = vertexAttributes[vertexId]?.get("label")?.toString()
+                    ?.substringAfter('[')
+                    ?.substringBefore(']')
+                    ?.trim()?.toInt() ?: vertexId.toInt(),
                 label = vertexAttributes[vertexId]?.get("label")?.toString()
                     ?.substringBefore('(')
                     ?.trim(),
@@ -134,7 +137,8 @@ fun loadPatternSpecificGraph(dotInput: InputStream)
                 else
                     PatternSpecificVertex.ChangeGraphPartIndicator.AFTER,
                 color = vertexColor,
-                shape = vertexAttributes[vertexId]?.get("shape")?.toString()
+                shape = vertexAttributes[vertexId]?.get("shape")?.toString(),
+                metadata = vertexAttributes[vertexId]?.get("metadata")?.toString() ?: ""
             )
         )
     }

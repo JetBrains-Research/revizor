@@ -1,5 +1,6 @@
 [
   {
+    "type": "Update",
     "targetVertexWrapper": {
       "rootVertexId": 1065,
       "type": 461,
@@ -8,6 +9,7 @@
     "value": "PyCallExpression: os.makedirs"
   },
   {
+    "type": "Update",
     "targetVertexWrapper": {
       "rootVertexId": 1068,
       "type": 448,

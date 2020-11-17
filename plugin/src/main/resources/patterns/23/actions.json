@@ -1,5 +1,6 @@
 [
   {
+    "type": "Insert",
     "targetVertexWrapper": {
       "rootVertexId": null,
       "type": 448,
@@ -13,6 +14,7 @@
     "position": 0
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 60,
       "type": 448,
@@ -20,6 +22,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 1871,
       "type": 448,
@@ -27,6 +30,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 61,
       "type": 422,
@@ -34,6 +38,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 1868,
       "type": 461,

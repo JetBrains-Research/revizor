@@ -1,5 +1,6 @@
 [
   {
+    "type": "Insert",
     "targetVertexWrapper": {
       "rootVertexId": null,
       "type": 463,
@@ -13,6 +14,7 @@
     "position": 0
   },
   {
+    "type": "Move",
     "targetVertexWrapper": {
       "rootVertexId": 1461,
       "type": 461,
@@ -26,6 +28,7 @@
     "position": 1
   },
   {
+    "type": "Update",
     "targetVertexWrapper": {
       "rootVertexId": 1461,
       "type": 461,
@@ -34,6 +37,7 @@
     "value": "PyCallExpression: enumerate"
   },
   {
+    "type": "Insert",
     "targetVertexWrapper": {
       "rootVertexId": null,
       "type": 421,
@@ -47,6 +51,7 @@
     "position": 0
   },
   {
+    "type": "Insert",
     "targetVertexWrapper": {
       "rootVertexId": null,
       "type": 421,
@@ -60,6 +65,7 @@
     "position": 1
   },
   {
+    "type": "Update",
     "targetVertexWrapper": {
       "rootVertexId": null,
       "type": 448,
@@ -68,6 +74,7 @@
     "value": "PyReferenceExpression: enumerate"
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 122,
       "type": 421,
@@ -75,6 +82,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": null,
       "type": 448,
@@ -82,6 +90,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 120,
       "type": 422,
@@ -89,6 +98,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 1457,
       "type": 461,
@@ -96,6 +106,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 1460,
       "type": 421,
@@ -103,6 +114,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 129,
       "type": 448,
@@ -110,6 +122,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 130,
       "type": 448,
@@ -117,6 +130,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 1459,
       "type": 456,
@@ -124,6 +138,7 @@
     }
   },
   {
+    "type": "Delete",
     "targetVertexWrapper": {
       "rootVertexId": 1465,
       "type": 426,

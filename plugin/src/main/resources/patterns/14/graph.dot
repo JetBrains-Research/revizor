@@ -5,20 +5,20 @@ digraph G {
   125 [ metadata="" color="red2" shape="ellipse" label="var (element) [125]" ];
   130 [ metadata="" color="red2" shape="box" label="add.PyArgumentList (add.PyArgumentList) [130]" ];
   13 [ metadata="hanger" color="null" shape="null" label="PyStatementList (PyStatementList) [13]" ];
-  16 [ metadata="hanger" color="null" shape="null" label="var (additional_data) [16]" ];
   22 [ metadata="hanger" color="null" shape="null" label="var (element) [22]" ];
   25 [ metadata="hanger" color="null" shape="null" label="PyExpressionStatement (PyExpressionStatement) [25]" ];
+  16 [ metadata="hanger" color="null" shape="null" label="var (additional_data) [16]" ];
   118 -> 130 [ from_closure="false" xlabel="control" ];
   118 -> 124 [ from_closure="false" xlabel="control" ];
   112 -> 124 [ from_closure="false" xlabel="recv" ];
   125 -> 130 [ from_closure="false" xlabel="para" ];
   125 -> 118 [ from_closure="false" xlabel="cond" ];
   130 -> 124 [ from_closure="false" xlabel="para" ];
-  16 -> 125 [ from_closure="false" xlabel="def" ];
-  16 -> 118 [ from_closure="false" xlabel="cond" ];
   125 -> 22 [ from_closure="false" xlabel="ref" ];
   22 -> 130 [ from_closure="false" xlabel="para" ];
-  124 -> 25 [ from_closure="false" xlabel="para" ];
-  130 -> 25 [ from_closure="true" xlabel="para" ];
   118 -> 25 [ from_closure="false" xlabel="control" ];
+  130 -> 25 [ from_closure="true" xlabel="para" ];
+  124 -> 25 [ from_closure="false" xlabel="para" ];
+  16 -> 125 [ from_closure="false" xlabel="def" ];
+  16 -> 118 [ from_closure="false" xlabel="cond" ];
 }
