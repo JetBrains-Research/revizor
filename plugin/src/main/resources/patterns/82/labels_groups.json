@@ -1,9 +1,10 @@
-[
-  {
+{
+  "21847": {
     "whatMatters": "VALUABLE_ORIGINAL_LABEL",
     "labels": [
-      "self.assertIs"
+      "numpy.array",
+      "np.array"
     ],
     "longestCommonSuffix": ""
   }
-]
+}

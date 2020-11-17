@@ -1,5 +1,5 @@
-[
-  {
+{
+  "1871": {
     "whatMatters": "LONGEST_COMMON_SUFFIX",
     "labels": [
       "self.data.keys",
@@ -12,16 +12,16 @@
     ],
     "longestCommonSuffix": ".keys"
   },
-  {
+  "1866": {
     "whatMatters": "NOTHING",
     "labels": [
-      "positions",
+      "keys",
       "output_keys",
+      "positions",
       "l",
       "sorted_pos_nums",
-      "keys",
       "levels"
     ],
     "longestCommonSuffix": ""
   }
-]
+}

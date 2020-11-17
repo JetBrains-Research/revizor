@@ -1,9 +1,9 @@
-[
-  {
+{
+  "1353": {
     "whatMatters": "LONGEST_COMMON_SUFFIX",
     "labels": [
-      "self._init_vars.keys",
       "self.values.keys",
+      "self._init_vars.keys",
       "f._Component__pending_events.keys",
       "test_feature.qualifiers.keys",
       "self.__adjacency_list.keys",
@@ -15,4 +15,4 @@
     ],
     "longestCommonSuffix": ".keys"
   }
-]
+}

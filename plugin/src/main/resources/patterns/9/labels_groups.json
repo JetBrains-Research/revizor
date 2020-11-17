@@ -1,10 +1,9 @@
-[
-  {
+{
+  "1460": {
     "whatMatters": "NOTHING",
     "labels": [
       "x1_i",
       "string1",
-      "cjn",
       "string2",
       "name",
       "dim",
@@ -13,12 +12,11 @@
     ],
     "longestCommonSuffix": ""
   },
-  {
+  "1463": {
     "whatMatters": "NOTHING",
     "labels": [
-      "static",
       "str_list",
-      "lb",
+      "static",
       "braid",
       "list_to_use",
       "x1",
@@ -26,4 +24,4 @@
     ],
     "longestCommonSuffix": ""
   }
-]
+}

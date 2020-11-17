@@ -1,18 +1,18 @@
-[
-  {
+{
+  "2248": {
     "whatMatters": "VALUABLE_ORIGINAL_LABEL",
     "labels": [
-      "types.FunctionType",
-      "collections.Callable"
+      "collections.Callable",
+      "types.FunctionType"
     ],
     "longestCommonSuffix": ""
   },
-  {
+  "2247": {
     "whatMatters": "VALUABLE_ORIGINAL_LABEL",
     "labels": [
-      "collections",
-      "types"
+      "types",
+      "collections"
     ],
     "longestCommonSuffix": ""
   }
-]
+}

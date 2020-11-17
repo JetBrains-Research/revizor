@@ -1,9 +1,9 @@
-[
-  {
+{
+  "3140": {
     "whatMatters": "VALUABLE_ORIGINAL_LABEL",
     "labels": [
-      "os.path.exists"
+      "self.assertIs"
     ],
     "longestCommonSuffix": ""
   }
-]
+}

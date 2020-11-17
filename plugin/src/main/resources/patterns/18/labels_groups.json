@@ -1,13 +1,9 @@
-[
-  {
+{
+  "79": {
     "whatMatters": "VALUABLE_ORIGINAL_LABEL",
     "labels": [
-      "math.log",
-      "numpy.log",
-      "np.log",
-      "cuda.cupy.log",
-      "tf.log"
+      "os.path.exists"
     ],
     "longestCommonSuffix": ""
   }
-]
+}

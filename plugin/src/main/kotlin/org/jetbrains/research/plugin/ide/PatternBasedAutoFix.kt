@@ -92,21 +92,21 @@ class PatternBasedAutoFix(
                             }
                             is Insert -> {
                                 val targetParentElement =
-                                        findRevision(elementByTree[action.parent as PyPsiGumTree]!!, revisions)
+                                    findRevision(elementByTree[action.parent as PyPsiGumTree]!!, revisions)
                                 val insert = replaceVarNames(action) as Insert
                                 val newElement = transformer.applyInsert(targetParentElement, insert)
                                 elementByTree[insert.node as PyPsiGumTree] = newElement
                             }
                             is Move -> {
                                 val targetParentElement =
-                                        findRevision(elementByTree[action.parent as PyPsiGumTree]!!, revisions)
+                                    findRevision(elementByTree[action.parent as PyPsiGumTree]!!, revisions)
                                 val targetElement =
-                                        findRevision(elementByTree[action.node as PyPsiGumTree]!!, revisions)
+                                    findRevision(elementByTree[action.node as PyPsiGumTree]!!, revisions)
                                 val movedElement = transformer.applyMove(targetElement, targetParentElement, action)
                                 updateRevisions(targetElement, movedElement, revisions)
                             }
                         }
-                    } catch (ex: Throwable) {
+                    } catch (ex: Exception) {
                         logger.warn("Can not apply the action $action")
                         logger.warn(ex)
                         continue

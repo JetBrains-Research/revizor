@@ -3,8 +3,6 @@ package org.jetbrains.research.plugin
 import com.github.gumtreediff.actions.model.Action
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.jetbrains.python.psi.PyElement
-import com.jetbrains.python.psi.PyFunction
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.jetbrains.research.plugin.gumtree.wrappers.ActionWrapper
@@ -35,17 +33,8 @@ typealias PatternDirectedAcyclicGraph = DirectedAcyclicGraph<PatternSpecificVert
  */
 object PatternsStorage {
     private val patternDescriptionById = HashMap<String, String>()
-
     private val patternGraphById = HashMap<String, PatternDirectedAcyclicGraph>()
-    private val fragmentGraphById = HashMap<String, PatternDirectedAcyclicGraph>()
-    private val fragmentGraphToPatternGraphMappingById =
-        HashMap<String, HashMap<PatternSpecificVertex, PatternSpecificVertex>>()
-    private val fragmentPsiToPatternGraphMappingById =
-        HashMap<String, HashMap<PyElement, PatternSpecificVertex>>()
-
     private val patternEditActionsById = HashMap<String, List<Action>>()
-    private val patternPsiBeforeById = HashMap<String, PyFunction?>()
-    private val patternPsiAfterById = HashMap<String, PyFunction?>()
 
     private val logger = Logger.getInstance(this::class.java)
     lateinit var project: Project
@@ -132,6 +121,6 @@ object PatternsStorage {
     private fun loadLabelsGroups(patternId: String): HashMap<Int, PatternSpecificVertex.LabelsGroup> {
         val filePath = "/patterns/$patternId/labels_groups.json"
         val fileContent = this::class.java.getResource(filePath).readText()
-        return Json.decodeFromString<HashMap<Int, PatternSpecificVertex.LabelsGroup>>(fileContent)
+        return Json.decodeFromString(fileContent)
     }
 }

@@ -112,10 +112,7 @@ fun loadPatternSpecificGraph(dotInput: InputStream): PatternDirectedAcyclicGraph
         val vertexColor = vertexAttributes[vertexId]?.get("color")?.toString()
         targetDAG.addVertex(
             PatternSpecificVertex(
-                id = vertexAttributes[vertexId]?.get("label")?.toString()
-                    ?.substringAfter('[')
-                    ?.substringBefore(']')
-                    ?.trim()?.toInt() ?: vertexId.toInt(),
+                id = vertexId.toInt(),
                 label = vertexAttributes[vertexId]?.get("label")?.toString()
                     ?.substringBefore('(')
                     ?.trim(),
