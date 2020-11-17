@@ -33,7 +33,11 @@ data class PatternSpecificVertex(
         val whatMatters: MatchingMode,
         val labels: HashSet<String>,
         val longestCommonSuffix: String
-    )
+    ) {
+        companion object {
+            fun getEmpty() = LabelsGroup(MatchingMode.UNKNOWN, hashSetOf(), "")
+        }
+    }
 
     object CommonLabel {
         const val VARIABLE = "var"

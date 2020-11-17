@@ -1,82 +1,77 @@
 package org.jetbrains.research.marking
 
-import com.google.gson.Gson
-import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
-import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import org.jetbrains.research.plugin.PatternDirectedAcyclicGraph
+import org.jetbrains.research.plugin.PatternGraph
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
+import org.jetbrains.research.plugin.jgrapht.getSuperWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.plugin.jgrapht.loadPatternSpecificGraph
-import org.jgrapht.Graph
+import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.graph.AsSubgraph
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
-import kotlinx.cli.*
 
-/**
- * An utility that provides CLI interface for marking and processing patterns used by the main plugin.
- */
+const val SRC = "/home/oleg/prog/data/plugin/output_final_best/"
+const val DEST = "/home/oleg/prog/data/plugin/output_final_best_1/"
 
-typealias FragmentsByPathMap = HashMap<Path, ArrayList<Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>>
-typealias PatternGraphByPathMap = HashMap<Path, Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>
+private val descriptionByPath = HashMap<Path, String>()
+private val labelsGroupsJsonByPath = HashMap<Path, String>()
 
-private fun loadFragments(inputPatternsStorage: String): FragmentsByPathMap {
-    val fragmentsByDirectory = FragmentsByPathMap()
-    File(inputPatternsStorage).walk().forEach {
-        if (it.isFile && it.extension == "dot" && it.name.startsWith("fragment")) {
-            val currentGraph = loadPatternSpecificGraph(it.inputStream())
+
+private fun loadFragments(inputPatternsStorage: String): HashMap<Path, ArrayList<PatternGraph>> {
+    val fragmentsByDir = HashMap<Path, ArrayList<PatternGraph>>()
+    File(inputPatternsStorage).walk().forEach { file ->
+        if (file.isFile && file.name.startsWith("fragment") && file.extension == "dot") {
+            val currentGraph = loadPatternSpecificGraph(file.inputStream())
             val subgraphBefore = AsSubgraph(
                 currentGraph,
                 currentGraph.vertexSet()
                     .filter { it.fromPart == PatternSpecificVertex.ChangeGraphPartIndicator.BEFORE }
                     .toSet()
             )
-            fragmentsByDirectory.getOrPut(Paths.get(it.parent)) { ArrayList() }.add(subgraphBefore)
+            fragmentsByDir.getOrPut(Paths.get(file.parent)) { ArrayList() }.add(subgraphBefore)
         }
     }
-    return fragmentsByDirectory
+    return fragmentsByDir
 }
 
-private fun getVarsGroups(fragments: List<Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>>)
-        : ArrayList<PatternSpecificVertex.LabelsGroup> {
-    val labelsGroups = ArrayList<PatternSpecificVertex.LabelsGroup>()
-    for (graph in fragments) {
-        var varsCnt = 0
-        for (vertex in graph.vertexSet()) {
-            if (vertex.label?.startsWith("var") == true) {
-                if (varsCnt >= labelsGroups.size) {
-                    labelsGroups.add(
-                        PatternSpecificVertex.LabelsGroup(
-                            whatMatters = PatternSpecificVertex.MatchingMode.UNKNOWN,
-                            labels = hashSetOf(vertex.originalLabel!!),
-                            longestCommonSuffix = ""
-                        )
-                    )
-                } else {
-                    labelsGroups[varsCnt].labels.add(vertex.originalLabel!!)
+private fun mergeFragments(fragmentsMap: HashMap<Path, ArrayList<PatternGraph>>): HashMap<Path, PatternDirectedAcyclicGraph> {
+    val patternGraphByPath = HashMap<Path, PatternDirectedAcyclicGraph>()
+    for ((path, fragments) in fragmentsMap) {
+        val labelsGroupsByVertexId = HashMap<Int, PatternSpecificVertex.LabelsGroup>()
+        val repr = fragments.first()
+        for (graph in fragments.drop(1)) {
+            val inspector = getSuperWeakSubgraphIsomorphismInspector(repr, graph)
+            if (!inspector.isomorphismExists()) {
+                throw IllegalStateException("Fragments are not isomorphic in the pattern $path")
+            } else {
+                val mapping = inspector.mappings.asSequence().first()
+                for (currentVertex in graph.vertexSet()) {
+                    if (currentVertex.label?.startsWith("var") == true) {
+                        val reprVertex = mapping.getVertexCorrespondence(currentVertex, false)
+                        labelsGroupsByVertexId.getOrPut(reprVertex.id) { PatternSpecificVertex.LabelsGroup.getEmpty() }
+                            .labels.add(currentVertex.originalLabel!!)
+                    }
                 }
-                varsCnt++
             }
         }
+        patternGraphByPath[path] = createPatternSpecificGraph(fragments.first(), labelsGroupsByVertexId)
     }
-    return labelsGroups
+    return patternGraphByPath
 }
 
-private fun collectVariableLabelsGroups(fragmentsMap: FragmentsByPathMap): PatternGraphByPathMap {
-    val graphs = PatternGraphByPathMap()
-    for ((path, fragmentsGraphs) in fragmentsMap) {
-        graphs[path] = createPatternSpecificGraph(
-            baseGraph = fragmentsGraphs.first(),
-            variableLabelsGroups = getVarsGroups(fragmentsGraphs)
-        )
-    }
-    return graphs
-}
-
-private fun markPatterns(patternsGraphs: PatternGraphByPathMap, addDescription: Boolean) {
+private fun markPatterns(
+    patternDirectedAcyclicGraphByPath: HashMap<Path, PatternDirectedAcyclicGraph>,
+    addDescription: Boolean = false
+) {
     println("Start marking")
-    for ((path, graph) in patternsGraphs) {
+    for ((path, graph) in patternDirectedAcyclicGraphByPath) {
         println("-".repeat(70))
         println("Path to current pattern: $path")
+
+        // Add description, which will be shown in the popup (optional)
         if (addDescription) {
             val dotFile = path.toFile()
                 .listFiles { file -> file.extension == "dot" && file.name.startsWith("fragment") }
@@ -86,11 +81,12 @@ private fun markPatterns(patternsGraphs: PatternGraphByPathMap, addDescription: 
             println("Your description:")
             val description = readLine() ?: "No description provided"
             println("Final description: $description")
-            val descFile = path.resolve("description.txt").toFile()
-            descFile.writeText(description)
+            descriptionByPath[path] = description
         }
+
+        // Choose matching mode
         println("Variable original labels groups:")
-        val labelsGroups = ArrayList<PatternSpecificVertex.LabelsGroup>()
+        val labelsGroupsByVertexId = HashMap<Int, PatternSpecificVertex.LabelsGroup>()
         for (vertex in graph.vertexSet()) {
             if (vertex.label?.startsWith("var") == true) {
                 println(vertex.dataNodeInfo?.labels)
@@ -100,34 +96,29 @@ private fun markPatterns(patternsGraphs: PatternGraphByPathMap, addDescription: 
                     val ans = readLine()
                     println("Your answer: $ans")
                     when (ans) {
-                        "labels" -> labelsGroups.add(
+                        "labels" -> labelsGroupsByVertexId[vertex.id] =
                             PatternSpecificVertex.LabelsGroup(
                                 whatMatters = PatternSpecificVertex.MatchingMode.VALUABLE_ORIGINAL_LABEL,
                                 labels = vertex.dataNodeInfo!!.labels,
                                 longestCommonSuffix = ""
-                            )
-                        ).also { exit = true }
-                        "lcs" -> labelsGroups.add(
+                            ).also { exit = true }
+                        "lcs" -> labelsGroupsByVertexId[vertex.id] =
                             PatternSpecificVertex.LabelsGroup(
                                 whatMatters = PatternSpecificVertex.MatchingMode.LONGEST_COMMON_SUFFIX,
                                 labels = vertex.dataNodeInfo!!.labels,
                                 longestCommonSuffix = getLongestCommonSuffix(vertex.dataNodeInfo?.labels)
-                            )
-                        ).also { exit = true }
-                        "nothing" -> labelsGroups.add(
+                            ).also { exit = true }
+                        "nothing" -> labelsGroupsByVertexId[vertex.id] =
                             PatternSpecificVertex.LabelsGroup(
                                 whatMatters = PatternSpecificVertex.MatchingMode.NOTHING,
                                 labels = vertex.dataNodeInfo!!.labels,
                                 longestCommonSuffix = ""
-                            )
-                        ).also { exit = true }
+                            ).also { exit = true }
                     }
                 }
             }
         }
-        val varLabelsJsonString = Gson().toJson(labelsGroups)
-        val varLabelsFile = path.resolve("possible_variable_labels.json").toFile()
-        varLabelsFile.writeText(varLabelsJsonString)
+        labelsGroupsJsonByPath[path] = Json.encodeToString(labelsGroupsByVertexId)
     }
     println("Finish marking")
 }
@@ -143,49 +134,25 @@ private fun getLongestCommonSuffix(strings: Collection<String?>?): String {
 }
 
 private fun copyUsefulFiles(from: String, dest: String) {
-    File(dest).mkdirs()
     File(from).listFiles()?.forEach { patternDir ->
-        val dotFile = patternDir
-            .listFiles { file -> file.extension == "dot" && file.name.startsWith("fragment") }
-            ?.first()
-        val varGroupsJsonFile = patternDir
-            .listFiles { file -> file.name == "possible_variable_labels.json" }
-            ?.first()
-        val descFile = patternDir
-            .listFiles { file -> file.name == "description.txt" }
-            ?.first()
-        patternDir.listFiles()
-            ?.filter { file -> file == dotFile || file == varGroupsJsonFile || file == descFile }
-            ?.forEach { file ->
-                file.copyTo(
-                    Paths.get(dest, patternDir.name, file.name).toFile(),
-                    overwrite = true
-                )
-            }
+        val labelsGroupsFile = Paths.get(dest, patternDir.name, "labels_groups.json").toFile().also {
+            it.parentFile.mkdirs()
+            it.createNewFile()
+            it.writeText(labelsGroupsJsonByPath[patternDir.toPath()]!!)
+        }
+        val descFile = Paths.get(dest, patternDir.name, "description.txt").toFile().also {
+            it.parentFile.mkdirs()
+            it.createNewFile()
+            it.writeText(descriptionByPath[patternDir.toPath()] ?: "No description provided")
+        }
+        patternDir.listFiles { file -> file.name.startsWith("fragment") && file.extension == "dot" }
+            ?.first()?.copyTo(Paths.get(dest, patternDir.name, "graph.dot").toFile(), overwrite = false)
     }
 }
 
 fun main(args: Array<String>) {
-    val parser: ArgParser = ArgParser(programName = "marking")
-    val input: String by parser.option(
-        type = ArgType.String,
-        shortName = "i",
-        description = "Input directory with patterns mined by code-change-miner tool"
-    ).required()
-    val output: String by parser.option(
-        type = ArgType.String,
-        shortName = "o",
-        description = "Output directory for processed patterns"
-    ).required()
-    val addDescription: Boolean by parser.option(
-        type = ArgType.Boolean,
-        fullName = "add-description",
-        shortName = "d",
-        description = "Add description manually for each pattern"
-    ).default(false)
-    parser.parse(args)
-    val fragmentsMap = loadFragments(input)
-    val patternsGraphsMap = collectVariableLabelsGroups(fragmentsMap)
-    markPatterns(patternsGraphsMap, addDescription)
-    copyUsefulFiles(from = input, dest = output)
+    val fragmentsMap = loadFragments(SRC)
+    val patternsGraphsMap = mergeFragments(fragmentsMap)
+    markPatterns(patternsGraphsMap, false)
+    copyUsefulFiles(from = SRC, dest = DEST)
 }

@@ -12,7 +12,7 @@ import com.jetbrains.python.psi.PyFunction
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.jetbrains.research.plugin.PatternGraph
+import org.jetbrains.research.plugin.PatternDirectedAcyclicGraph
 import org.jetbrains.research.plugin.buildPyFlowGraphForMethod
 import org.jetbrains.research.plugin.gumtree.PyPsiGumTree
 import org.jetbrains.research.plugin.gumtree.PyPsiGumTreeGenerator
@@ -42,8 +42,8 @@ class ActionsPreprocessing : BasePlatformTestCase() {
     private val psiToPatternMappingByPattern =
         HashMap<String, HashMap<PyElement, PatternSpecificVertex>>()
 
-    private val patternGraphCache = HashMap<String, PatternGraph>()
-    private val fragmentGraphCache = HashMap<String, PatternGraph>()
+    private val patternGraphCache = HashMap<String, PatternDirectedAcyclicGraph>()
+    private val fragmentGraphCache = HashMap<String, PatternDirectedAcyclicGraph>()
     private val actionsCache = HashMap<String, List<Action>>()
     private val psiCache = HashMap<File, PyElement>()
 
@@ -81,7 +81,7 @@ class ActionsPreprocessing : BasePlatformTestCase() {
         }
     }
 
-    private fun loadPatternGraph(patternDir: File): PatternGraph {
+    private fun loadPatternGraph(patternDir: File): PatternDirectedAcyclicGraph {
         return if (patternGraphCache.containsKey(patternDir.name)) {
             patternGraphCache[patternDir.name]!!
         } else {
@@ -94,8 +94,8 @@ class ActionsPreprocessing : BasePlatformTestCase() {
                     .filter { it.fromPart == PatternSpecificVertex.ChangeGraphPartIndicator.BEFORE }
                     .toSet()
             )
-            val labelsGroupsSrc = patternDir.toPath().resolve("possible_variable_labels.json").toFile().readText()
-            val labelsGroups = Json.decodeFromString<List<PatternSpecificVertex.LabelsGroup>>(labelsGroupsSrc)
+            val labelsGroupsSrc = patternDir.toPath().resolve("labels_groups.json").toFile().readText()
+            val labelsGroups = Json.decodeFromString<HashMap<Int, PatternSpecificVertex.LabelsGroup>>(labelsGroupsSrc)
             val graph = createPatternSpecificGraph(subgraphBefore, labelsGroups)
             patternGraphCache[patternDir.name] = graph
             graph

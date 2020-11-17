@@ -13,6 +13,7 @@ import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.plugin.jgrapht.loadPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
+import org.jgrapht.Graph
 import org.jgrapht.GraphMapping
 import org.jgrapht.graph.DirectedAcyclicGraph
 import java.io.File
@@ -22,7 +23,8 @@ import java.util.*
 import java.util.jar.JarFile
 import kotlin.collections.HashMap
 
-typealias PatternGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>
+typealias PatternGraph = Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>
+typealias PatternDirectedAcyclicGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>
 
 /**
  * A singleton class for storing graph patterns.
@@ -34,8 +36,8 @@ typealias PatternGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpec
 object PatternsStorage {
     private val patternDescriptionById = HashMap<String, String>()
 
-    private val patternGraphById = HashMap<String, PatternGraph>()
-    private val fragmentGraphById = HashMap<String, PatternGraph>()
+    private val patternGraphById = HashMap<String, PatternDirectedAcyclicGraph>()
+    private val fragmentGraphById = HashMap<String, PatternDirectedAcyclicGraph>()
     private val fragmentGraphToPatternGraphMappingById =
         HashMap<String, HashMap<PatternSpecificVertex, PatternSpecificVertex>>()
     private val fragmentPsiToPatternGraphMappingById =
@@ -63,8 +65,9 @@ object PatternsStorage {
                     val dotSrcStream = this::class.java.getResourceAsStream("/$entryPath")
                     val initialGraph = loadPatternSpecificGraph(dotSrcStream)
                     val labelsGroups = loadLabelsGroups(patternId)
-                    val patternGraph: PatternGraph = createPatternSpecificGraph(initialGraph, labelsGroups)
-                    patternGraphById[patternId] = patternGraph
+                    val patternDirectedAcyclicGraph: PatternDirectedAcyclicGraph =
+                        createPatternSpecificGraph(initialGraph, labelsGroups)
+                    patternGraphById[patternId] = patternDirectedAcyclicGraph
                 }
             }
         } catch (ex: Exception) {
@@ -74,7 +77,7 @@ object PatternsStorage {
         }
     }
 
-    fun getPatternById(patternId: String): PatternGraph? = patternGraphById[patternId]
+    fun getPatternById(patternId: String): PatternDirectedAcyclicGraph? = patternGraphById[patternId]
 
     fun getPatternDescriptionById(patternId: String): String =
         patternDescriptionById.getOrPut(patternId) { loadDescription(patternId) ?: "Unnamed pattern: $patternId" }
@@ -82,12 +85,12 @@ object PatternsStorage {
     fun getPatternEditActionsById(patternId: String): List<Action> =
         patternEditActionsById.getOrPut(patternId) { loadEditActionsFromPattern(patternId) }
 
-    fun getIsomorphicPatterns(targetGraph: PatternGraph)
+    fun getIsomorphicPatterns(targetDirectedAcyclicGraph: PatternDirectedAcyclicGraph)
             : HashMap<String, ArrayList<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>> {
         val suitablePatterns =
             HashMap<String, ArrayList<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>>()
         for ((patternId, patternGraph) in patternGraphById) {
-            val inspector = getWeakSubgraphIsomorphismInspector(targetGraph, patternGraph)
+            val inspector = getWeakSubgraphIsomorphismInspector(targetDirectedAcyclicGraph, patternGraph)
             if (inspector.isomorphismExists()) {
                 for (mapping in inspector.mappings) {
                     suitablePatterns.getOrPut(patternId) { arrayListOf() }.add(mapping)
@@ -126,9 +129,9 @@ object PatternsStorage {
         }
     }
 
-    private fun loadLabelsGroups(patternId: String): List<PatternSpecificVertex.LabelsGroup> {
-        val filePath = "/patterns/$patternId/possible_variable_labels.json"
+    private fun loadLabelsGroups(patternId: String): HashMap<Int, PatternSpecificVertex.LabelsGroup> {
+        val filePath = "/patterns/$patternId/labels_groups.json"
         val fileContent = this::class.java.getResource(filePath).readText()
-        return Json.decodeFromString<List<PatternSpecificVertex.LabelsGroup>>(fileContent)
+        return Json.decodeFromString<HashMap<Int, PatternSpecificVertex.LabelsGroup>>(fileContent)
     }
 }

@@ -31,7 +31,8 @@ class BugFinderInspection : LocalInspectionTool() {
             if (node != null) {
                 try {
                     val methodGraph = buildPyFlowGraphForMethod(node, builder = "kotlin")
-                    val patternsMappings = PatternsStorage.getIsomorphicPatterns(targetGraph = methodGraph)
+                    val patternsMappings =
+                        PatternsStorage.getIsomorphicPatterns(targetDirectedAcyclicGraph = methodGraph)
                     val problems = DetectedVertexMappingsHolder()
                     for ((patternId, mappings) in patternsMappings) {
                         val patternGraph = PatternsStorage.getPatternById(patternId)!!

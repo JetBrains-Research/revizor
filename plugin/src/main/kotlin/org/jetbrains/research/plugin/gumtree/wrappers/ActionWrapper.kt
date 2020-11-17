@@ -6,7 +6,7 @@ import com.github.gumtreediff.actions.model.Move
 import com.github.gumtreediff.actions.model.Update
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.jetbrains.research.plugin.PatternGraph
+import org.jetbrains.research.plugin.PatternDirectedAcyclicGraph
 import org.jetbrains.research.plugin.gumtree.PyPsiGumTree
 import org.jetbrains.research.plugin.jgrapht.findVertexById
 
@@ -22,9 +22,9 @@ sealed class ActionWrapper {
             this.targetVertexWrapper = PyPsiGumTreeWrapper(action.node as PyPsiGumTree)
         }
 
-        fun reconstructAction(correspondingGraph: PatternGraph): Delete {
+        fun reconstructAction(correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph): Delete {
             targetVertexWrapper.rootVertex = targetVertexWrapper.rootVertexId?.let {
-                correspondingGraph.findVertexById(it)
+                correspondingDirectedAcyclicGraph.findVertexById(it)
             }
             return Delete(targetVertexWrapper.getNode())
         }
@@ -41,9 +41,9 @@ sealed class ActionWrapper {
             this.value = action.value
         }
 
-        fun reconstructAction(correspondingGraph: PatternGraph): Update {
+        fun reconstructAction(correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph): Update {
             targetVertexWrapper.rootVertex = targetVertexWrapper.rootVertexId?.let {
-                correspondingGraph.findVertexById(it)
+                correspondingDirectedAcyclicGraph.findVertexById(it)
             }
             return Update(targetVertexWrapper.getNode(), value)
         }
@@ -62,10 +62,10 @@ sealed class ActionWrapper {
             this.position = action.position
         }
 
-        fun reconstructAction(correspondingGraph: PatternGraph): Insert {
+        fun reconstructAction(correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph): Insert {
             targetVertexWrapper.rootVertex = null
             parentVertexWrapper?.rootVertex = parentVertexWrapper?.rootVertexId?.let {
-                correspondingGraph.findVertexById(it)
+                correspondingDirectedAcyclicGraph.findVertexById(it)
             }
             return Insert(targetVertexWrapper.getNode(), parentVertexWrapper?.getNode(), position)
         }
@@ -84,12 +84,12 @@ sealed class ActionWrapper {
             this.position = action.position
         }
 
-        fun reconstructAction(correspondingGraph: PatternGraph): Move {
+        fun reconstructAction(correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph): Move {
             targetVertexWrapper.rootVertex = targetVertexWrapper.rootVertexId?.let {
-                correspondingGraph.findVertexById(it)
+                correspondingDirectedAcyclicGraph.findVertexById(it)
             }
             parentVertexWrapper?.rootVertex = parentVertexWrapper?.rootVertexId?.let {
-                correspondingGraph.findVertexById(it)
+                correspondingDirectedAcyclicGraph.findVertexById(it)
             }
             return Move(targetVertexWrapper.getNode(), parentVertexWrapper?.getNode(), position)
         }

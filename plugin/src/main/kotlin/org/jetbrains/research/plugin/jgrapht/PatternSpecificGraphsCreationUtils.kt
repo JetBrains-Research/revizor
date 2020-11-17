@@ -1,11 +1,11 @@
 package org.jetbrains.research.plugin.jgrapht
 
+import org.jetbrains.research.plugin.PatternDirectedAcyclicGraph
 import org.jetbrains.research.plugin.PatternGraph
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificEdge
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jetbrains.research.plugin.pyflowgraph.models.PyFlowGraph
-import org.jgrapht.Graph
 import org.jgrapht.graph.DefaultEdge
 import org.jgrapht.graph.DirectedAcyclicGraph
 import org.jgrapht.graph.DirectedMultigraph
@@ -22,40 +22,32 @@ import java.io.InputStream
  */
 
 fun createPatternSpecificGraph(
-    baseGraph: Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>,
-    variableLabelsGroups: List<PatternSpecificVertex.LabelsGroup>
-): DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> {
+    baseDirectedAcyclicGraph: PatternGraph,
+    labelsGroupsByVertexId: Map<Int, PatternSpecificVertex.LabelsGroup>
+): PatternDirectedAcyclicGraph {
     val targetGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
         PatternSpecificMultipleEdge::class.java
     )
     val verticesMapping = HashMap<PatternSpecificVertex, PatternSpecificVertex>()
-    var variableVerticesCounter = 0
-    for (vertex in baseGraph.vertexSet()) {
+    for (vertex in baseDirectedAcyclicGraph.vertexSet()) {
         val newVertex = vertex.copy()
         if (vertex.label?.startsWith("var") == true) {
-            newVertex.dataNodeInfo = variableLabelsGroups.getOrNull(variableVerticesCounter)
-                ?: PatternSpecificVertex.LabelsGroup(
-                    whatMatters = PatternSpecificVertex.MatchingMode.UNKNOWN,
-                    labels = hashSetOf(),
-                    longestCommonSuffix = ""
-                )
-            variableVerticesCounter++
+            newVertex.dataNodeInfo = labelsGroupsByVertexId[vertex.id] ?: PatternSpecificVertex.LabelsGroup.getEmpty()
         }
         targetGraph.addVertex(newVertex)
         verticesMapping[vertex] = newVertex
     }
-    for (edge in baseGraph.edgeSet()) {
+    for (edge in baseDirectedAcyclicGraph.edgeSet()) {
         targetGraph.addEdge(
-            verticesMapping[baseGraph.getEdgeSource(edge)],
-            verticesMapping[baseGraph.getEdgeTarget(edge)],
+            verticesMapping[baseDirectedAcyclicGraph.getEdgeSource(edge)],
+            verticesMapping[baseDirectedAcyclicGraph.getEdgeTarget(edge)],
             edge.copy()
         )
     }
     return targetGraph
 }
 
-fun createPatternSpecificGraph(pfg: PyFlowGraph):
-        DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> {
+fun createPatternSpecificGraph(pfg: PyFlowGraph): PatternDirectedAcyclicGraph {
     val defaultDAG = DirectedMultigraph<PatternSpecificVertex, PatternSpecificEdge>(
         PatternSpecificEdge::class.java
     )
@@ -99,8 +91,7 @@ fun createPatternSpecificGraph(pfg: PyFlowGraph):
     return targetDAG
 }
 
-fun loadPatternSpecificGraph(dotInput: InputStream)
-        : DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> {
+fun loadPatternSpecificGraph(dotInput: InputStream): PatternDirectedAcyclicGraph {
     val importer = DOTImporter<String, DefaultEdge>()
     importer.setVertexFactory { id -> id }
     val vertexAttributes = HashMap<String, HashMap<String, Attribute>>()
@@ -171,5 +162,5 @@ fun loadPatternSpecificGraph(dotInput: InputStream)
     return targetDAG
 }
 
-fun PatternGraph.findVertexById(id: Int): PatternSpecificVertex =
+fun PatternDirectedAcyclicGraph.findVertexById(id: Int): PatternSpecificVertex =
     this.vertexSet().find { it.id == id } ?: throw NoSuchElementException()
