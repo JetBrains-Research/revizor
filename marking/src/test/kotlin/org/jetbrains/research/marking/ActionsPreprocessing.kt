@@ -16,13 +16,11 @@ import org.jetbrains.research.plugin.PatternGraph
 import org.jetbrains.research.plugin.buildPyFlowGraphForMethod
 import org.jetbrains.research.plugin.gumtree.PyPsiGumTree
 import org.jetbrains.research.plugin.gumtree.PyPsiGumTreeGenerator
-import org.jetbrains.research.plugin.gumtree.wrappers.DeleteActionWrapper
-import org.jetbrains.research.plugin.gumtree.wrappers.InsertActionWrapper
-import org.jetbrains.research.plugin.gumtree.wrappers.MoveActionWrapper
-import org.jetbrains.research.plugin.gumtree.wrappers.UpdateActionWrapper
+import org.jetbrains.research.plugin.gumtree.wrappers.ActionWrapper
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.export
 import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
+import org.jetbrains.research.plugin.jgrapht.loadPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.graph.AsSubgraph
 import java.io.File
@@ -33,7 +31,7 @@ import kotlin.collections.HashMap
 class ActionsPreprocessing : BasePlatformTestCase() {
 
     companion object {
-        const val PATTERNS_SRC = "/home/oleg/prog/data/plugin/jar_patterns/patterns"
+        const val PATTERNS_SRC = "/home/oleg/prog/data/plugin/jar_patterns/old_patterns"
         const val PATTERNS_DEST = "/home/oleg/prog/data/plugin/jar_patterns/preprocessed"
     }
 
@@ -89,7 +87,7 @@ class ActionsPreprocessing : BasePlatformTestCase() {
         } else {
             val dotFiles = patternDir.listFiles { _, name -> name.endsWith(".dot") }!!
             val inputDotStream = dotFiles[0].inputStream()
-            val changeGraph = createPatternSpecificGraph(inputDotStream)
+            val changeGraph = loadPatternSpecificGraph(inputDotStream)
             val subgraphBefore = AsSubgraph(
                 changeGraph,
                 changeGraph.vertexSet()
@@ -229,32 +227,32 @@ class ActionsPreprocessing : BasePlatformTestCase() {
     private fun serializeActions(patternDir: File): String {
         val psiToPatternVertex = psiToPatternMappingByPattern[patternDir.name]!!
         val actions = loadEditActions(patternDir)
-        val serializedActions = arrayListOf<String>()
+        val serializedActions = arrayListOf<ActionWrapper>()
         for (action in actions) {
             val element = (action.node as PyPsiGumTree).rootElement!!
             when (action) {
                 is Update -> {
                     (action.node as PyPsiGumTree).rootVertex = psiToPatternVertex[element]
-                    serializedActions.add(Json.encodeToString(UpdateActionWrapper(action)))
+                    serializedActions.add(ActionWrapper.UpdateActionWrapper(action))
                 }
                 is Delete -> {
                     (action.node as PyPsiGumTree).rootVertex = psiToPatternVertex[element]
-                    serializedActions.add(Json.encodeToString(DeleteActionWrapper(action)))
+                    serializedActions.add(ActionWrapper.DeleteActionWrapper(action))
                 }
                 is Insert -> {
                     val parentElement = (action.parent as PyPsiGumTree).rootElement!!
                     (action.parent as PyPsiGumTree).rootVertex = psiToPatternVertex[parentElement]
-                    serializedActions.add(Json.encodeToString(InsertActionWrapper(action)))
+                    serializedActions.add(ActionWrapper.InsertActionWrapper(action))
                 }
                 is Move -> {
                     val parentElement = (action.parent as PyPsiGumTree).rootElement!!
                     (action.parent as PyPsiGumTree).rootVertex = psiToPatternVertex[parentElement]
                     (action.node as PyPsiGumTree).rootVertex = psiToPatternVertex[element]
-                    serializedActions.add(Json.encodeToString(MoveActionWrapper(action)))
+                    serializedActions.add(ActionWrapper.MoveActionWrapper(action))
                 }
             }
         }
-        return serializedActions.joinToString(",", "[", "]")
+        return Json.encodeToString(serializedActions)
     }
 
     fun test() {
