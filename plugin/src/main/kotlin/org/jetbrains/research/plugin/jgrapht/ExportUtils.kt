@@ -12,13 +12,14 @@ import org.jgrapht.nio.dot.DOTExporter
 import java.io.File
 
 
-fun exportDotFile(graph: Graph<PatternSpecificVertex, PatternSpecificEdge>, file: File) {
+fun Graph<PatternSpecificVertex, PatternSpecificEdge>.export(file: File) {
     val exporter = DOTExporter<PatternSpecificVertex, PatternSpecificEdge> { v -> v.id.toString() }
     exporter.setVertexAttributeProvider { v ->
         val map = HashMap<String, Attribute>()
-        map["label"] = DefaultAttribute.createAttribute("${v.label} (${v.originalLabel}) []")
+        map["label"] = DefaultAttribute.createAttribute("${v.label} (${v.originalLabel}) [${v.id}]")
         map["color"] = DefaultAttribute.createAttribute(v.color)
         map["shape"] = DefaultAttribute.createAttribute(v.shape)
+        map["metadata"] = DefaultAttribute.createAttribute(v.metadata)
         map
     }
     exporter.setEdgeAttributeProvider { e ->
@@ -27,7 +28,7 @@ fun exportDotFile(graph: Graph<PatternSpecificVertex, PatternSpecificEdge>, file
         map["from_closure"] = DefaultAttribute.createAttribute(e.fromClosure)
         map
     }
-    exporter.exportGraph(graph, file)
+    exporter.exportGraph(this, file)
     val builder = ProcessBuilder().also {
         it.command("dot", "-Tps", file.absolutePath, "-o", "${file.absolutePath}.pdf")
     }
@@ -35,20 +36,17 @@ fun exportDotFile(graph: Graph<PatternSpecificVertex, PatternSpecificEdge>, file
     process.waitFor()
 }
 
-fun exportDotFileForGraphWithMultipleEdges(
-    graphWithMultipleEdges: DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>,
-    file: File
-) {
+fun DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>.export(file: File) {
     val targetGraph = DirectedMultigraph<PatternSpecificVertex, PatternSpecificEdge>(PatternSpecificEdge::class.java)
-    graphWithMultipleEdges.vertexSet().forEach { targetGraph.addVertex(it) }
-    for (multipleEdge in graphWithMultipleEdges.edgeSet()) {
+    this.vertexSet().forEach { targetGraph.addVertex(it) }
+    for (multipleEdge in this.edgeSet()) {
         for (edge in multipleEdge.embeddedEdgeByXlabel.values) {
             targetGraph.addEdge(
-                graphWithMultipleEdges.getEdgeSource(multipleEdge),
-                graphWithMultipleEdges.getEdgeTarget(multipleEdge),
+                this.getEdgeSource(multipleEdge),
+                this.getEdgeTarget(multipleEdge),
                 edge
             )
         }
     }
-    exportDotFile(targetGraph, file)
+    targetGraph.export(file)
 }
