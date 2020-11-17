@@ -12,7 +12,7 @@ import org.jgrapht.nio.dot.DOTExporter
 import java.io.File
 
 
-fun Graph<PatternSpecificVertex, PatternSpecificEdge>.export(file: File) {
+fun Graph<PatternSpecificVertex, PatternSpecificEdge>.export(file: File, createPdf: Boolean = false) {
     val exporter = DOTExporter<PatternSpecificVertex, PatternSpecificEdge> { v -> v.id.toString() }
     exporter.setVertexAttributeProvider { v ->
         val map = HashMap<String, Attribute>()
@@ -29,14 +29,19 @@ fun Graph<PatternSpecificVertex, PatternSpecificEdge>.export(file: File) {
         map
     }
     exporter.exportGraph(this, file)
-    val builder = ProcessBuilder().also {
-        it.command("dot", "-Tps", file.absolutePath, "-o", "${file.absolutePath}.pdf")
+    if (createPdf) {
+        val builder = ProcessBuilder().also {
+            it.command("dot", "-Tps", file.absolutePath, "-o", "${file.absolutePath}.pdf")
+        }
+        val process = builder.start()
+        process.waitFor()
     }
-    val process = builder.start()
-    process.waitFor()
 }
 
-fun DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>.export(file: File) {
+fun DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>.export(
+    file: File,
+    createPdf: Boolean = false
+) {
     val targetGraph = DirectedMultigraph<PatternSpecificVertex, PatternSpecificEdge>(PatternSpecificEdge::class.java)
     this.vertexSet().forEach { targetGraph.addVertex(it) }
     for (multipleEdge in this.edgeSet()) {
@@ -48,5 +53,5 @@ fun DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>.exp
             )
         }
     }
-    targetGraph.export(file)
+    targetGraph.export(file, createPdf)
 }
