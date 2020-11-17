@@ -10,11 +10,13 @@ class PyPsiGumTreeWrapper {
 
     @Transient
     var rootVertex: PatternSpecificVertex? = null
+    val rootVertexId: Int?
     val type: Int
     val label: String
 
     constructor(initialTree: PyPsiGumTree) {
         this.rootVertex = initialTree.rootVertex
+        this.rootVertexId = this.rootVertex?.id
         this.type = initialTree.type
         this.label = initialTree.label
     }

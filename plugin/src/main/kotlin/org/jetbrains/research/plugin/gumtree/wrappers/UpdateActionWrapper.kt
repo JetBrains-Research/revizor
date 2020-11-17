@@ -1,12 +1,14 @@
 package org.jetbrains.research.plugin.gumtree.wrappers
 
 import com.github.gumtreediff.actions.model.Update
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jetbrains.research.plugin.PatternGraph
 import org.jetbrains.research.plugin.gumtree.PyPsiGumTree
 import org.jetbrains.research.plugin.jgrapht.findVertexById
 
 @Serializable
+@SerialName("Update")
 class UpdateActionWrapper : ActionWrapper<Update> {
     private var targetVertexWrapper: PyPsiGumTreeWrapper
     private var value: String
@@ -17,7 +19,7 @@ class UpdateActionWrapper : ActionWrapper<Update> {
     }
 
     override fun reconstructAction(correspondingGraph: PatternGraph): Update {
-        targetVertexWrapper.rootVertex = correspondingGraph.findVertexById(targetVertexWrapper.rootVertex?.id!!)
+        targetVertexWrapper.rootVertex = correspondingGraph.findVertexById(targetVertexWrapper.rootVertexId!!)
         return Update(targetVertexWrapper.getNode(), value)
     }
 }
