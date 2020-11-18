@@ -1,58 +1,65 @@
 [
   {
     "type": "Update",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 21849,
       "type": 461,
       "label": "PyCallExpression: np.array"
     },
+    "targetTreeHashCode": 850348032,
     "value": "PyCallExpression: np.arange"
   },
   {
     "type": "Update",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 21847,
       "type": 448,
       "label": "PyReferenceExpression: array"
     },
+    "targetTreeHashCode": 749066285,
     "value": "PyReferenceExpression: arange"
   },
   {
     "type": "Move",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 72,
       "type": 422,
       "label": "PyArgumentList"
     },
-    "parentVertexWrapper": {
+    "parentTreeWrapper": {
       "rootVertexId": 21849,
       "type": 461,
       "label": "PyCallExpression: np.array"
     },
+    "targetTreeHashCode": 1023682632,
+    "parentTreeHashCode": 850348032,
     "position": 1
   },
   {
     "type": "Delete",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": null,
       "type": 448,
       "label": "PyReferenceExpression: range"
-    }
+    },
+    "targetTreeHashCode": 1517006071
   },
   {
     "type": "Delete",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 21851,
       "type": 461,
       "label": "PyCallExpression: range"
-    }
+    },
+    "targetTreeHashCode": 724489643
   },
   {
     "type": "Delete",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 74,
       "type": 422,
       "label": "PyArgumentList"
-    }
+    },
+    "targetTreeHashCode": 256612235
   }
 ]

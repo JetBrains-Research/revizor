@@ -8,7 +8,7 @@ digraph G {
   21851 -> 21849 [ from_closure="false" xlabel="para" ];
   72 -> 21849 [ from_closure="true" xlabel="para" ];
   72 -> 21851 [ from_closure="false" xlabel="para" ];
-  21851 -> 74 [ from_closure="false" xlabel="para" ];
   72 -> 74 [ from_closure="true" xlabel="para" ];
+  21851 -> 74 [ from_closure="false" xlabel="para" ];
   74 -> 21849 [ from_closure="false" xlabel="para" ];
 }

@@ -1,20 +1,22 @@
 [
   {
     "type": "Update",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 221,
       "type": 461,
       "label": "PyCallExpression: os.path.exists"
     },
+    "targetTreeHashCode": 832600553,
     "value": "PyCallExpression: os.path.isfile"
   },
   {
     "type": "Update",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 222,
       "type": 448,
       "label": "PyReferenceExpression: exists"
     },
+    "targetTreeHashCode": 1928866937,
     "value": "PyReferenceExpression: isfile"
   }
 ]

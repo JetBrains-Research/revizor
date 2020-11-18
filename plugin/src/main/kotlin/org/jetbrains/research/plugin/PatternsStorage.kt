@@ -5,6 +5,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.jetbrains.research.plugin.gumtree.PyPsiGumTree
 import org.jetbrains.research.plugin.gumtree.wrappers.ActionWrapper
 import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
@@ -96,12 +97,33 @@ object PatternsStorage {
             val fileContent = this::class.java.getResource(filePath).readText()
             val actionsWrappers = Json.decodeFromString<List<ActionWrapper>>(fileContent)
             val patternGraph = getPatternById(patternId)!!
+            val reconstructedTrees = hashMapOf<Int, PyPsiGumTree>()
             for (wrapper in actionsWrappers) {
                 when (wrapper) {
-                    is ActionWrapper.UpdateActionWrapper -> actions.add(wrapper.reconstructAction(patternGraph))
-                    is ActionWrapper.DeleteActionWrapper -> actions.add(wrapper.reconstructAction(patternGraph))
-                    is ActionWrapper.InsertActionWrapper -> actions.add(wrapper.reconstructAction(patternGraph))
-                    is ActionWrapper.MoveActionWrapper -> actions.add(wrapper.reconstructAction(patternGraph))
+                    is ActionWrapper.UpdateActionWrapper -> actions.add(
+                        wrapper.reconstructAction(
+                            patternGraph,
+                            reconstructedTrees
+                        )
+                    )
+                    is ActionWrapper.DeleteActionWrapper -> actions.add(
+                        wrapper.reconstructAction(
+                            patternGraph,
+                            reconstructedTrees
+                        )
+                    )
+                    is ActionWrapper.InsertActionWrapper -> actions.add(
+                        wrapper.reconstructAction(
+                            patternGraph,
+                            reconstructedTrees
+                        )
+                    )
+                    is ActionWrapper.MoveActionWrapper -> actions.add(
+                        wrapper.reconstructAction(
+                            patternGraph,
+                            reconstructedTrees
+                        )
+                    )
                 }
             }
         } catch (ex: Exception) {

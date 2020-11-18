@@ -10,7 +10,7 @@ digraph G {
   82 -> 1347 [ from_closure="false" xlabel="para" ];
   82 -> 1349 [ from_closure="true" xlabel="para" ];
   81 -> 1353 [ from_closure="false" xlabel="qual" ];
-  1347 -> 84 [ from_closure="false" xlabel="para" ];
   82 -> 84 [ from_closure="true" xlabel="para" ];
+  1347 -> 84 [ from_closure="false" xlabel="para" ];
   84 -> 1349 [ from_closure="false" xlabel="para" ];
 }

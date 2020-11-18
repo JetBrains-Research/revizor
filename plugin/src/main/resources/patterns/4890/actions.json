@@ -1,58 +1,65 @@
 [
   {
     "type": "Update",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 256,
       "type": 461,
       "label": "PyCallExpression: np.log"
     },
+    "targetTreeHashCode": 2085009749,
     "value": "PyCallExpression: np.log1p"
   },
   {
     "type": "Update",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 258,
       "type": 448,
       "label": "PyReferenceExpression: log"
     },
+    "targetTreeHashCode": 342706567,
     "value": "PyReferenceExpression: log1p"
   },
   {
     "type": "Insert",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": null,
       "type": 448,
       "label": "PyReferenceExpression: x"
     },
-    "parentVertexWrapper": {
+    "parentTreeWrapper": {
       "rootVertexId": 95,
       "type": 422,
       "label": "PyArgumentList"
     },
+    "targetTreeHashCode": 1745601494,
+    "parentTreeHashCode": 1040227070,
     "position": 0
   },
   {
     "type": "Delete",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 263,
       "type": 449,
       "label": "PyNumericLiteralExpression"
-    }
+    },
+    "targetTreeHashCode": 779130610
   },
   {
     "type": "Delete",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 94,
       "type": 448,
       "label": "PyReferenceExpression: x"
-    }
+    },
+    "targetTreeHashCode": 1908832331
   },
   {
     "type": "Delete",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 262,
       "type": 459,
       "label": "PyBinaryExpression"
-    }
+    },
+    "targetTreeHashCode": 1907096152
   }
 ]

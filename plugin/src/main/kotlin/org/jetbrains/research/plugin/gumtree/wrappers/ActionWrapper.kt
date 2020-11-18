@@ -16,82 +16,107 @@ sealed class ActionWrapper {
     @Serializable
     @SerialName("Delete")
     class DeleteActionWrapper : ActionWrapper {
-        private var targetVertexWrapper: PyPsiGumTreeWrapper
+        private var targetTreeWrapper: PyPsiGumTreeWrapper
+        private var targetTreeHashCode: Int
 
         constructor(action: Delete) : super() {
-            this.targetVertexWrapper = PyPsiGumTreeWrapper(action.node as PyPsiGumTree)
+            this.targetTreeWrapper = PyPsiGumTreeWrapper(action.node as PyPsiGumTree)
+            this.targetTreeHashCode = (action.node as PyPsiGumTree).hashCode()
         }
 
-        fun reconstructAction(correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph): Delete {
-            targetVertexWrapper.rootVertex = targetVertexWrapper.rootVertexId?.let {
-                correspondingDirectedAcyclicGraph.findVertexById(it)
-            }
-            return Delete(targetVertexWrapper.getNode())
+        fun reconstructAction(
+            correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph,
+            reconstructedTrees: HashMap<Int, PyPsiGumTree>
+        ): Delete {
+            targetTreeWrapper.rootVertex = targetTreeWrapper.rootVertexId
+                ?.let { correspondingDirectedAcyclicGraph.findVertexById(it) }
+            val targetNode = reconstructedTrees.getOrPut(targetTreeHashCode) { targetTreeWrapper.getNode() }
+            return Delete(targetNode)
         }
     }
 
     @Serializable
     @SerialName("Update")
     class UpdateActionWrapper : ActionWrapper {
-        private var targetVertexWrapper: PyPsiGumTreeWrapper
+        private var targetTreeWrapper: PyPsiGumTreeWrapper
+        private var targetTreeHashCode: Int
         private var value: String
 
         constructor(action: Update) : super() {
-            this.targetVertexWrapper = PyPsiGumTreeWrapper(action.node as PyPsiGumTree)
+            this.targetTreeWrapper = PyPsiGumTreeWrapper(action.node as PyPsiGumTree)
+            this.targetTreeHashCode = (action.node as PyPsiGumTree).hashCode()
             this.value = action.value
         }
 
-        fun reconstructAction(correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph): Update {
-            targetVertexWrapper.rootVertex = targetVertexWrapper.rootVertexId?.let {
-                correspondingDirectedAcyclicGraph.findVertexById(it)
-            }
-            return Update(targetVertexWrapper.getNode(), value)
+        fun reconstructAction(
+            correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph,
+            reconstructedTrees: HashMap<Int, PyPsiGumTree>
+        ): Update {
+            targetTreeWrapper.rootVertex = targetTreeWrapper.rootVertexId
+                ?.let { correspondingDirectedAcyclicGraph.findVertexById(it) }
+            val targetNode = reconstructedTrees.getOrPut(targetTreeHashCode) { targetTreeWrapper.getNode() }
+            return Update(targetNode, value)
         }
     }
 
     @Serializable
     @SerialName("Insert")
     class InsertActionWrapper : ActionWrapper {
-        private var targetVertexWrapper: PyPsiGumTreeWrapper
-        private var parentVertexWrapper: PyPsiGumTreeWrapper?
+        private var targetTreeWrapper: PyPsiGumTreeWrapper
+        private var parentTreeWrapper: PyPsiGumTreeWrapper
+        private var targetTreeHashCode: Int
+        private var parentTreeHashCode: Int
         private var position: Int
 
         constructor(action: Insert) : super() {
-            this.targetVertexWrapper = PyPsiGumTreeWrapper(action.node as PyPsiGumTree)
-            this.parentVertexWrapper = PyPsiGumTreeWrapper(action.parent as PyPsiGumTree)
+            this.targetTreeWrapper = PyPsiGumTreeWrapper(action.node as PyPsiGumTree)
+            this.parentTreeWrapper = PyPsiGumTreeWrapper(action.parent as PyPsiGumTree)
+            this.targetTreeHashCode = (action.node as PyPsiGumTree).hashCode()
+            this.parentTreeHashCode = (action.parent as PyPsiGumTree).hashCode()
             this.position = action.position
         }
 
-        fun reconstructAction(correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph): Insert {
-            targetVertexWrapper.rootVertex = null
-            parentVertexWrapper?.rootVertex = parentVertexWrapper?.rootVertexId?.let {
-                correspondingDirectedAcyclicGraph.findVertexById(it)
-            }
-            return Insert(targetVertexWrapper.getNode(), parentVertexWrapper?.getNode(), position)
+        fun reconstructAction(
+            correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph,
+            reconstructedTrees: HashMap<Int, PyPsiGumTree>
+        ): Insert {
+            targetTreeWrapper.rootVertex = null
+            parentTreeWrapper.rootVertex = parentTreeWrapper.rootVertexId
+                ?.let { correspondingDirectedAcyclicGraph.findVertexById(it) }
+            val targetNode = reconstructedTrees.getOrPut(targetTreeHashCode) { targetTreeWrapper.getNode() }
+            val parentNode = reconstructedTrees.getOrPut(parentTreeHashCode) { parentTreeWrapper.getNode() }
+            return Insert(targetNode, parentNode, position)
         }
     }
 
     @Serializable
     @SerialName("Move")
     class MoveActionWrapper : ActionWrapper {
-        private var targetVertexWrapper: PyPsiGumTreeWrapper
-        private var parentVertexWrapper: PyPsiGumTreeWrapper?
+        private var targetTreeWrapper: PyPsiGumTreeWrapper
+        private var parentTreeWrapper: PyPsiGumTreeWrapper
+        private var targetTreeHashCode: Int
+        private var parentTreeHashCode: Int
         private var position: Int
 
         constructor(action: Move) : super() {
-            this.targetVertexWrapper = PyPsiGumTreeWrapper(action.node as PyPsiGumTree)
-            this.parentVertexWrapper = PyPsiGumTreeWrapper(action.parent as PyPsiGumTree)
+            this.targetTreeWrapper = PyPsiGumTreeWrapper(action.node as PyPsiGumTree)
+            this.parentTreeWrapper = PyPsiGumTreeWrapper(action.parent as PyPsiGumTree)
+            this.targetTreeHashCode = (action.node as PyPsiGumTree).hashCode()
+            this.parentTreeHashCode = (action.parent as PyPsiGumTree).hashCode()
             this.position = action.position
         }
 
-        fun reconstructAction(correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph): Move {
-            targetVertexWrapper.rootVertex = targetVertexWrapper.rootVertexId?.let {
-                correspondingDirectedAcyclicGraph.findVertexById(it)
-            }
-            parentVertexWrapper?.rootVertex = parentVertexWrapper?.rootVertexId?.let {
-                correspondingDirectedAcyclicGraph.findVertexById(it)
-            }
-            return Move(targetVertexWrapper.getNode(), parentVertexWrapper?.getNode(), position)
+        fun reconstructAction(
+            correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph,
+            reconstructedTrees: HashMap<Int, PyPsiGumTree>
+        ): Move {
+            targetTreeWrapper.rootVertex = targetTreeWrapper.rootVertexId
+                ?.let { correspondingDirectedAcyclicGraph.findVertexById(it) }
+            parentTreeWrapper.rootVertex = parentTreeWrapper.rootVertexId
+                ?.let { correspondingDirectedAcyclicGraph.findVertexById(it) }
+            val targetNode = reconstructedTrees.getOrPut(targetTreeHashCode) { targetTreeWrapper.getNode() }
+            val parentNode = reconstructedTrees.getOrPut(parentTreeHashCode) { parentTreeWrapper.getNode() }
+            return Move(targetNode, parentNode, position)
         }
     }
 }

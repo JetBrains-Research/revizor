@@ -1,28 +1,31 @@
 [
   {
     "type": "Update",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 3138,
       "type": 461,
       "label": "PyCallExpression: self.assertIs"
     },
+    "targetTreeHashCode": 74332616,
     "value": "PyCallExpression: self.assertTrue"
   },
   {
     "type": "Update",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 3140,
       "type": 448,
       "label": "PyReferenceExpression: assertIs"
     },
+    "targetTreeHashCode": 107295666,
     "value": "PyReferenceExpression: assertTrue"
   },
   {
     "type": "Delete",
-    "targetVertexWrapper": {
+    "targetTreeWrapper": {
       "rootVertexId": 3143,
       "type": 454,
       "label": "PyBoolLiteralExpression"
-    }
+    },
+    "targetTreeHashCode": 1771464723
   }
 ]

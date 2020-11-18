@@ -32,7 +32,7 @@ class ActionsPreprocessing : BasePlatformTestCase() {
 
     companion object {
         const val PATTERNS_SRC = "/home/oleg/prog/data/plugin/jar_patterns/old_patterns"
-        const val PATTERNS_DEST = "/home/oleg/prog/data/plugin/jar_patterns/preprocessed"
+        const val PATTERNS_DEST = "/home/oleg/prog/data/plugin/jar_patterns/new_patterns"
     }
 
     private val logger = Logger.getInstance(this::class.java)
