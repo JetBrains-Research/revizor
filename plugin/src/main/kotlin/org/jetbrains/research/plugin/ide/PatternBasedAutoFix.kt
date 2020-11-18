@@ -95,7 +95,7 @@ class PatternBasedAutoFix(
                             is Delete -> {
                                 val targetElement =
                                     findRevision(elementByTree[action.node as PyPsiGumTree]!!, revisions)
-                                transformer.applyDelete(targetElement, action)
+                                transformer.applyDelete(targetElement)
                             }
                             is Insert -> {
                                 val targetParentElement =

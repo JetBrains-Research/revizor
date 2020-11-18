@@ -1,6 +1,5 @@
 package org.jetbrains.research.plugin.gumtree
 
-import com.github.gumtreediff.actions.model.Delete
 import com.github.gumtreediff.actions.model.Insert
 import com.github.gumtreediff.actions.model.Move
 import com.github.gumtreediff.actions.model.Update
@@ -74,7 +73,7 @@ class PyElementTransformer(var project: Project) {
         return executeInsert(newElement, parentElement, action.position)
     }
 
-    fun applyDelete(element: PyElement, action: Delete) {
+    fun applyDelete(element: PyElement) {
         element.delete()
     }
 
