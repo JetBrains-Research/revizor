@@ -4,9 +4,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jetbrains.research.plugin.PatternDirectedAcyclicGraph
 import org.jetbrains.research.plugin.PatternGraph
-import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
+import org.jetbrains.research.plugin.jgrapht.PatternDirectedAcyclicGraph
 import org.jetbrains.research.plugin.jgrapht.getSuperWeakSubgraphIsomorphismInspector
-import org.jetbrains.research.plugin.jgrapht.loadPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.graph.AsSubgraph
 import java.io.File
@@ -24,7 +23,7 @@ private fun loadFragments(inputPatternsStorage: String): HashMap<Path, ArrayList
     val fragmentsByDir = HashMap<Path, ArrayList<PatternGraph>>()
     File(inputPatternsStorage).walk().forEach { file ->
         if (file.isFile && file.name.startsWith("fragment") && file.extension == "dot") {
-            val currentGraph = loadPatternSpecificGraph(file.inputStream())
+            val currentGraph = PatternDirectedAcyclicGraph(file.inputStream())
             val subgraphBefore = AsSubgraph(
                 currentGraph,
                 currentGraph.vertexSet()
@@ -57,7 +56,8 @@ private fun mergeFragments(fragmentsMap: HashMap<Path, ArrayList<PatternGraph>>)
                 }
             }
         }
-        patternGraphByPath[path] = createPatternSpecificGraph(fragments.first(), labelsGroupsByVertexId)
+        patternGraphByPath[path] =
+            PatternDirectedAcyclicGraph(fragments.first(), labelsGroupsByVertexId)
     }
     return patternGraphByPath
 }
@@ -135,12 +135,12 @@ private fun getLongestCommonSuffix(strings: Collection<String?>?): String {
 
 private fun copyUsefulFiles(from: String, dest: String) {
     File(from).listFiles()?.forEach { patternDir ->
-        val labelsGroupsFile = Paths.get(dest, patternDir.name, "labels_groups.json").toFile().also {
+        Paths.get(dest, patternDir.name, "labels_groups.json").toFile().also {
             it.parentFile.mkdirs()
             it.createNewFile()
             it.writeText(labelsGroupsJsonByPath[patternDir.toPath()]!!)
         }
-        val descFile = Paths.get(dest, patternDir.name, "description.txt").toFile().also {
+        Paths.get(dest, patternDir.name, "description.txt").toFile().also {
             it.parentFile.mkdirs()
             it.createNewFile()
             it.writeText(descriptionByPath[patternDir.toPath()] ?: "No description provided")
@@ -150,7 +150,7 @@ private fun copyUsefulFiles(from: String, dest: String) {
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val fragmentsMap = loadFragments(SRC)
     val patternsGraphsMap = mergeFragments(fragmentsMap)
     markPatterns(patternsGraphsMap, false)

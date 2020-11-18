@@ -7,10 +7,9 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.jetbrains.research.plugin.gumtree.PyPsiGumTree
 import org.jetbrains.research.plugin.gumtree.wrappers.ActionWrapper
-import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
+import org.jetbrains.research.plugin.jgrapht.PatternDirectedAcyclicGraph
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
-import org.jetbrains.research.plugin.jgrapht.loadPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.Graph
 import org.jgrapht.GraphMapping
@@ -53,10 +52,10 @@ object PatternsStorage {
                 if (entryPath.matches("^patterns/[-_.A-Za-z0-9]+/graph.dot$".toRegex())) {
                     val patternId = entryPath.split("/")[1]
                     val dotSrcStream = this::class.java.getResourceAsStream("/$entryPath")
-                    val initialGraph = loadPatternSpecificGraph(dotSrcStream)
+                    val initialGraph = PatternDirectedAcyclicGraph(dotSrcStream)
                     val labelsGroups = loadLabelsGroups(patternId)
                     val patternDirectedAcyclicGraph: PatternDirectedAcyclicGraph =
-                        createPatternSpecificGraph(initialGraph, labelsGroups)
+                        PatternDirectedAcyclicGraph(initialGraph, labelsGroups)
                     patternGraphById[patternId] = patternDirectedAcyclicGraph
                 }
             }

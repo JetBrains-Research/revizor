@@ -1,6 +1,5 @@
 package org.jetbrains.research.plugin.jgrapht
 
-import org.jetbrains.research.plugin.PatternDirectedAcyclicGraph
 import org.jetbrains.research.plugin.PatternGraph
 import org.jetbrains.research.plugin.jgrapht.edges.MultipleEdgeComparator
 import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
@@ -28,17 +27,11 @@ fun getWeakSubgraphIsomorphismInspector(target: PatternGraph, pattern: PatternGr
         false
     )
 
-fun getStrictGraphIsomorphismInspector(
-    directedAcyclicGraph1: PatternDirectedAcyclicGraph,
-    directedAcyclicGraph2: PatternDirectedAcyclicGraph
-): VF2GraphIsomorphismInspector<PatternSpecificVertex, PatternSpecificMultipleEdge> {
-    val strictVertexComparator: Comparator<PatternSpecificVertex?> =
-        compareBy({ it?.originalLabel?.toLowerCase() }, { it?.label?.toLowerCase() })
-    return VF2GraphIsomorphismInspector<PatternSpecificVertex, PatternSpecificMultipleEdge>(
-        directedAcyclicGraph1,
-        directedAcyclicGraph2,
-        strictVertexComparator,
+fun getStrictGraphIsomorphismInspector(graph1: PatternGraph, graph2: PatternGraph) =
+    VF2GraphIsomorphismInspector<PatternSpecificVertex, PatternSpecificMultipleEdge>(
+        graph1,
+        graph2,
+        compareBy({ it?.originalLabel?.toLowerCase() }, { it?.label?.toLowerCase() }),
         MultipleEdgeComparator(),
         false
     )
-}

@@ -17,10 +17,9 @@ import org.jetbrains.research.plugin.buildPyFlowGraphForMethod
 import org.jetbrains.research.plugin.gumtree.PyPsiGumTree
 import org.jetbrains.research.plugin.gumtree.PyPsiGumTreeGenerator
 import org.jetbrains.research.plugin.gumtree.wrappers.ActionWrapper
-import org.jetbrains.research.plugin.jgrapht.createPatternSpecificGraph
+import org.jetbrains.research.plugin.jgrapht.PatternDirectedAcyclicGraph
 import org.jetbrains.research.plugin.jgrapht.export
 import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
-import org.jetbrains.research.plugin.jgrapht.loadPatternSpecificGraph
 import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.graph.AsSubgraph
 import java.io.File
@@ -87,7 +86,7 @@ class ActionsPreprocessing : BasePlatformTestCase() {
         } else {
             val dotFiles = patternDir.listFiles { _, name -> name.endsWith(".dot") }!!
             val inputDotStream = dotFiles[0].inputStream()
-            val changeGraph = loadPatternSpecificGraph(inputDotStream)
+            val changeGraph = PatternDirectedAcyclicGraph(inputDotStream)
             val subgraphBefore = AsSubgraph(
                 changeGraph,
                 changeGraph.vertexSet()
@@ -96,7 +95,7 @@ class ActionsPreprocessing : BasePlatformTestCase() {
             )
             val labelsGroupsSrc = patternDir.toPath().resolve("labels_groups.json").toFile().readText()
             val labelsGroups = Json.decodeFromString<HashMap<Int, PatternSpecificVertex.LabelsGroup>>(labelsGroupsSrc)
-            val graph = createPatternSpecificGraph(subgraphBefore, labelsGroups)
+            val graph = PatternDirectedAcyclicGraph(subgraphBefore, labelsGroups)
             patternGraphCache[patternDir.name] = graph
             graph
         }
