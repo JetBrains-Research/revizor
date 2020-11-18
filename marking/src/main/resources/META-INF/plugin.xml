@@ -1,0 +1,18 @@
+<idea-plugin>
+    <id>org.jetbrains.research.bug-finder</id>
+    <name>Preprocessing</name>
+    <vendor>JetBrains Research</vendor>
+
+    <description>Edit actions preprocessing and serialization</description>
+
+    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.python</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+        <appStarter implementation="org.jetbrains.research.marking.ActionsPreprocessing"/>
+    </extensions>
+
+</idea-plugin>

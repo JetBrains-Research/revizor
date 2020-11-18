@@ -3,9 +3,11 @@ package org.jetbrains.research.marking
 import com.github.gumtreediff.actions.ActionGenerator
 import com.github.gumtreediff.actions.model.*
 import com.github.gumtreediff.matchers.Matchers
+import com.intellij.ide.impl.ProjectUtil
+import com.intellij.openapi.application.ApplicationStarter
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFileFactory
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.psi.PyElement
 import com.jetbrains.python.psi.PyFunction
@@ -25,13 +27,17 @@ import org.jgrapht.graph.AsSubgraph
 import java.io.File
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.system.exitProcess
 
 
-class ActionsPreprocessing : BasePlatformTestCase() {
+class ActionsPreprocessing : ApplicationStarter {
+
+    override fun getCommandName(): String = "preprocessing"
 
     companion object {
         const val PATTERNS_SRC = "/home/oleg/prog/data/plugin/jar_patterns/old_patterns"
         const val PATTERNS_DEST = "/home/oleg/prog/data/plugin/jar_patterns/new_patterns"
+        var project: Project? = null
     }
 
     private val logger = Logger.getInstance(this::class.java)
@@ -51,7 +57,7 @@ class ActionsPreprocessing : BasePlatformTestCase() {
             psiCache[file] as PyFunction
         } else {
             val src: String = file.readText()
-            val psi = PsiFileFactory.getInstance(myFixture.project)
+            val psi = PsiFileFactory.getInstance(project)
                 .createFileFromText(PythonLanguage.getInstance(), src)
                 .children.first() as PyFunction
             psiCache[file] = psi
@@ -254,8 +260,9 @@ class ActionsPreprocessing : BasePlatformTestCase() {
         return Json.encodeToString(actionsWrappers)
     }
 
-    fun test() {
+    override fun main(args: Array<out String>) {
         File(PATTERNS_SRC).listFiles()?.forEach { patternDir ->
+            project = ProjectUtil.openOrImport(patternDir.toPath(), null, true)
             createFragmentToPatternMappings(patternDir)
             extendPatternGraphWithElements(patternDir)
             sortActions(patternDir)
@@ -267,5 +274,6 @@ class ActionsPreprocessing : BasePlatformTestCase() {
             val patternGraph = loadPatternGraph(patternDir)
             patternGraph.export(dest.resolve("graph.dot"))
         }
+        exitProcess(0)
     }
 }

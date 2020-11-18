@@ -19,4 +19,13 @@ tasks {
         }
         from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
     }
+
+    runIde {
+        args = listOfNotNull("preprocessing")
+        jvmArgs = listOf("-Djava.awt.headless=true")
+    }
+
+    register("preprocessing") {
+        dependsOn(runIde)
+    }
 }
