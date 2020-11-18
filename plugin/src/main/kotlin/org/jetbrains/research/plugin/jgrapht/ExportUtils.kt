@@ -20,6 +20,7 @@ fun Graph<PatternSpecificVertex, PatternSpecificEdge>.export(file: File, createP
         map["color"] = DefaultAttribute.createAttribute(v.color)
         map["shape"] = DefaultAttribute.createAttribute(v.shape)
         map["metadata"] = DefaultAttribute.createAttribute(v.metadata)
+        map["kind"] = DefaultAttribute.createAttribute(v.kind)
         map
     }
     exporter.setEdgeAttributeProvider { e ->

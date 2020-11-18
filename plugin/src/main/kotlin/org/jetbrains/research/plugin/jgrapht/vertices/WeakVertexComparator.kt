@@ -16,7 +16,7 @@ class WeakVertexComparator : Comparator<PatternSpecificVertex> {
         ) {
             // FIXME: Differ <variable-usage> and <variable-decl> nodes in the original miner
             // Now it is temporary solution
-            val patternVarRoleLabel = (fromPattern.origin as? DataNode?)?.kind
+            val patternVarRoleLabel = fromPattern.kind
             val targetVarRoleLabel = (fromTarget.origin as? DataNode?)?.kind
             if (patternVarRoleLabel != null && targetVarRoleLabel != null && patternVarRoleLabel != targetVarRoleLabel) {
                 return 1

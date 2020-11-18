@@ -16,9 +16,9 @@ data class PatternSpecificVertex(
     var shape: String? = null,
     var dataNodeInfo: LabelsGroup? = null,
     var origin: Node? = null,
-    var metadata: String = ""
+    var metadata: String = "",
+    var kind: String? = null
 ) {
-
     enum class ChangeGraphPartIndicator { BEFORE, AFTER }
 
     enum class MatchingMode {

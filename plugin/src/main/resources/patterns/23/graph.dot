@@ -1,10 +1,10 @@
 digraph G {
   1868 [ metadata="" color="red2" shape="box" label="keys (keys) [1868]" ];
-  1871 [ metadata="" color="red2" shape="ellipse" label="var (d.keys) [1871]" ];
+  1871 [ metadata="" color="red2" shape="ellipse" label="var (d.keys) [1871]" kind="variable-usage" ];
   1870 [ metadata="" color="red2" shape="box" label="sorted (sorted) [1870]" ];
   1865 [ metadata="" color="red2" shape="box" label="= (=) [1865]" ];
   1866 [ metadata="" color="red2" shape="ellipse" label="var (keys) [1866]" ];
-  60 [ metadata="hanger" color="null" shape="null" label="var (d) [60]" ];
+  60 [ metadata="hanger" color="null" shape="null" label="var (d) [60]" kind="variable-usage" ];
   63 [ metadata="hanger" color="null" shape="null" label="sorted.PyArgumentList (sorted.PyArgumentList) [63]" ];
   61 [ metadata="hanger" color="null" shape="null" label="keys.PyArgumentList (keys.PyArgumentList) [61]" ];
   1868 -> 1870 [ from_closure="false" xlabel="para" ];
