@@ -2,11 +2,11 @@ package org.jetbrains.research.marking
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.jetbrains.research.plugin.PatternDirectedAcyclicGraph
-import org.jetbrains.research.plugin.PatternGraph
-import org.jetbrains.research.plugin.jgrapht.PatternDirectedAcyclicGraph
-import org.jetbrains.research.plugin.jgrapht.getSuperWeakSubgraphIsomorphismInspector
-import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
+import org.jetbrains.research.common.PatternDirectedAcyclicGraph
+import org.jetbrains.research.common.PatternGraph
+import org.jetbrains.research.common.jgrapht.PatternDirectedAcyclicGraph
+import org.jetbrains.research.common.jgrapht.getSuperWeakSubgraphIsomorphismInspector
+import org.jetbrains.research.common.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.graph.AsSubgraph
 import java.io.File
 import java.nio.file.Path

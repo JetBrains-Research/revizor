@@ -37,6 +37,9 @@ subprojects {
         kotlinOptions.jvmTarget = "1.8"
     }
 
-//    tasks.withType<org.jetbrains.intellij.tasks.BuildSearchableOptionsTask>()
-//        .forEach { it.enabled = false }
+    tasks.withType<org.jetbrains.intellij.tasks.BuildSearchableOptionsTask>()
+        .forEach { it.enabled = false }
 }
+
+tasks.withType<org.jetbrains.intellij.tasks.BuildSearchableOptionsTask>()
+    .forEach { it.enabled = false }

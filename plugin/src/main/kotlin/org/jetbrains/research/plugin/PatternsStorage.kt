@@ -5,24 +5,20 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.jetbrains.research.plugin.gumtree.PyPsiGumTree
-import org.jetbrains.research.plugin.gumtree.wrappers.ActionWrapper
-import org.jetbrains.research.plugin.jgrapht.PatternDirectedAcyclicGraph
-import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
-import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
-import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
-import org.jgrapht.Graph
+import org.jetbrains.research.common.PatternDirectedAcyclicGraph
+import org.jetbrains.research.common.gumtree.PyPsiGumTree
+import org.jetbrains.research.common.gumtree.wrappers.ActionWrapper
+import org.jetbrains.research.common.jgrapht.PatternDirectedAcyclicGraph
+import org.jetbrains.research.common.jgrapht.edges.PatternSpecificMultipleEdge
+import org.jetbrains.research.common.jgrapht.getWeakSubgraphIsomorphismInspector
+import org.jetbrains.research.common.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.GraphMapping
-import org.jgrapht.graph.DirectedAcyclicGraph
 import java.io.File
 import java.net.URL
 import java.nio.file.Paths
 import java.util.*
 import java.util.jar.JarFile
 import kotlin.collections.HashMap
-
-typealias PatternGraph = Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>
-typealias PatternDirectedAcyclicGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>
 
 /**
  * A singleton class for storing graph patterns.

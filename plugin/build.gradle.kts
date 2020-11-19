@@ -8,6 +8,7 @@ intellij {
 }
 
 dependencies {
+    implementation(project(":common"))
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.6.2")
 }
 

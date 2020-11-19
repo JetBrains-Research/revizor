@@ -3,7 +3,8 @@ package org.jetbrains.research.plugin
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.jetbrains.python.psi.PyFunction
 import junit.framework.TestCase
-import org.jetbrains.research.plugin.jgrapht.getStrictGraphIsomorphismInspector
+import org.jetbrains.research.common.buildPyFlowGraphForMethod
+import org.jetbrains.research.common.jgrapht.getStrictGraphIsomorphismInspector
 
 /**
  *  A group of unit tests.

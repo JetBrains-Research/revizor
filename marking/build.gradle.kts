@@ -9,7 +9,7 @@ intellij {
 
 dependencies {
     implementation(group = "org.jetbrains.kotlinx", name = "kotlinx-cli-jvm", version = "0.3")
-    implementation(project(":plugin"))
+    implementation(project(":common"))
 }
 
 tasks {
