@@ -8,16 +8,24 @@ intellij {
 }
 
 dependencies {
-    implementation(group = "org.jetbrains.kotlinx", name = "kotlinx-cli-jvm", version = "0.3")
+    implementation("com.xenomachina:kotlin-argparser:2.0.7")
     implementation(project(":common"))
 }
 
 tasks {
     runIde {
+        val src: String? by project
+        val dest: String? by project
+        val addDescription: String? by project
+        args = listOfNotNull(
+            "preprocessing",
+            src?.let { "--src=$it" },
+            dest?.let { "--dest=$it" },
+            addDescription?.let { "--addDescription" }
+        )
+        jvmArgs = listOf("-Djava.awt.headless=true")
         standardInput = System.`in`
         standardOutput = System.`out`
-        args = listOfNotNull("preprocessing")
-        jvmArgs = listOf("-Djava.awt.headless=true")
     }
 
     register("cli") {

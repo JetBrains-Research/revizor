@@ -11,6 +11,9 @@ import com.intellij.psi.PsiFileFactory
 import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.psi.PyElement
 import com.jetbrains.python.psi.PyFunction
+import com.xenomachina.argparser.ArgParser
+import com.xenomachina.argparser.SystemExitException
+import com.xenomachina.argparser.default
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -37,17 +40,40 @@ import kotlin.system.exitProcess
 
 class PreprocessingRunner : ApplicationStarter {
 
-    private val sourceDir: Path = Paths.get("/home/oleg/prog/data/plugin/111")
-    private val destDir: Path = Paths.get("/home/oleg/prog/data/plugin/222")
-    private val addDescription: Boolean = false
+    private lateinit var sourceDir: Path
+    private lateinit var destDir: Path
+    private var addDescription: Boolean = false
 
     private var project: Project? = null
     private val logger = Logger.getInstance(this::class.java)
 
     override fun getCommandName(): String = "preprocessing"
 
+    class PreprocessingRunnerArgs(parser: ArgParser) {
+        val source by parser.storing(
+            "-s", "--src",
+            help = "path/to/patterns/mined/by/code-change-miner"
+        )
+
+        val destination by parser.storing(
+            "-d", "--dest",
+            help = "path/to/destination"
+        )
+
+        val desc by parser.flagging(
+            "-a", "--addDescription",
+            help = "add description to each pattern, will be shown in the IDE (optional)"
+        ).default(false)
+    }
+
     override fun main(args: Array<out String>) {
         try {
+            ArgParser(args.drop(1).toTypedArray()).parseInto(::PreprocessingRunnerArgs).run {
+                sourceDir = Paths.get(source)
+                destDir = Paths.get(destination)
+                addDescription = desc
+            }
+
             // Create labels groups and descriptions for each pattern
             val fragmentsByPath = loadFragments(sourceDir)
             val patternByPath = mergeFragments(fragmentsByPath)
@@ -80,6 +106,8 @@ class PreprocessingRunner : ApplicationStarter {
                 destDir.resolve(patternDir.name).resolve("description.txt").toFile()
                     .writeText(descriptionByPath[patternDir.toPath()] ?: "No description provided")
             }
+        } catch (ex: SystemExitException) {
+            logger.error(ex)
         } catch (ex: Exception) {
             logger.error(ex)
         } finally {
