@@ -40,6 +40,3 @@ subprojects {
     tasks.withType<org.jetbrains.intellij.tasks.BuildSearchableOptionsTask>()
         .forEach { it.enabled = false }
 }
-
-tasks.withType<org.jetbrains.intellij.tasks.BuildSearchableOptionsTask>()
-    .forEach { it.enabled = false }

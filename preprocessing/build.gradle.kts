@@ -13,19 +13,14 @@ dependencies {
 }
 
 tasks {
-    jar {
-        manifest {
-            attributes["Main-Class"] = "org.jetbrains.research.marking.VariableLabelsMarking.kt"
-        }
-        from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-    }
-
     runIde {
+        standardInput = System.`in`
+        standardOutput = System.`out`
         args = listOfNotNull("preprocessing")
         jvmArgs = listOf("-Djava.awt.headless=true")
     }
 
     register("cli") {
-        dependsOn(runIde)
+        dependsOn("runIde")
     }
 }

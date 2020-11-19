@@ -47,43 +47,44 @@ class PreprocessingRunner : ApplicationStarter {
     override fun getCommandName(): String = "preprocessing"
 
     override fun main(args: Array<out String>) {
-        // Create labels groups and descriptions for each pattern
-        val fragmentsByPath = loadFragments(sourceDir)
-        val patternByPath = mergeFragments(fragmentsByPath)
-        markPatterns(patternByPath, addDescription)
+        try {
+            // Create labels groups and descriptions for each pattern
+            val fragmentsByPath = loadFragments(sourceDir)
+            val patternByPath = mergeFragments(fragmentsByPath)
+            markPatterns(patternByPath, addDescription)
 
-        sourceDir.toFile().listFiles()?.forEach { patternDir ->
-            // Import project in order to create PSI
-            project = ProjectUtil.openOrImport(patternDir.toPath(), null, true)
+            sourceDir.toFile().listFiles()?.forEach { patternDir ->
+                // Import project in order to create PSI
+                project = ProjectUtil.openOrImport(patternDir.toPath(), null, true)
 
-            // Prepare actions and extend graphs
-            createFragmentToPatternMappings(patternDir)
-            extendPatternGraphWithElements(patternDir)
-            sortActions(patternDir)
+                // Prepare actions and extend graphs
+                createFragmentToPatternMappings(patternDir)
+                extendPatternGraphWithElements(patternDir)
+                sortActions(patternDir)
+                destDir.resolve(patternDir.name).toFile().mkdirs()
 
-            // Serialize and save edit actions
-            val serializedActions = serializeActions(patternDir)
-            destDir.resolve(patternDir.name).resolve("actions.json").toFile().writeText(serializedActions)
+                // Serialize and save edit actions
+                val serializedActions = serializeActions(patternDir)
+                destDir.resolve(patternDir.name).resolve("actions.json").toFile()
+                    .writeText(serializedActions)
 
-            // Save adjusted pattern's graph
-            val patternGraph = loadPatternGraph(patternDir)
-            patternGraph.export(destDir.resolve(patternDir.name).resolve("graph.dot").toFile())
+                // Save adjusted pattern's graph
+                val patternGraph = loadPatternGraph(patternDir)
+                patternGraph.export(destDir.resolve(patternDir.name).resolve("graph.dot").toFile())
 
-            // Save labels groups
-            destDir.resolve(patternDir.name).resolve("labels_groups.json").toFile().also {
-                it.parentFile.mkdirs()
-                it.createNewFile()
-                it.writeText(labelsGroupsJsonByPath[patternDir.toPath()]!!)
+                // Save labels groups
+                destDir.resolve(patternDir.name).resolve("labels_groups.json").toFile()
+                    .writeText(labelsGroupsJsonByPath[patternDir.toPath()]!!)
+
+                // Save description
+                destDir.resolve(patternDir.name).resolve("description.txt").toFile()
+                    .writeText(descriptionByPath[patternDir.toPath()] ?: "No description provided")
             }
-
-            // Save description
-            destDir.resolve(patternDir.name).resolve("description.txt").toFile().also {
-                it.parentFile.mkdirs()
-                it.createNewFile()
-                it.writeText(descriptionByPath[patternDir.toPath()] ?: "No description provided")
-            }
+        } catch (ex: Exception) {
+            logger.error(ex)
+        } finally {
+            exitProcess(0)
         }
-        exitProcess(0)
     }
 
     private val descriptionByPath = HashMap<Path, String>()
@@ -252,17 +253,16 @@ class PreprocessingRunner : ApplicationStarter {
         return if (patternGraphCache.containsKey(patternDir.name)) {
             patternGraphCache[patternDir.name]!!
         } else {
-            val dotFiles = patternDir.listFiles { _, name -> name.endsWith(".dot") }!!
-            val inputDotStream = dotFiles[0].inputStream()
-            val changeGraph = PatternGraph(inputDotStream)
+            val changeGraph = reprFragmentByPatternPath[patternDir.toPath()]!!
             val subgraphBefore = AsSubgraph(
                 changeGraph,
                 changeGraph.vertexSet()
                     .filter { it.fromPart == PatternSpecificVertex.ChangeGraphPartIndicator.BEFORE }
                     .toSet()
             )
-            val labelsGroupsSrc = patternDir.toPath().resolve("labels_groups.json").toFile().readText()
-            val labelsGroups = Json.decodeFromString<HashMap<Int, PatternSpecificVertex.LabelsGroup>>(labelsGroupsSrc)
+            val labelsGroups = Json.decodeFromString<HashMap<Int, PatternSpecificVertex.LabelsGroup>>(
+                labelsGroupsJsonByPath[patternDir.toPath()]!!
+            )
             val graph = PatternGraph(subgraphBefore, labelsGroups)
             patternGraphCache[patternDir.name] = graph
             graph
