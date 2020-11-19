@@ -6,7 +6,7 @@ import com.github.gumtreediff.actions.model.Move
 import com.github.gumtreediff.actions.model.Update
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.jetbrains.research.common.PatternDirectedAcyclicGraph
+import org.jetbrains.research.common.PatternGraph
 import org.jetbrains.research.common.gumtree.PyPsiGumTree
 import org.jetbrains.research.common.jgrapht.findVertexById
 
@@ -25,7 +25,7 @@ sealed class ActionWrapper {
         }
 
         fun reconstructAction(
-            correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph,
+            correspondingDirectedAcyclicGraph: PatternGraph,
             reconstructedTrees: HashMap<Int, PyPsiGumTree>
         ): Delete {
             targetTreeWrapper.rootVertex = targetTreeWrapper.rootVertexId
@@ -49,7 +49,7 @@ sealed class ActionWrapper {
         }
 
         fun reconstructAction(
-            correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph,
+            correspondingDirectedAcyclicGraph: PatternGraph,
             reconstructedTrees: HashMap<Int, PyPsiGumTree>
         ): Update {
             targetTreeWrapper.rootVertex = targetTreeWrapper.rootVertexId
@@ -77,7 +77,7 @@ sealed class ActionWrapper {
         }
 
         fun reconstructAction(
-            correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph,
+            correspondingDirectedAcyclicGraph: PatternGraph,
             reconstructedTrees: HashMap<Int, PyPsiGumTree>
         ): Insert {
             targetTreeWrapper.rootVertex = null
@@ -107,7 +107,7 @@ sealed class ActionWrapper {
         }
 
         fun reconstructAction(
-            correspondingDirectedAcyclicGraph: PatternDirectedAcyclicGraph,
+            correspondingDirectedAcyclicGraph: PatternGraph,
             reconstructedTrees: HashMap<Int, PyPsiGumTree>
         ): Move {
             targetTreeWrapper.rootVertex = targetTreeWrapper.rootVertexId

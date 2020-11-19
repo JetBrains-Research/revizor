@@ -12,7 +12,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <appStarter implementation="org.jetbrains.research.marking.ActionsPreprocessing"/>
+        <appStarter implementation="org.jetbrains.research.preprocessing.PreprocessingRunner"/>
     </extensions>
 
 </idea-plugin>

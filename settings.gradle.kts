@@ -1,2 +1,2 @@
 rootProject.name = "bug-finder"
-include(":plugin", ":marking", ":common")
+include(":plugin", ":preprocessing", ":common")

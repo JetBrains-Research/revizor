@@ -1,6 +1,5 @@
 package org.jetbrains.research.common.jgrapht
 
-import org.jetbrains.research.common.PatternDirectedAcyclicGraph
 import org.jetbrains.research.common.PatternGraph
 import org.jetbrains.research.common.jgrapht.edges.PatternSpecificEdge
 import org.jetbrains.research.common.jgrapht.edges.PatternSpecificMultipleEdge
@@ -23,10 +22,10 @@ import java.io.InputStream
  * locating isomorphic subgraphs using JGraphT library methods.
  */
 
-fun PatternDirectedAcyclicGraph(
+fun PatternGraph(
     baseDirectedAcyclicGraph: PatternGraph,
     labelsGroupsByVertexId: Map<Int, PatternSpecificVertex.LabelsGroup>
-): PatternDirectedAcyclicGraph {
+): PatternGraph {
     val targetGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>(
         PatternSpecificMultipleEdge::class.java
     )
@@ -49,7 +48,7 @@ fun PatternDirectedAcyclicGraph(
     return targetGraph
 }
 
-fun PatternDirectedAcyclicGraph(pfg: PyFlowGraph): PatternDirectedAcyclicGraph {
+fun PatternGraph(pfg: PyFlowGraph): PatternGraph {
     val defaultDAG = DirectedMultigraph<PatternSpecificVertex, PatternSpecificEdge>(
         PatternSpecificEdge::class.java
     )
@@ -93,7 +92,7 @@ fun PatternDirectedAcyclicGraph(pfg: PyFlowGraph): PatternDirectedAcyclicGraph {
     return targetDAG
 }
 
-fun PatternDirectedAcyclicGraph(stream: InputStream): PatternDirectedAcyclicGraph {
+fun PatternGraph(stream: InputStream): PatternGraph {
     val importer = DOTImporter<String, DefaultEdge>()
     importer.setVertexFactory { id -> id }
     val vertexAttributes = HashMap<String, HashMap<String, Attribute>>()
@@ -162,5 +161,5 @@ fun PatternDirectedAcyclicGraph(stream: InputStream): PatternDirectedAcyclicGrap
     return targetDAG
 }
 
-fun PatternDirectedAcyclicGraph.findVertexById(id: Int): PatternSpecificVertex =
+fun PatternGraph.findVertexById(id: Int): PatternSpecificVertex =
     this.vertexSet().find { it.id == id } ?: throw NoSuchElementException()

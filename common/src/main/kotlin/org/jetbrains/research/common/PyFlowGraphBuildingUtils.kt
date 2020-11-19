@@ -1,26 +1,22 @@
 package org.jetbrains.research.common
 
 import com.jetbrains.python.psi.PyFunction
-import org.jetbrains.research.common.jgrapht.PatternDirectedAcyclicGraph
-import org.jetbrains.research.common.jgrapht.edges.PatternSpecificMultipleEdge
-import org.jetbrains.research.common.jgrapht.vertices.PatternSpecificVertex
+import org.jetbrains.research.common.jgrapht.PatternGraph
 import org.jetbrains.research.common.pyflowgraph.GraphBuildingException
 import org.jetbrains.research.common.pyflowgraph.PyFlowGraphBuilder
-import org.jgrapht.graph.DirectedAcyclicGraph
 import java.io.File
 
 
-fun buildPyFlowGraphForMethod(node: PyFunction, builder: String = "kotlin")
-        : DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge> =
+fun buildPyFlowGraphForMethod(node: PyFunction, builder: String = "kotlin"): PatternGraph =
     when (builder) {
         "python" -> {
             val tempFile = createTempFileFromMethodPsi(node)
             val dotFile = buildPyFlowGraphBySubprocess(tempFile)
-            PatternDirectedAcyclicGraph(dotFile.inputStream())
+            PatternGraph(dotFile.inputStream())
         }
         "kotlin" -> {
             val methodPyFlowGraph = PyFlowGraphBuilder().buildForPyFunction(node)
-            PatternDirectedAcyclicGraph(methodPyFlowGraph)
+            PatternGraph(methodPyFlowGraph)
         }
         else -> throw  IllegalArgumentException()
     }

@@ -5,12 +5,10 @@ import com.jetbrains.python.psi.LanguageLevel
 import org.jetbrains.research.common.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.common.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.Graph
-import org.jgrapht.graph.DirectedAcyclicGraph
 import java.nio.file.Path
 import java.nio.file.Paths
 
 typealias PatternGraph = Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>
-typealias PatternDirectedAcyclicGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>
 
 /**
  * A singleton class for storing configuration settings.

@@ -25,7 +25,7 @@ tasks {
         jvmArgs = listOf("-Djava.awt.headless=true")
     }
 
-    register("preprocessing") {
+    register("cli") {
         dependsOn(runIde)
     }
 }
