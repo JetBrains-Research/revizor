@@ -1,7 +1,8 @@
 package org.jetbrains.research.common
 
-import com.google.gson.Gson
 import com.jetbrains.python.psi.LanguageLevel
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.jetbrains.research.common.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.common.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.Graph
@@ -13,9 +14,7 @@ typealias PatternGraph = Graph<PatternSpecificVertex, PatternSpecificMultipleEdg
 /**
  * A singleton class for storing configuration settings.
  *
- * This class parses information from `src/main/resources/config.json`.
- * It is used only within `PyFlowGraphIsomorphismTest` class for calling
- * Python subprocess.
+ * This class parses information from the `bug-finder/plugin/src/main/resources/config.json`.
  */
 object Config {
     val CODE_CHANGE_MINER_PATH: Path
@@ -25,7 +24,7 @@ object Config {
 
     init {
         val configJson = this::class.java.getResource("/config.json").readText()
-        val config = Gson().fromJson(configJson, HashMap<String, String>()::class.java)
+        val config = Json.decodeFromString<HashMap<String, String>>(configJson)
         CODE_CHANGE_MINER_PATH = config["code_change_miner_path"]?.let { Paths.get(it) }
             ?: throw IllegalStateException("\"code_change_miner_path\" is not specified in config.json")
         TEMP_DIRECTORY_PATH = config["temp_directory_path"]?.let { Paths.get(it) }
