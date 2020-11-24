@@ -4,7 +4,7 @@ version = "1.0-SNAPSHOT"
 
 plugins {
     java
-    id("org.jetbrains.intellij") version "0.4.21"
+    id("org.jetbrains.intellij") version "0.4.22"
     val kotlinVersion = "1.4.10"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
