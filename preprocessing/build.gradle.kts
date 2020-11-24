@@ -15,12 +15,12 @@ dependencies {
 tasks {
     runIde {
         val src: String? by project
-        val dest: String? by project
+        val dst: String? by project
         val addDescription: String? by project
         args = listOfNotNull(
             "preprocessing",
             src?.let { "--src=$it" },
-            dest?.let { "--dest=$it" },
+            dst?.let { "--dest=$it" },
             addDescription?.let { "--addDescription" }
         )
         jvmArgs = listOf("-Djava.awt.headless=true")

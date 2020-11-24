@@ -1,53 +1,57 @@
+[![JetBrains Research](https://jb.gg/badges/research.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+
 # Bug Finder
 
-A static code analysis tool that tries to find 
-complicated, semantic, and (as far as possible) 
-buggy patterns in your Python code. We use 
-patterns represented in control flow graphs, 
-which were gathered by 
+A static code analysis tool for locating complicated, semantic, 
+and (as far as possible) buggy patterns in your Python code. We use 
+graphs-based patterns, which were gathered from 120 GitHub repositories by 
 [code-change-miner](https://github.com/JetBrains-Research/code-change-miner) 
-tool. For real, this plugin runs an inspection which 
-aims to build mappings between isomorphic subgraphs 
-of patterns and control flow graph of your code, 
-which is built automatically on the fly. 
+tool. 
 
-<img src="https://bit.ly/351i1HB" width="700" alt="Plugin demo">
+Behind the scenes, this plugin runs an inspection which builds 
+mappings between isomorphic subgraphs of mined patterns and 
+*fine-grained Program Dependence Graph (fgPDG)* of your code, 
+that is built automatically on the fly.
+
+<a href="https://ibb.co/GTdHn42">
+<img src="https://i.ibb.co/C2wPm37/presentation.gif" alt="Plugin demo">
+</a>
+
 
 ## Installation
 
+ - Clone this repository: `git clone https://github.com/JetBrains-Research/bug-finder.git`
+ - Open the root directory: `cd bug-finder`
+ 
 **Build plugin from sources**
 
- - Run `./gradlew buildPlugin`
- - Check out `build/distributions/bug-finder-*.zip`
+ - Run `./gradlew :plugin:buildPlugin`
+ - Check out `./build/distributions/plugin-*.zip`
+ - Install the plugin in your PyCharm via `File - Settings - Plugins - Install Plugin from Disk...`
  
 **Quick IDE launch for evaluation**
  
- - Run `./gradlew runIde`
- - Open any Python file containing functions
+ - Run `./gradlew :plugin:runIde`
+ - Open any Python file with functions, possibly containing mined code patterns 
  - Wait until the code analysis is complete
  - Check out `WARNING` messages
- 
-**Run tests**
 
- - Clone and install [code-change-miner](https://github.com/JetBrains-Research/code-change-miner)
- by following the instructions in README.md
- - In the `src/main/resources/config.json` specify:
-   - `code_change_miner_path` (correct path to the installation folder)
-   - `python_executable_path` (your python executable from correct environment)
-   - `temp_directory_path` (directory for temporary files)
- - Run `./gradlew test --tests "org.jetbrains.research.plugin.PyFlowGraphIsomorphismTest"`
- 
 ## Custom patterns support
 
- - Let's say you've already mined patterns using [code-change-miner](https://github.com/JetBrains-Research/code-change-miner)
+ - Let's say you've already mined patterns using 
+ [code-change-miner](https://github.com/JetBrains-Research/code-change-miner)
  - Select the ones you need and put them in a separate folder.
  Make sure each pattern is represented by a directory
- with a unique name (id) and contains necessary `.dot` files
- - Run `./gradlew :marking:jar`
- - Now you can mark patterns using CLI interface: `java -jar marking/build/libs/marking-*.jar <options>`
- - Options: 
-   - `--input`, `-i`: Path to input directory with patterns mined by code-change-miner (always required)
-   - `--output`, `-o`: Path to output directory for processed patterns (always required)
-   - `--add-description`, `-d`: Add description manually for each pattern (optional)
-   - `--help`, `-h`: Usage info
- - When you are finished, copy processed patterns to `src/main/resources/patterns` and re-build plugin
+ with a unique name and contains necessary `fragment-*.dot` files.
+ - Add files `before.py` and `after.py` with minimal change pattern reproduction code snippet
+ manually to each pattern's folder. The files should contain only one function with statements corresponding to pattern.
+ The plugin need it to produce GumTree edit actions over the PSI. You can find examples in \
+ `./plugin/src/main/resources/patterns`
+ - Run `./gradlew :preprocessing:cli -Psrc=path/to/pattern/dir/ -Pdst=path/to/destination/dir/ -PaddDescription`
+ - Follow the instructions in the command line to mark variable labels groups and provide descriptions.
+ - Gradle task arguments: 
+   - `-Psrc`: Path to input directory with patterns mined by code-change-miner (always required)
+   - `-Pdst`: Path to output directory for processed patterns (always required)
+   - `-PaddDescription`: Add description manually for each pattern (optional)
+ - When you are finished, copy processed patterns from the
+  destination directory to `./plugin/src/main/resources/patterns` and re-build the plugin
