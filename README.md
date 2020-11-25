@@ -23,7 +23,7 @@ that is built automatically on the fly.
 **Build plugin from sources**
 
  - Run `./gradlew :plugin:buildPlugin`
- - Check out `./build/distributions/plugin-*.zip`
+ - Check out `./plugin/build/distributions/plugin-*.zip`
  - Install the plugin in your PyCharm via `File - Settings - Plugins - Install Plugin from Disk...`
  
 **Quick IDE launch for evaluation**
