@@ -8,7 +8,7 @@ intellij {
 }
 
 dependencies {
-    implementation(group = "com.google.code.gson", name = "gson", version = "2.8.6")
+    implementation(project(":common"))
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.6.2")
 }
 

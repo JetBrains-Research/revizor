@@ -5,24 +5,20 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.jetbrains.research.plugin.gumtree.PyPsiGumTree
-import org.jetbrains.research.plugin.gumtree.wrappers.ActionWrapper
-import org.jetbrains.research.plugin.jgrapht.PatternDirectedAcyclicGraph
-import org.jetbrains.research.plugin.jgrapht.edges.PatternSpecificMultipleEdge
-import org.jetbrains.research.plugin.jgrapht.getWeakSubgraphIsomorphismInspector
-import org.jetbrains.research.plugin.jgrapht.vertices.PatternSpecificVertex
-import org.jgrapht.Graph
+import org.jetbrains.research.common.PatternGraph
+import org.jetbrains.research.common.gumtree.PyPsiGumTree
+import org.jetbrains.research.common.gumtree.wrappers.ActionWrapper
+import org.jetbrains.research.common.jgrapht.PatternGraph
+import org.jetbrains.research.common.jgrapht.edges.PatternSpecificMultipleEdge
+import org.jetbrains.research.common.jgrapht.getWeakSubgraphIsomorphismInspector
+import org.jetbrains.research.common.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.GraphMapping
-import org.jgrapht.graph.DirectedAcyclicGraph
 import java.io.File
 import java.net.URL
 import java.nio.file.Paths
 import java.util.*
 import java.util.jar.JarFile
 import kotlin.collections.HashMap
-
-typealias PatternGraph = Graph<PatternSpecificVertex, PatternSpecificMultipleEdge>
-typealias PatternDirectedAcyclicGraph = DirectedAcyclicGraph<PatternSpecificVertex, PatternSpecificMultipleEdge>
 
 /**
  * A singleton class for storing graph patterns.
@@ -33,7 +29,7 @@ typealias PatternDirectedAcyclicGraph = DirectedAcyclicGraph<PatternSpecificVert
  */
 object PatternsStorage {
     private val patternDescriptionById = HashMap<String, String>()
-    private val patternGraphById = HashMap<String, PatternDirectedAcyclicGraph>()
+    private val patternGraphById = HashMap<String, PatternGraph>()
     private val patternEditActionsById = HashMap<String, List<Action>>()
 
     private val logger = Logger.getInstance(this::class.java)
@@ -52,10 +48,10 @@ object PatternsStorage {
                 if (entryPath.matches("^patterns/[-_.A-Za-z0-9]+/graph.dot$".toRegex())) {
                     val patternId = entryPath.split("/")[1]
                     val dotSrcStream = this::class.java.getResourceAsStream("/$entryPath")
-                    val initialGraph = PatternDirectedAcyclicGraph(dotSrcStream)
+                    val initialGraph = PatternGraph(dotSrcStream)
                     val labelsGroups = loadLabelsGroups(patternId)
-                    val patternDirectedAcyclicGraph: PatternDirectedAcyclicGraph =
-                        PatternDirectedAcyclicGraph(initialGraph, labelsGroups)
+                    val patternDirectedAcyclicGraph: PatternGraph =
+                        PatternGraph(initialGraph, labelsGroups)
                     patternGraphById[patternId] = patternDirectedAcyclicGraph
                 }
             }
@@ -66,7 +62,7 @@ object PatternsStorage {
         }
     }
 
-    fun getPatternById(patternId: String): PatternDirectedAcyclicGraph? = patternGraphById[patternId]
+    fun getPatternById(patternId: String): PatternGraph? = patternGraphById[patternId]
 
     fun getPatternDescriptionById(patternId: String): String =
         patternDescriptionById.getOrPut(patternId) { loadDescription(patternId) ?: "Unnamed pattern: $patternId" }
@@ -74,7 +70,7 @@ object PatternsStorage {
     fun getPatternEditActionsById(patternId: String): List<Action> =
         patternEditActionsById.getOrPut(patternId) { loadEditActionsFromPattern(patternId) }
 
-    fun getIsomorphicPatterns(targetDirectedAcyclicGraph: PatternDirectedAcyclicGraph)
+    fun getIsomorphicPatterns(targetDirectedAcyclicGraph: PatternGraph)
             : HashMap<String, ArrayList<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>> {
         val suitablePatterns =
             HashMap<String, ArrayList<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>>()
