@@ -1,12 +1,6 @@
 group = rootProject.group
 version = rootProject.version
 
-intellij {
-    version = "2020.2"
-    type = "PY"
-    setPlugins("Pythonid")
-}
-
 dependencies {
     implementation("com.xenomachina:kotlin-argparser:2.0.7")
     implementation(project(":common"))

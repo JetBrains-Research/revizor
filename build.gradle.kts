@@ -25,6 +25,12 @@ subprojects {
         plugin("org.jetbrains.intellij")
     }
 
+    intellij {
+        version = "2020.2"
+        type = "PC"
+        setPlugins("PythonCore")
+    }
+
     dependencies {
         compileOnly(kotlin("stdlib-jdk8"))
         implementation(group = "com.github.gumtreediff", name = "core", version = "2.1.2")

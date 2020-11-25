@@ -63,8 +63,7 @@ class BugFinderInspection : LocalInspectionTool() {
                                         .getOrPut(targetVertex) { hashSetOf() }
                                         .add(patternId)
                                 problems.vertexMappingsByTargetVertex
-                                        .getOrPut(targetVertex) { hashMapOf() }
-                                        .put(patternId, mapping)
+                                    .getOrPut(targetVertex) { hashMapOf() }[patternId] = mapping
                             }
                             problems.varNamesMappingByVertexMapping[mapping] = patternToTargetVarNamesMapping
                         }
