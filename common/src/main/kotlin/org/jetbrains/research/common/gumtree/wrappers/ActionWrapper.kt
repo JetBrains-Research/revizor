@@ -1,9 +1,6 @@
 package org.jetbrains.research.common.gumtree.wrappers
 
-import com.github.gumtreediff.actions.model.Delete
-import com.github.gumtreediff.actions.model.Insert
-import com.github.gumtreediff.actions.model.Move
-import com.github.gumtreediff.actions.model.Update
+import com.github.gumtreediff.actions.model.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jetbrains.research.common.PatternGraph
@@ -12,6 +9,11 @@ import org.jetbrains.research.common.jgrapht.findVertexById
 
 @Serializable
 sealed class ActionWrapper {
+
+    abstract fun reconstructAction(
+        correspondingDirectedAcyclicGraph: PatternGraph,
+        reconstructedTrees: HashMap<Int, PyPsiGumTree>
+    ): Action
 
     @Serializable
     @SerialName("Delete")
@@ -24,7 +26,7 @@ sealed class ActionWrapper {
             this.targetTreeHashCode = (action.node as PyPsiGumTree).hashCode()
         }
 
-        fun reconstructAction(
+        override fun reconstructAction(
             correspondingDirectedAcyclicGraph: PatternGraph,
             reconstructedTrees: HashMap<Int, PyPsiGumTree>
         ): Delete {
@@ -48,7 +50,7 @@ sealed class ActionWrapper {
             this.value = action.value
         }
 
-        fun reconstructAction(
+        override fun reconstructAction(
             correspondingDirectedAcyclicGraph: PatternGraph,
             reconstructedTrees: HashMap<Int, PyPsiGumTree>
         ): Update {
@@ -76,7 +78,7 @@ sealed class ActionWrapper {
             this.position = action.position
         }
 
-        fun reconstructAction(
+        override fun reconstructAction(
             correspondingDirectedAcyclicGraph: PatternGraph,
             reconstructedTrees: HashMap<Int, PyPsiGumTree>
         ): Insert {
@@ -106,7 +108,7 @@ sealed class ActionWrapper {
             this.position = action.position
         }
 
-        fun reconstructAction(
+        override fun reconstructAction(
             correspondingDirectedAcyclicGraph: PatternGraph,
             reconstructedTrees: HashMap<Int, PyPsiGumTree>
         ): Move {

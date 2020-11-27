@@ -94,32 +94,7 @@ object PatternsStorage {
             val patternGraph = getPatternById(patternId)!!
             val reconstructedTrees = hashMapOf<Int, PyPsiGumTree>()
             for (wrapper in actionsWrappers) {
-                when (wrapper) {
-                    is ActionWrapper.UpdateActionWrapper -> actions.add(
-                        wrapper.reconstructAction(
-                            patternGraph,
-                            reconstructedTrees
-                        )
-                    )
-                    is ActionWrapper.DeleteActionWrapper -> actions.add(
-                        wrapper.reconstructAction(
-                            patternGraph,
-                            reconstructedTrees
-                        )
-                    )
-                    is ActionWrapper.InsertActionWrapper -> actions.add(
-                        wrapper.reconstructAction(
-                            patternGraph,
-                            reconstructedTrees
-                        )
-                    )
-                    is ActionWrapper.MoveActionWrapper -> actions.add(
-                        wrapper.reconstructAction(
-                            patternGraph,
-                            reconstructedTrees
-                        )
-                    )
-                }
+                actions.add(wrapper.reconstructAction(patternGraph, reconstructedTrees))
             }
         } catch (ex: Exception) {
             logger.error(ex)
