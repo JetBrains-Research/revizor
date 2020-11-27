@@ -65,7 +65,7 @@ object PatternsStorage {
     fun getPatternById(patternId: String): PatternGraph? = patternGraphById[patternId]
 
     fun getPatternDescriptionById(patternId: String): String =
-        patternDescriptionById.getOrPut(patternId) { loadDescription(patternId) ?: "Unnamed pattern: $patternId" }
+        patternDescriptionById.getOrPut(patternId) { loadDescription(patternId) }
 
     fun getPatternEditActionsById(patternId: String): List<Action> =
         patternEditActionsById.getOrPut(patternId) { loadEditActionsFromPattern(patternId) }
@@ -102,11 +102,12 @@ object PatternsStorage {
         return actions
     }
 
-    private fun loadDescription(patternId: String): String? {
+    private fun loadDescription(patternId: String): String {
         return try {
             this::class.java.getResource("/patterns/$patternId/description.txt").readText()
         } catch (ex: Exception) {
-            null
+            logger.warn("File 'description.txt' for pattern $patternId was not specified")
+            "Unnamed pattern: $patternId"
         }
     }
 
