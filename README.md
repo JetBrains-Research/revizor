@@ -2,16 +2,16 @@
 
 # Bug Finder
 
-A static code analysis tool for locating complicated, semantic, 
+A static code analysis tool for locating and fixing complicated, semantic, 
 and (as far as possible) buggy patterns in your Python code. We use 
 graphs-based patterns, which were gathered from 120 GitHub repositories by 
 [code-change-miner](https://github.com/JetBrains-Research/code-change-miner) 
 tool. 
 
-Behind the scenes, this plugin runs an inspection which builds 
-mappings between isomorphic subgraphs of mined patterns and 
-*fine-grained Program Dependence Graph (fgPDG)* of your code, 
-that is built automatically on the fly.
+Behind the scenes, the plugin runs an inspection which builds 
+isomorphic mappings between fine-grained Program Dependence Graphs 
+of mined patterns and a similar graph of your code, and then suggests 
+you a relevant quick-fix to repair the highlighted code fragment.
 
 <img src="https://i.ibb.co/ySN4dcy/presentation.gif" alt="Plugin demo">
 
