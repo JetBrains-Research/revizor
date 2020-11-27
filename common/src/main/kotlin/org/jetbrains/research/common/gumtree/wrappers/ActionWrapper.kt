@@ -18,8 +18,8 @@ sealed class ActionWrapper {
     @Serializable
     @SerialName("Delete")
     class DeleteActionWrapper : ActionWrapper {
-        private var targetTreeWrapper: PyPsiGumTreeWrapper
-        private var targetTreeHashCode: Int
+        private val targetTreeWrapper: PyPsiGumTreeWrapper
+        private val targetTreeHashCode: Int
 
         constructor(action: Delete) : super() {
             this.targetTreeWrapper = PyPsiGumTreeWrapper(action.node as PyPsiGumTree)
@@ -40,9 +40,9 @@ sealed class ActionWrapper {
     @Serializable
     @SerialName("Update")
     class UpdateActionWrapper : ActionWrapper {
-        private var targetTreeWrapper: PyPsiGumTreeWrapper
-        private var targetTreeHashCode: Int
-        private var value: String
+        private val targetTreeWrapper: PyPsiGumTreeWrapper
+        private val targetTreeHashCode: Int
+        private val value: String
 
         constructor(action: Update) : super() {
             this.targetTreeWrapper = PyPsiGumTreeWrapper(action.node as PyPsiGumTree)
@@ -64,11 +64,11 @@ sealed class ActionWrapper {
     @Serializable
     @SerialName("Insert")
     class InsertActionWrapper : ActionWrapper {
-        private var targetTreeWrapper: PyPsiGumTreeWrapper
-        private var parentTreeWrapper: PyPsiGumTreeWrapper
-        private var targetTreeHashCode: Int
-        private var parentTreeHashCode: Int
-        private var position: Int
+        private val targetTreeWrapper: PyPsiGumTreeWrapper
+        private val parentTreeWrapper: PyPsiGumTreeWrapper
+        private val targetTreeHashCode: Int
+        private val parentTreeHashCode: Int
+        private val position: Int
 
         constructor(action: Insert) : super() {
             this.targetTreeWrapper = PyPsiGumTreeWrapper(action.node as PyPsiGumTree)
@@ -94,11 +94,11 @@ sealed class ActionWrapper {
     @Serializable
     @SerialName("Move")
     class MoveActionWrapper : ActionWrapper {
-        private var targetTreeWrapper: PyPsiGumTreeWrapper
-        private var parentTreeWrapper: PyPsiGumTreeWrapper
-        private var targetTreeHashCode: Int
-        private var parentTreeHashCode: Int
-        private var position: Int
+        private val targetTreeWrapper: PyPsiGumTreeWrapper
+        private val parentTreeWrapper: PyPsiGumTreeWrapper
+        private val targetTreeHashCode: Int
+        private val parentTreeHashCode: Int
+        private val position: Int
 
         constructor(action: Move) : super() {
             this.targetTreeWrapper = PyPsiGumTreeWrapper(action.node as PyPsiGumTree)
