@@ -76,30 +76,30 @@ class BugFinderInspection : LocalInspectionTool() {
                                 // Find a Least Common Ancestor for all tokens by each pattern per line to highlight
                                 if (targetVertex.metadata == "hanger")
                                     continue
-                                var currentToken = targetVertex.origin?.psi!! as PsiElement?
-                                val line = documentManager.getDocument(currentToken!!.containingFile)
-                                    ?.getLineNumber(currentToken.textOffset)!!
+                                var targetToken = targetVertex.origin?.psi!! as PsiElement?
+                                val line = documentManager.getDocument(targetToken!!.containingFile)
+                                    ?.getLineNumber(targetToken.textOffset)!!
                                 val tokenByLine = tokenByLineByPattern.getOrPut(patternId) { hashMapOf() }
                                 if (tokenByLine.containsKey(line)) {
-                                    var prevToken = tokenByLine[line]
+                                    var prevLCAToken = tokenByLine[line]
                                     val visited = hashSetOf<PsiElement>()
-                                    while (currentToken != null && prevToken != null) {
-                                        if (visited.contains(currentToken)) {
+                                    while (targetToken != null && prevLCAToken != null) {
+                                        if (visited.contains(targetToken)) {
                                             break
                                         }
-                                        visited.add(currentToken)
-                                        if (visited.contains(prevToken)) {
-                                            currentToken = prevToken
+                                        visited.add(targetToken)
+                                        if (visited.contains(prevLCAToken)) {
+                                            targetToken = prevLCAToken
                                             break
                                         }
-                                        visited.add(prevToken)
-                                        prevToken = prevToken.parent
-                                        currentToken = currentToken.parent
+                                        visited.add(prevLCAToken)
+                                        prevLCAToken = prevLCAToken.parent
+                                        targetToken = targetToken.parent
                                     }
                                 }
-                                tokenByLine[line] = currentToken!!
-                                if (targetVertex.origin?.psi!! == currentToken) {
-                                    vertexByHighlightedToken[currentToken] = targetVertex
+                                tokenByLine[line] = targetToken!!
+                                if (targetVertex.origin?.psi!! == targetToken) {
+                                    vertexByHighlightedToken[targetToken] = targetVertex
                                 }
                             }
                             mappingsHolder.varNamesMappingByVertexMapping[mapping] = patternToTargetVarNamesMapping
