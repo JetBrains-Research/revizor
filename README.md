@@ -1,6 +1,6 @@
 [![JetBrains Research](https://jb.gg/badges/research.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
-# Bug Finder
+# <a href="https://imgbb.com/"><img src="https://i.ibb.co/VLs1nHR/logo.png" alt="logo" width=80px height=80px></a> Bug Finder
 
 A static code analysis tool for locating and fixing complicated, semantic, 
 and (as far as possible) buggy patterns in your Python code. We use 
