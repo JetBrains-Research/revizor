@@ -152,7 +152,7 @@ class PreprocessingRunner : ApplicationStarter {
             val labelsGroupsByVertexId = HashMap<Int, PatternSpecificVertex.LabelsGroup>()
             val repr = fragments.first()
             reprFragmentByPatternPath[path] = repr
-            for (graph in fragments.drop(1)) {
+            for (graph in fragments) {
                 val inspector = getSuperWeakSubgraphIsomorphismInspector(repr, graph)
                 if (!inspector.isomorphismExists()) {
                     throw IllegalStateException("Fragments are not isomorphic in the pattern $path")
