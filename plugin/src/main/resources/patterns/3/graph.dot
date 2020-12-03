@@ -1,0 +1,16 @@
+digraph G {
+  1347 [ metadata="" color="red2" shape="box" label="keys (keys) [1347]" ];
+  1353 [ metadata="" color="red2" shape="ellipse" label="var (d.keys) [1353]" kind="variable-usage" ];
+  1349 [ metadata="" color="red2" shape="box" label="len (len) [1349]" ];
+  82 [ metadata="hanger" color="null" shape="null" label="keys.PyArgumentList (keys.PyArgumentList) [82]" ];
+  81 [ metadata="hanger" color="null" shape="null" label="var (d) [81]" kind="variable-usage" ];
+  84 [ metadata="hanger" color="null" shape="null" label="len.PyArgumentList (len.PyArgumentList) [84]" ];
+  1347 -> 1349 [ from_closure="false" xlabel="para" ];
+  1353 -> 1347 [ from_closure="false" xlabel="recv" ];
+  82 -> 1347 [ from_closure="false" xlabel="para" ];
+  82 -> 1349 [ from_closure="true" xlabel="para" ];
+  81 -> 1353 [ from_closure="false" xlabel="qual" ];
+  82 -> 84 [ from_closure="true" xlabel="para" ];
+  1347 -> 84 [ from_closure="false" xlabel="para" ];
+  84 -> 1349 [ from_closure="false" xlabel="para" ];
+}

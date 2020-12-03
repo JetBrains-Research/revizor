@@ -1,0 +1,5 @@
+{
+  "code_change_miner_path": "/path/to/code_change_miner",
+  "temp_directory_path": "/tmp",
+  "python_executable_path": "/usr/bin/python3.8"
+}

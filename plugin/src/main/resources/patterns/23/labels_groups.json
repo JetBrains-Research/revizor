@@ -1,0 +1,27 @@
+{
+  "1871": {
+    "whatMatters": "LONGEST_COMMON_SUFFIX",
+    "labels": [
+      "self.data.keys",
+      "summary_info.ic_vector.keys",
+      "self.child_dict.keys",
+      "self._output.values.keys",
+      "self.abs_res_dict.keys",
+      "self.tracks.keys",
+      "self._adjacency_list.keys"
+    ],
+    "longestCommonSuffix": ".keys"
+  },
+  "1866": {
+    "whatMatters": "NOTHING",
+    "labels": [
+      "keys",
+      "output_keys",
+      "positions",
+      "l",
+      "sorted_pos_nums",
+      "levels"
+    ],
+    "longestCommonSuffix": ""
+  }
+}

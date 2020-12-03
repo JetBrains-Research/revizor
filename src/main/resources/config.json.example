@@ -1,5 +1,0 @@
-{
-  "code_change_miner_path": "/home/<user_name>/code_change_miner",
-  "temp_directory_path": "/home/<user-name>/.temp",
-  "python_executable_path": "/home/<user_name>/miniconda3/envs/<env_name>/bin/python"
-}

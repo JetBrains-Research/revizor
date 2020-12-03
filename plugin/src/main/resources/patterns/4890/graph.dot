@@ -1,0 +1,16 @@
+digraph G {
+  256 [ metadata="" color="red2" shape="box" label="log (log) [256]" ];
+  258 [ metadata="" color="red2" shape="ellipse" label="var (np.log) [258]" ];
+  95 [ metadata="" color="red2" shape="box" label="log.PyArgumentList (log.PyArgumentList) [95]" ];
+  263 [ metadata="" color="red2" shape="ellipse" label="lit (1) [263]" ];
+  262 [ metadata="" color="red2" shape="box" label="add (add) [262]" ];
+  94 [ metadata="hanger" color="null" shape="null" label="var (x) [94]" ];
+  258 -> 256 [ from_closure="false" xlabel="recv" ];
+  95 -> 256 [ from_closure="false" xlabel="para" ];
+  263 -> 95 [ from_closure="false" xlabel="para" ];
+  263 -> 262 [ from_closure="false" xlabel="para" ];
+  262 -> 256 [ from_closure="false" xlabel="para" ];
+  262 -> 95 [ from_closure="false" xlabel="para" ];
+  94 -> 95 [ from_closure="false" xlabel="para" ];
+  94 -> 262 [ from_closure="false" xlabel="para" ];
+}

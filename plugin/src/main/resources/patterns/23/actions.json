@@ -1,0 +1,54 @@
+[
+  {
+    "type": "Insert",
+    "targetTreeWrapper": {
+      "rootVertexId": null,
+      "type": 448,
+      "label": "PyReferenceExpression: d"
+    },
+    "parentTreeWrapper": {
+      "rootVertexId": 63,
+      "type": 422,
+      "label": "PyArgumentList"
+    },
+    "targetTreeHashCode": 1999600221,
+    "parentTreeHashCode": 906995553,
+    "position": 0
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 60,
+      "type": 448,
+      "label": "PyReferenceExpression: d"
+    },
+    "targetTreeHashCode": 524648537
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 1871,
+      "type": 448,
+      "label": "PyReferenceExpression: keys"
+    },
+    "targetTreeHashCode": 1850971002
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 61,
+      "type": 422,
+      "label": "PyArgumentList"
+    },
+    "targetTreeHashCode": 53215471
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 1868,
+      "type": 461,
+      "label": "PyCallExpression: d.keys"
+    },
+    "targetTreeHashCode": 2000762167
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 17115,
+      "type": 747,
+      "label": "PyCallExpression: np.random.randint"
+    },
+    "targetTreeHashCode": 56277898,
+    "value": "PyCallExpression: np.random.choice"
+  },
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 17147,
+      "type": 734,
+      "label": "PyReferenceExpression: randint"
+    },
+    "targetTreeHashCode": 34938534,
+    "value": "PyReferenceExpression: choice"
+  },
+  {
+    "type": "Move",
+    "targetTreeWrapper": {
+      "rootVertexId": 7,
+      "type": 708,
+      "label": "PyArgumentList"
+    },
+    "parentTreeWrapper": {
+      "rootVertexId": 17115,
+      "type": 747,
+      "label": "PyCallExpression: np.random.randint"
+    },
+    "targetTreeHashCode": 711781044,
+    "parentTreeHashCode": 56277898,
+    "position": 1
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 17158,
+      "type": 735,
+      "label": "PyNumericLiteralExpression"
+    },
+    "targetTreeHashCode": 714384160
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": null,
+      "type": 734,
+      "label": "PyReferenceExpression: len"
+    },
+    "targetTreeHashCode": 380377444
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 17101,
+      "type": 747,
+      "label": "PyCallExpression: len"
+    },
+    "targetTreeHashCode": 1793026717
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 9,
+      "type": 708,
+      "label": "PyArgumentList"
+    },
+    "targetTreeHashCode": 1445381511
+  }
+]

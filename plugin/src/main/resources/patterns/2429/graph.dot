@@ -1,0 +1,9 @@
+digraph G {
+  2246 [ metadata="" color="red2" shape="box" label="isinstance (isinstance) [2246]" ];
+  2248 [ metadata="" color="red2" shape="ellipse" label="var (types.FunctionType) [2248]" ];
+  2247 [ metadata="" color="red2" shape="ellipse" label="var (types) [2247]" ];
+  43 [ metadata="" color="red2" shape="box" label="isinstance.PyArgumentList (isinstance.PyArgumentList) [43]" ];
+  2248 -> 43 [ from_closure="false" xlabel="para" ];
+  2247 -> 2248 [ from_closure="false" xlabel="qual" ];
+  43 -> 2246 [ from_closure="false" xlabel="para" ];
+}

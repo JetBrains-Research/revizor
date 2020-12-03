@@ -1,0 +1,18 @@
+{
+  "2248": {
+    "whatMatters": "VALUABLE_ORIGINAL_LABEL",
+    "labels": [
+      "collections.Callable",
+      "types.FunctionType"
+    ],
+    "longestCommonSuffix": ""
+  },
+  "2247": {
+    "whatMatters": "VALUABLE_ORIGINAL_LABEL",
+    "labels": [
+      "types",
+      "collections"
+    ],
+    "longestCommonSuffix": ""
+  }
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 1065,
+      "type": 461,
+      "label": "PyCallExpression: os.mkdir"
+    },
+    "targetTreeHashCode": 1358360795,
+    "value": "PyCallExpression: os.makedirs"
+  },
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 1068,
+      "type": 448,
+      "label": "PyReferenceExpression: mkdir"
+    },
+    "targetTreeHashCode": 1779448516,
+    "value": "PyReferenceExpression: makedirs"
+  }
+]

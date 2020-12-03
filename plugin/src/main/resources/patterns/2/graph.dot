@@ -1,0 +1,5 @@
+digraph G {
+  221 [ metadata="" color="red2" shape="box" label="exists (exists) [221]" ];
+  222 [ metadata="" color="red2" shape="ellipse" label="var (os.path.exists) [222]" ];
+  222 -> 221 [ from_closure="false" xlabel="recv" ];
+}

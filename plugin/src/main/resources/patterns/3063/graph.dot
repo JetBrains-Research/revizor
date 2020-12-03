@@ -1,0 +1,18 @@
+digraph G {
+  17115 [ metadata="" color="red2" shape="box" kind="null" label="randint (randint) [17115]" ];
+  17147 [ metadata="" color="red2" shape="ellipse" kind="variable-usage" label="var (np.random.randint) [17147]" ];
+  17158 [ metadata="" color="red2" shape="ellipse" kind="null" label="lit (0) [17158]" ];
+  17101 [ metadata="" color="red2" shape="box" kind="null" label="len (len) [17101]" ];
+  17107 [ metadata="" color="red2" shape="ellipse" kind="variable-usage" label="var (population) [17107]" ];
+  9 [ metadata="" color="red2" shape="null" kind="null" label="randint.PyArgumentList (randint.PyArgumentList) [9]" ];
+  7 [ metadata="" color="red2" shape="null" kind="null" label="len.PyArgumentList (len.PyArgumentList) [7]" ];
+  17147 -> 17115 [ from_closure="null" xlabel="recv" ];
+  17158 -> 9 [ from_closure="false" xlabel="para" ];
+  17101 -> 17115 [ from_closure="null" xlabel="para" ];
+  17101 -> 9 [ from_closure="false" xlabel="para" ];
+  17107 -> 7 [ from_closure="false" xlabel="para" ];
+  9 -> 17115 [ from_closure="false" xlabel="para" ];
+  7 -> 17101 [ from_closure="false" xlabel="para" ];
+  7 -> 9 [ from_closure="true" xlabel="para" ];
+  7 -> 17115 [ from_closure="true" xlabel="para" ];
+}
