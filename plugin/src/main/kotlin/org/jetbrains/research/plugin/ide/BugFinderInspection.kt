@@ -12,7 +12,6 @@ import com.jetbrains.python.psi.PyFunction
 import org.jetbrains.research.common.buildPyFlowGraphForMethod
 import org.jetbrains.research.common.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.common.jgrapht.vertices.PatternSpecificVertex
-import org.jetbrains.research.common.pyflowgraph.GraphBuildingException
 import org.jetbrains.research.plugin.PatternsStorage
 import org.jgrapht.GraphMapping
 
@@ -118,7 +117,7 @@ class BugFinderInspection : LocalInspectionTool() {
                             )
                         }
                     }
-                } catch (exception: GraphBuildingException) {
+                } catch (exception: Exception) {
                     logger.warn("Unable to build PyFlowGraph for method `${node.name}`")
                 }
             }

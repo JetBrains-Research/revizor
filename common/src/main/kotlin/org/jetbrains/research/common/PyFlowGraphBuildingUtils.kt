@@ -18,7 +18,7 @@ fun buildPyFlowGraphForMethod(node: PyFunction, builder: String = "kotlin"): Pat
             val methodPyFlowGraph = PyFlowGraphBuilder().buildForPyFunction(node)
             PatternGraph(methodPyFlowGraph)
         }
-        else -> throw  IllegalArgumentException()
+        else -> throw IllegalArgumentException()
     }
 
 fun createTempFileFromMethodPsi(node: PyFunction): File {
