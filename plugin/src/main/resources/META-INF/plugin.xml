@@ -5,13 +5,13 @@
 
     <description><![CDATA[
         <p>
-        A static code analysis tool for locating and fixing complicated, semantic,
-        and (as far as possible) buggy patterns in your Python code.
+        A static code analysis tool for locating and quick-fixing semantic patterns in your Python code.
         </p>
         <br>
         <p>
-        We use graphs-based patterns, which were gathered from <b>120 GitHub repositories</b> by
-        code-change-miner tool. Behind the scenes, the plugin runs an inspection which builds
+        We use graph-based patterns, which were gathered from <b>120 GitHub repositories</b> by
+        <a href="https://github.com/JetBrains-Research/code-change-miner">code-change-miner</a> tool.
+        Behind the scenes, the plugin runs an inspection which builds
         isomorphic mappings between fine-grained Program Dependence Graphs
         of mined patterns and a similar graph of your code, and then suggests
         you a relevant quick-fix to repair the highlighted code fragment.
