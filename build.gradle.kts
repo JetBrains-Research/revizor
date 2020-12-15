@@ -26,7 +26,7 @@ subprojects {
     }
 
     intellij {
-        version = "2020.2"
+        version = "2020.3"
         type = "PC"
         setPlugins("PythonCore")
     }
