@@ -1,9 +1,8 @@
 [![JetBrains Research](https://jb.gg/badges/research.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 #  Bug Finder
 
-A static code analysis tool for locating and fixing complicated, semantic, 
-and (as far as possible) buggy patterns in your Python code. We use 
-graphs-based patterns, which were gathered from 120 GitHub repositories by 
+A static code analysis tool for locating and quick-fixing semantic patterns in your Python code. 
+We use graphs-based patterns, which were gathered from 120 GitHub repositories by 
 [code-change-miner](https://github.com/JetBrains-Research/code-change-miner) 
 tool. 
 
