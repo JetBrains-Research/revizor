@@ -88,7 +88,7 @@ class PatternBasedAutoFix(
                             is Update -> {
                                 val preprocessedAction = updateLabels(action) as Update
                                 val targetElement =
-                                    findRevision(elementByTree[preprocessedAction.node as PyPsiGumTree]!!, revisions)
+                                    findRevision(elementByTree[action.node as PyPsiGumTree]!!, revisions)
                                 val newElement = transformer.applyUpdate(targetElement, preprocessedAction)
                                 updateRevisions(targetElement, newElement, revisions)
                             }
@@ -102,7 +102,7 @@ class PatternBasedAutoFix(
                                     findRevision(elementByTree[action.parent as PyPsiGumTree]!!, revisions)
                                 val preprocessedAction = updateLabels(action) as Insert
                                 val newElement = transformer.applyInsert(targetParentElement, preprocessedAction)
-                                elementByTree[preprocessedAction.node as PyPsiGumTree] = newElement
+                                elementByTree[action.node as PyPsiGumTree] = newElement
                             }
                             is Move -> {
                                 val targetParentElement =
