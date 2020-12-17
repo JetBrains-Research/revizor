@@ -30,7 +30,7 @@
                          level="WARNING"
                          implementationClass="org.jetbrains.research.plugin.ide.BugFinderInspection"
                          displayName="BugFinder"
-                         shortName="BugFinder"/>
+                         shortName="BugFinderInspection"/>
     </extensions>
 
 </idea-plugin>
