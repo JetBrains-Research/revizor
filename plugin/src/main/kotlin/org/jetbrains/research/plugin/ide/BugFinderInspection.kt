@@ -37,6 +37,7 @@ class BugFinderInspection : PyInspection() {
         holder: ProblemsHolder,
         session: LocalInspectionToolSession
     ) : PyInspectionVisitor(holder, session) {
+
         override fun visitPyFunction(node: PyFunction) {
             try {
                 val documentManager = holder?.project?.let { PsiDocumentManager.getInstance(it) }

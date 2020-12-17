@@ -61,7 +61,7 @@ class PatternBasedAutoFix(
             return super.onChosen(selectedValue, finalChoice)
         }
 
-        override fun getFinalRunnable(): Runnable? {
+        override fun getFinalRunnable(): Runnable {
             return Runnable { applyEditFromPattern(selectedPatternId) }
         }
 
@@ -149,13 +149,20 @@ class PatternBasedAutoFix(
             // Labels and values inside actions are presented in format "PsiElementType: Label"
             val oldLabel = action.node.label.substringAfterLast(":", "").trim()
             val newLabel = getNewLabel(oldLabel)
-            action.node.label = action.node.label.replaceAfterLast(": ", newLabel)
-            if (action is Update) {
-                val updatedOldVarName = action.value.substringAfterLast(":", "").trim()
-                val updatedNewVarName = getNewLabel(updatedOldVarName)
-                return Update(action.node, action.value.replaceAfterLast(": ", updatedNewVarName))
+
+            return when (action) {
+                is Insert -> {
+                    val newNode = (action.node as PyPsiGumTree).deepCopy()
+                    newNode.label = action.node.label.replaceAfterLast(": ", newLabel)
+                    Insert(newNode, action.parent, action.position)
+                }
+                is Update -> {
+                    val updatedOldVarName = action.value.substringAfterLast(":", "").trim()
+                    val updatedNewVarName = getNewLabel(updatedOldVarName)
+                    Update(action.node, action.value.replaceAfterLast(": ", updatedNewVarName))
+                }
+                else -> throw IllegalStateException()
             }
-            return action
         }
 
         private fun getNewLabel(oldName: String): String {
