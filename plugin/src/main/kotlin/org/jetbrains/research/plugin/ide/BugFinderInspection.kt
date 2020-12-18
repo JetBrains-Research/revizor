@@ -124,7 +124,7 @@ class BugFinderInspection : PyInspection() {
                         )
                     }
                 }
-            } catch (exception: Exception) {
+            } catch (exception: Throwable) {
                 logger.warn("Unable to build PyFlowGraph for method `${node.name}`")
             }
         }

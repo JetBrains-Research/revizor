@@ -60,7 +60,7 @@ fun PyElement.getShortName(): String =
         else -> throw IllegalArgumentException()
     }
 
-fun PyElement.getOperationName(): String? =
+fun PyElement.getOperationName(): String =
     when (this) {
         is PyAugAssignmentStatement -> {
             when (this.operation?.text) {
