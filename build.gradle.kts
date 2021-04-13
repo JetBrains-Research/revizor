@@ -4,8 +4,8 @@ version = "1.0-SNAPSHOT"
 
 plugins {
     java
-    id("org.jetbrains.intellij") version "0.4.22"
-    val kotlinVersion = "1.4.10"
+    id("org.jetbrains.intellij") version "0.7.2"
+    val kotlinVersion = "1.4.20"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 }
@@ -26,9 +26,10 @@ subprojects {
     }
 
     intellij {
-        version = "2020.3"
         type = "PC"
+        version = "2020.3.3"
         setPlugins("PythonCore")
+        updateSinceUntilBuild = true
     }
 
     dependencies {
