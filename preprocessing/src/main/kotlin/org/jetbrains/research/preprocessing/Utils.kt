@@ -14,40 +14,42 @@ fun getLongestCommonSuffix(strings: Collection<String?>?): String {
 }
 
 fun getLongestCommonEditActionsSubsequence(first: List<Action>, second: List<Action>): List<Action> {
+    return getLongestCommonSubsequence(first, second, elementsEquals = ::actionsHeuristicallyEquals)
+}
+
+fun <T> getLongestCommonSubsequence(first: List<T>, second: List<T>, elementsEquals: (T, T) -> Boolean): List<T> {
     if (first.isEmpty() || second.isEmpty()) return arrayListOf()
 
-    val lceas = Array(first.size) { IntArray(second.size) }
+    val lcs = Array(first.size) { IntArray(second.size) }
     val prev = Array(first.size) { Array(second.size) { IntPair(0, 0) } }
+    val result = arrayListOf<T>()
 
-    lceas[0][0] = if (first[0].heuristicallyEquals(second[0])) 1 else 0
-
+    lcs[0][0] = if (elementsEquals(first[0], second[0])) 1 else 0
     for (i in 1 until first.size)
-        lceas[i][0] = if (first[i].heuristicallyEquals(second[0])) 1 else maxOf(lceas[i - 1][0], 0)
+        lcs[i][0] = if (elementsEquals(first[i], second[0])) 1 else maxOf(lcs[i - 1][0], 0)
     for (j in 1 until second.size)
-        lceas[0][j] = if (first[0].heuristicallyEquals(second[j])) 1 else maxOf(lceas[0][j - 1], 0)
+        lcs[0][j] = if (elementsEquals(first[0], second[j])) 1 else maxOf(lcs[0][j - 1], 0)
 
     for (i in 1 until first.size) {
         for (j in 1 until second.size) {
-            if (first[i].heuristicallyEquals(second[i])) {
-                lceas[i][j] = lceas[i - 1][j - 1] + 1
+            if (elementsEquals(first[i], second[i])) {
+                lcs[i][j] = lcs[i - 1][j - 1] + 1
                 prev[i][j] = IntPair(i - 1, j - 1)
             } else {
-                if (lceas[i - 1][j] >= lceas[i][j - 1]) {
-                    lceas[i][j] = lceas[i - 1][j]
+                if (lcs[i - 1][j] >= lcs[i][j - 1]) {
+                    lcs[i][j] = lcs[i - 1][j]
                     prev[i][j] = IntPair(i - 1, j)
                 } else {
-                    lceas[i][j] = lceas[i][j - 1]
+                    lcs[i][j] = lcs[i][j - 1]
                     prev[i][j] = IntPair(i, j - 1)
                 }
             }
         }
     }
 
-    val result = arrayListOf<Action>()
-
     fun collectResultingSubsequence(i: Int, j: Int) {
         if (i == 0 || j == 0) {
-            if (first[i].heuristicallyEquals(second[j]))
+            if (elementsEquals(first[i], second[j]))
                 result.add(first[i])
             return
         }
@@ -66,8 +68,7 @@ fun getLongestCommonEditActionsSubsequence(first: List<Action>, second: List<Act
     return result
 }
 
-fun Action.heuristicallyEquals(other: Any): Boolean {
-    if (other !is Action) return false
-    if (other === this) return true
-    return this.toString() == other.toString()
+fun actionsHeuristicallyEquals(first: Action, second: Action): Boolean {
+    if (first === second) return true
+    return first.toString() == second.toString()
 }
