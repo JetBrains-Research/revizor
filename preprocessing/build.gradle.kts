@@ -3,6 +3,7 @@ version = rootProject.version
 
 dependencies {
     implementation("com.xenomachina:kotlin-argparser:2.0.7")
+    implementation("org.jsoup:jsoup:1.13.1")
     implementation(project(":common"))
 }
 

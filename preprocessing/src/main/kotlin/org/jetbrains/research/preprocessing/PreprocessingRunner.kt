@@ -7,10 +7,7 @@ import com.intellij.ide.impl.ProjectUtil
 import com.intellij.openapi.application.ApplicationStarter
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiFileFactory
-import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.psi.PyElement
-import com.jetbrains.python.psi.PyFunction
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.SystemExitException
 import com.xenomachina.argparser.default
@@ -28,24 +25,37 @@ import org.jetbrains.research.common.jgrapht.getSuperWeakSubgraphIsomorphismInsp
 import org.jetbrains.research.common.jgrapht.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.common.jgrapht.vertices.PatternSpecificVertex
 import org.jgrapht.graph.AsSubgraph
+import org.jsoup.Jsoup
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
-import kotlin.collections.HashMap
 import kotlin.system.exitProcess
 
 
 class PreprocessingRunner : ApplicationStarter {
-
     private lateinit var sourceDir: Path
     private lateinit var destDir: Path
     private var addDescription: Boolean = false
 
     private var project: Project? = null
     private val logger = Logger.getInstance(this::class.java)
+
+    private val descriptionByPath = HashMap<Path, String>()
+    private val labelsGroupsJsonByPath = HashMap<Path, String>()
+    private val reprFragmentByPatternPath = HashMap<Path, PatternGraph>()
+
+    private val fragmentToPatternMappingByPattern =
+        HashMap<String, HashMap<PatternSpecificVertex, PatternSpecificVertex>>()
+    private val psiToPatternMappingByPattern =
+        HashMap<String, HashMap<PyElement, PatternSpecificVertex>>()
+
+    private val patternGraphCache = HashMap<String, PatternGraph>()
+    private val fragmentGraphCache = HashMap<String, PatternGraph>()
+    private val actionsCache = HashMap<String, List<Action>>()
+
 
     override fun getCommandName(): String = "preprocessing"
 
@@ -75,17 +85,22 @@ class PreprocessingRunner : ApplicationStarter {
             }
 
             // Create labels groups and descriptions for each pattern
+
             val fragmentsByPath = loadFragments(sourceDir)
             val patternByPath = mergeFragments(fragmentsByPath)
-            markPatterns(patternByPath, addDescription)
+
+            markPatternsAutomatically(patternByPath, addDescription)
 
             sourceDir.toFile().listFiles()?.forEach { patternDir ->
                 // Import project in order to create PSI
                 project = ProjectUtil.openOrImport(patternDir.toPath(), null, true)
+                    ?: throw IllegalStateException("Can not import or create project")
 
                 // Prepare actions and extend graphs
                 createFragmentToPatternMappings(patternDir)
                 extendPatternGraphWithElements(patternDir)
+
+                loadEditActions(patternDir)
                 sortActions(patternDir)
                 destDir.resolve(patternDir.name).toFile().mkdirs()
 
@@ -115,20 +130,12 @@ class PreprocessingRunner : ApplicationStarter {
         }
     }
 
-    private val descriptionByPath = HashMap<Path, String>()
-    private val labelsGroupsJsonByPath = HashMap<Path, String>()
-    private val reprFragmentByPatternPath = HashMap<Path, PatternGraph>()
-
-    private val fragmentToPatternMappingByPattern =
-        HashMap<String, HashMap<PatternSpecificVertex, PatternSpecificVertex>>()
-    private val psiToPatternMappingByPattern =
-        HashMap<String, HashMap<PyElement, PatternSpecificVertex>>()
-
-    private val patternGraphCache = HashMap<String, PatternGraph>()
-    private val fragmentGraphCache = HashMap<String, PatternGraph>()
-    private val actionsCache = HashMap<String, List<Action>>()
-    private val psiCache = HashMap<File, PyElement>()
-
+    /**
+     * Loads all `fragment-[0-9]*.dot` files from the specified directory. Such directory should
+     * contain patterns mined by the code-change-miner tool.
+     *
+     * @return mappings from concrete pattern's directory to its fragments.
+     */
     private fun loadFragments(inputPatternsStorage: Path): HashMap<Path, ArrayList<PatternGraph>> {
         val fragmentsByDir = HashMap<Path, ArrayList<PatternGraph>>()
         inputPatternsStorage.toFile().walk().forEach { file ->
@@ -146,6 +153,12 @@ class PreprocessingRunner : ApplicationStarter {
         return fragmentsByDir
     }
 
+    /**
+     * Checks whether the loaded fragments for each pattern are isomorphic between each other
+     * and picks the first fragment as a representative element for corresponding pattern.
+     *
+     * @return mappings from concrete pattern's directory to the pattern's graph representation.
+     */
     private fun mergeFragments(fragmentsMap: HashMap<Path, ArrayList<PatternGraph>>): HashMap<Path, PatternGraph> {
         val patternGraphByPath = HashMap<Path, PatternGraph>()
         for ((path, fragments) in fragmentsMap) {
@@ -161,7 +174,8 @@ class PreprocessingRunner : ApplicationStarter {
                     for (currentVertex in graph.vertexSet()) {
                         if (currentVertex.label?.startsWith("var") == true) {
                             val reprVertex = mapping.getVertexCorrespondence(currentVertex, false)
-                            labelsGroupsByVertexId.getOrPut(reprVertex.id) { PatternSpecificVertex.LabelsGroup.getEmpty() }
+                            labelsGroupsByVertexId.getOrPut(reprVertex.id)
+                            { PatternSpecificVertex.LabelsGroup.getEmpty() }
                                 .labels.add(currentVertex.originalLabel!!)
                         }
                     }
@@ -172,7 +186,8 @@ class PreprocessingRunner : ApplicationStarter {
         return patternGraphByPath
     }
 
-    private fun markPatterns(
+    // TODO: extract to class
+    private fun markPatternsManually(
         patternDirectedAcyclicGraphByPath: HashMap<Path, PatternGraph>,
         addDescription: Boolean = false
     ) {
@@ -233,47 +248,121 @@ class PreprocessingRunner : ApplicationStarter {
         println("Finish marking")
     }
 
-    private fun getLongestCommonSuffix(strings: Collection<String?>?): String {
-        if (strings == null || strings.isEmpty())
-            return ""
-        var lcs = strings.first()
-        for (string in strings) {
-            lcs = lcs?.commonSuffixWith(string ?: "")
-        }
-        return lcs ?: ""
-    }
+    private fun markPatternsAutomatically(
+        patternDirectedAcyclicGraphByPath: HashMap<Path, PatternGraph>,
+        addDescription: Boolean = false
+    ) {
+        println("Start marking")
+        for ((path, graph) in patternDirectedAcyclicGraphByPath) {
+            println("-".repeat(70))
+            println("Path to current pattern: $path")
 
-    private fun loadPsi(file: File): PyFunction? {
-        return if (psiCache.containsKey(file)) {
-            psiCache[file] as PyFunction
-        } else {
-            val src: String = file.readText()
-            val psi = PsiFileFactory.getInstance(project)
-                .createFileFromText(PythonLanguage.getInstance(), src)
-                .children.first() as PyFunction
-            psiCache[file] = psi
-            psi
-        }
-    }
-
-    private fun loadEditActions(patternDir: File): List<Action> {
-        return if (actionsCache.containsKey(patternDir.name)) {
-            actionsCache[patternDir.name]!!
-        } else {
-            var actions: List<Action> = arrayListOf()
-            try {
-                val pyFunctionBefore = loadPsi(patternDir.toPath().resolve("before.py").toFile())!!
-                val pyFunctionAfter = loadPsi(patternDir.toPath().resolve("after.py").toFile())!!
-                val srcGumtree = PyPsiGumTreeGenerator().generate(pyFunctionBefore).root
-                val dstGumtree = PyPsiGumTreeGenerator().generate(pyFunctionAfter).root
-                val matcher = Matchers.getInstance().getMatcher(srcGumtree, dstGumtree).also { it.match() }
-                val generator = ActionGenerator(srcGumtree, dstGumtree, matcher.mappings)
-                actions = generator.generate()
-            } catch (ex: Exception) {
-                logger.error(ex)
+            // Add description, which will be shown in the popup (optional)
+            if (addDescription) {
+                val dotFile = path.toFile()
+                    .listFiles { file -> file.extension == "dot" && file.name.startsWith("fragment") }
+                    ?.first()
+                println("Fragment sample ${dotFile?.name}")
+                println(dotFile?.readText())
+                println("Your description:")
+                val description = readLine() ?: "No description provided"
+                println("Final description: $description")
+                descriptionByPath[path] = description
             }
-            actionsCache[patternDir.name] = actions
-            actions
+
+            // Choose matching mode automatically
+            val labelsGroupsByVertexId = HashMap<Int, PatternSpecificVertex.LabelsGroup>()
+            for (vertex in graph.vertexSet()) {
+                if (vertex.label?.startsWith("var") == true) {
+                    val labels = vertex.dataNodeInfo?.labels ?: hashSetOf()
+                    val lcs = getLongestCommonSuffix(labels)
+                    when {
+                        lcs.contains('.') -> {
+                            // If all the labels have common attribute at the end, such as `.size`
+                            labelsGroupsByVertexId[vertex.id] = PatternSpecificVertex.LabelsGroup(
+                                whatMatters = PatternSpecificVertex.MatchingMode.LONGEST_COMMON_SUFFIX,
+                                labels = labels,
+                                longestCommonSuffix = lcs
+                            )
+                        }
+                        labels.all { it.contains('.') } -> {
+                            // If the labels do not have any common attribute suffix, but still have some attributes,
+                            // we should save their original labels as well
+                            labelsGroupsByVertexId[vertex.id] = PatternSpecificVertex.LabelsGroup(
+                                whatMatters = PatternSpecificVertex.MatchingMode.VALUABLE_ORIGINAL_LABEL,
+                                labels = labels,
+                                longestCommonSuffix = ""
+                            )
+                        }
+                        else -> {
+                            // Otherwise, just suppose that this vertex corresponds to a variable,
+                            // so its name does not matter
+                            labelsGroupsByVertexId[vertex.id] =
+                                PatternSpecificVertex.LabelsGroup(
+                                    whatMatters = PatternSpecificVertex.MatchingMode.NOTHING,
+                                    labels = vertex.dataNodeInfo!!.labels,
+                                    longestCommonSuffix = ""
+                                )
+                        }
+                    }
+                }
+            }
+            labelsGroupsJsonByPath[path] = Json.encodeToString(labelsGroupsByVertexId)
+        }
+        println("Finish marking")
+    }
+
+    /**
+     * Creates mapping from PSI of the representative fragment to the pattern's graph vertices,
+     * also creates mapping between repr fragment's graph vertices and pattern's graph vertices,
+     * also save repr fragment's graph to the local cache
+     */
+    private fun createFragmentToPatternMappings(patternDir: File) {
+        var reprFragmentGraph: PatternGraph? = null
+        for (file in patternDir.walk()) {
+            if (file.name.startsWith("sample") && file.extension == "html") {
+                val document = Jsoup.parse(file.readText())
+                val codeElements = document.getElementsByClass("code language-python")
+                assert(codeElements.size == 2)
+
+                val fragmentCodeBefore = codeElements[0].text()
+                val psiBefore = PsiCachingLoader.getInstance(project!!).loadPsiFromSource(fragmentCodeBefore)
+                reprFragmentGraph = buildPyFlowGraphForMethod(psiBefore)
+                break
+            }
+        }
+        fragmentGraphCache[patternDir.name] = reprFragmentGraph
+            ?: throw IllegalStateException("Can not find any sample-[0-9]*.html file in the directory")
+
+        val patternGraph = loadPatternGraph(patternDir)
+        val inspector = getWeakSubgraphIsomorphismInspector(reprFragmentGraph, patternGraph)
+
+        val fragmentToPatternMapping = HashMap<PatternSpecificVertex, PatternSpecificVertex>()
+        val psiToPatternMapping = HashMap<PyElement, PatternSpecificVertex>()
+
+        var foundCorrectMapping = false
+        if (inspector.isomorphismExists()) {
+            for (mapping in inspector.mappings.asSequence()) {
+                var isCorrectMapping = true
+                for (patternVertex in patternGraph.vertexSet()) {
+                    val fragmentVertex = mapping.getVertexCorrespondence(patternVertex, false)
+                    if (patternVertex.originalLabel?.toLowerCase() != fragmentVertex.originalLabel?.toLowerCase()) {
+                        isCorrectMapping = false
+                        break
+                    }
+                    fragmentToPatternMapping[fragmentVertex] = patternVertex
+                    psiToPatternMapping[fragmentVertex.origin!!.psi!!] = patternVertex
+                }
+                if (isCorrectMapping) {
+                    fragmentToPatternMappingByPattern[patternDir.name] = fragmentToPatternMapping
+                    psiToPatternMappingByPattern[patternDir.name] = psiToPatternMapping
+                    foundCorrectMapping = true
+                    break
+                }
+            }
+        }
+        if (!foundCorrectMapping) {
+            throw IllegalStateException("Pattern's fragments do not match between each other")
         }
     }
 
@@ -297,32 +386,40 @@ class PreprocessingRunner : ApplicationStarter {
         }
     }
 
-    /**
-     * Create mapping from fragment's PSI elements to pattern's graph vertices
-     * Also create mapping from fragment's graph vertices to pattern's graph vertices
-     * Also save fragment's graph to cache
-     */
-    private fun createFragmentToPatternMappings(patternDir: File) {
-        val fragmentPsi = loadPsi(patternDir.toPath().resolve("before.py").toFile())!!
-        val patternGraph = loadPatternGraph(patternDir)
-        val fragmentGraph = buildPyFlowGraphForMethod(fragmentPsi, builder = "kotlin")
-        fragmentGraphCache[patternDir.name] = fragmentGraph
-        val fragmentToPatternMapping = HashMap<PatternSpecificVertex, PatternSpecificVertex>()
-        val psiToPatternMapping = HashMap<PyElement, PatternSpecificVertex>()
-        val inspector = getWeakSubgraphIsomorphismInspector(fragmentGraph, patternGraph)
-        if (inspector.isomorphismExists()) {
-            val mapping = inspector.mappings.asSequence().first()
-            for (patternVertex in patternGraph.vertexSet()) {
-                val fragmentVertex = mapping.getVertexCorrespondence(patternVertex, false)
-                fragmentToPatternMapping[fragmentVertex] = patternVertex
-                psiToPatternMapping[fragmentVertex.origin!!.psi!!] = patternVertex
-            }
-            fragmentToPatternMappingByPattern[patternDir.name] = fragmentToPatternMapping
-            psiToPatternMappingByPattern[patternDir.name] = psiToPatternMapping
+    private fun loadEditActions(patternDir: File): List<Action> =
+        if (actionsCache.containsKey(patternDir.name)) {
+            actionsCache[patternDir.name]!!
         } else {
-            logger.error("Pattern's graph does not match to pattern's code fragment (before.py)")
+            val actionsGroups: MutableList<List<Action>> = arrayListOf()
+
+            patternDir.walk().forEach { file ->
+                if (file.name.startsWith("sample") && file.extension == "html") {
+                    val document = Jsoup.parse(file.readText())
+                    val codeElements = document.getElementsByClass("code language-python")
+                    assert(codeElements.size == 2)
+
+                    val fragmentCodeBefore = codeElements[0].text()
+                    val fragmentCodeAfter = codeElements[1].text()
+                    val psiBefore = PsiCachingLoader.getInstance(project!!).loadPsiFromSource(fragmentCodeBefore)
+                    val psiAfter = PsiCachingLoader.getInstance(project!!).loadPsiFromSource(fragmentCodeAfter)
+                    val srcGumtree = PyPsiGumTreeGenerator().generate(psiBefore).root
+                    val dstGumtree = PyPsiGumTreeGenerator().generate(psiAfter).root
+
+                    val matcher = Matchers.getInstance().getMatcher(srcGumtree, dstGumtree).also { it.match() }
+                    val generator = ActionGenerator(srcGumtree, dstGumtree, matcher.mappings)
+                    val currentFragmentActions = generator.generate()
+                    actionsGroups.add(currentFragmentActions)
+                }
+            }
+
+            var reprActions = actionsGroups.first()
+            for (actions in actionsGroups.drop(1)) {
+                reprActions = getLongestCommonEditActionsSubsequence(reprActions, actions)
+            }
+            actionsCache[patternDir.name] = reprActions
+            reprActions
         }
-    }
+
 
     /**
      * Collect PSI elements which are involved in edit actions but are not contained in the pattern's graph
@@ -364,10 +461,10 @@ class PreprocessingRunner : ApplicationStarter {
         val fragmentGraph = fragmentGraphCache[patternDir.name]!!
         val fragmentToPatternMapping = fragmentToPatternMappingByPattern[patternDir.name]!!
         val hangerElements = collectAdditionalElementsFromActions(patternDir)
+
         for (element in hangerElements) {
-            val originalVertex = fragmentGraph.vertexSet().find { it.origin?.psi == element }
-            if (originalVertex == null
-                || fragmentToPatternMapping.containsKey(originalVertex)
+            val originalVertex = fragmentGraph.vertexSet().find { it.origin?.psi == element } ?: continue
+            if (fragmentToPatternMapping.containsKey(originalVertex)
                 && patternGraph.containsVertex(fragmentToPatternMapping[originalVertex])
             ) {
                 continue
