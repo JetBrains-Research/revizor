@@ -1,5 +1,0 @@
-digraph G {
-  1065 [ metadata="" color="red2" shape="box" label="mkdir (mkdir) [1065]" ];
-  1068 [ metadata="" color="red2" shape="ellipse" label="var (os.mkdir) [1068]" ];
-  1068 -> 1065 [ from_closure="false" xlabel="recv" ];
-}
