@@ -20,10 +20,11 @@ import org.jetbrains.research.common.gumtree.PyPsiGumTree
 import org.jetbrains.research.common.gumtree.PyPsiGumTreeGenerator
 import org.jetbrains.research.common.gumtree.wrappers.ActionWrapper
 import org.jetbrains.research.common.jgrapht.PatternGraph
-import org.jetbrains.research.common.jgrapht.export
 import org.jetbrains.research.common.jgrapht.getSuperWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.common.jgrapht.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.common.jgrapht.vertices.PatternSpecificVertex
+import org.jetbrains.research.preprocessing.loaders.CachingPsiLoader
+import org.jetbrains.research.preprocessing.models.Pattern
 import org.jgrapht.graph.AsSubgraph
 import org.jsoup.Jsoup
 import java.io.BufferedReader
@@ -40,7 +41,7 @@ class PreprocessingRunner : ApplicationStarter {
     private lateinit var destDir: Path
     private var addDescription: Boolean = false
 
-    private var project: Project? = null
+    private lateinit var myProject: Project
     private val logger = Logger.getInstance(this::class.java)
 
     private val descriptionByPath = HashMap<Path, String>()
@@ -84,42 +85,14 @@ class PreprocessingRunner : ApplicationStarter {
                 addDescription = desc
             }
 
-            // Create labels groups and descriptions for each pattern
-
-            val fragmentsByPath = loadFragments(sourceDir)
-            val patternByPath = mergeFragments(fragmentsByPath)
-
-            markPatternsAutomatically(patternByPath, addDescription)
-
             sourceDir.toFile().listFiles()?.forEach { patternDir ->
-                // Import project in order to create PSI
-                project = ProjectUtil.openOrImport(patternDir.toPath(), null, true)
+                myProject = ProjectUtil.openOrImport(patternDir.toPath(), null, true)
                     ?: throw IllegalStateException("Can not import or create project")
+                val pattern = Pattern(directory = patternDir.toPath(), project = myProject)
 
-                // Prepare actions and extend graphs
-                createFragmentToPatternMappings(patternDir)
-                extendPatternGraphWithElements(patternDir)
-
-                loadEditActions(patternDir)
-                sortActions(patternDir)
-                destDir.resolve(patternDir.name).toFile().mkdirs()
-
-                // Serialize and save edit actions
-                val serializedActions = serializeActions(patternDir)
-                destDir.resolve(patternDir.name).resolve("actions.json").toFile()
-                    .writeText(serializedActions)
-
-                // Save adjusted pattern's graph
-                val patternGraph = loadPatternGraph(patternDir)
-                patternGraph.export(destDir.resolve(patternDir.name).resolve("graph.dot").toFile())
-
-                // Save labels groups
-                destDir.resolve(patternDir.name).resolve("labels_groups.json").toFile()
-                    .writeText(labelsGroupsJsonByPath[patternDir.toPath()]!!)
-
-                // Save description
-                destDir.resolve(patternDir.name).resolve("description.txt").toFile()
-                    .writeText(descriptionByPath[patternDir.toPath()] ?: "No description provided")
+                val targetDirectory = destDir.resolve(pattern.name)
+                targetDirectory.toFile().mkdirs()
+                pattern.save(targetDirectory)
             }
         } catch (ex: SystemExitException) {
             logger.error(ex)
@@ -186,7 +159,6 @@ class PreprocessingRunner : ApplicationStarter {
         return patternGraphByPath
     }
 
-    // TODO: extract to class
     private fun markPatternsManually(
         patternDirectedAcyclicGraphByPath: HashMap<Path, PatternGraph>,
         addDescription: Boolean = false
@@ -326,7 +298,7 @@ class PreprocessingRunner : ApplicationStarter {
                 assert(codeElements.size == 2)
 
                 val fragmentCodeBefore = codeElements[0].text()
-                val psiBefore = PsiCachingLoader.getInstance(project!!).loadPsiFromSource(fragmentCodeBefore)
+                val psiBefore = CachingPsiLoader.getInstance(myProject).loadPsiFromSource(fragmentCodeBefore)
                 reprFragmentGraph = buildPyFlowGraphForMethod(psiBefore)
                 break
             }
@@ -400,8 +372,8 @@ class PreprocessingRunner : ApplicationStarter {
 
                     val fragmentCodeBefore = codeElements[0].text()
                     val fragmentCodeAfter = codeElements[1].text()
-                    val psiBefore = PsiCachingLoader.getInstance(project!!).loadPsiFromSource(fragmentCodeBefore)
-                    val psiAfter = PsiCachingLoader.getInstance(project!!).loadPsiFromSource(fragmentCodeAfter)
+                    val psiBefore = CachingPsiLoader.getInstance(myProject).loadPsiFromSource(fragmentCodeBefore)
+                    val psiAfter = CachingPsiLoader.getInstance(myProject).loadPsiFromSource(fragmentCodeAfter)
                     val srcGumtree = PyPsiGumTreeGenerator().generate(psiBefore).root
                     val dstGumtree = PyPsiGumTreeGenerator().generate(psiAfter).root
 
