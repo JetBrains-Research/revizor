@@ -199,7 +199,7 @@ class Pattern(private val directory: Path, private val project: Project) {
         mainGraph.export(directory.resolve("graph.dot").toFile())
         directory.resolve("description.txt").toFile().writeText(description)
         directory.resolve("labels_groups.json").toFile()
-            .writeText(Json.encodeToString(variableVertexToLabelsGroup.values.toList())) // FIXME
+            .writeText(Json.encodeToString(variableVertexToLabelsGroup.values.toList())) // FIXME: dict instead of list
     }
 
     private fun getEditActionsJson(): String {

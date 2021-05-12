@@ -74,7 +74,7 @@ fun <T> getLongestCommonSubsequence(first: List<T>, second: List<T>, elementsEqu
 
 fun actionsHeuristicallyEquals(first: Action, second: Action): Boolean {
     if (first === second) return true
-    return first.toString() == second.toString()
+    return first.toString() == second.toString() // FIXME: var names within the actions
 }
 
 fun sortEditActions(actions: List<Action>) {
