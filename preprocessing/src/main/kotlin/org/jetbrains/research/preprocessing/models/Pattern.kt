@@ -67,6 +67,7 @@ class Pattern(private val directory: Path, private val project: Project) {
         reprFragmentId = fragmentById.first().key
         reprFragment = fragmentById.first().value
 
+
         // Create, initialize and mark `mainGraph`
         val labeler = HeuristicVerticesMatchingModeLabeler(
             reprFragment = reprFragment,
@@ -75,7 +76,9 @@ class Pattern(private val directory: Path, private val project: Project) {
         variableVertexToLabelsGroup = labeler.markVertices()
         mainGraph = PatternGraph(
             baseDirectedAcyclicGraph = reprFragment,
-            labelsGroupsByVertexId = variableVertexToLabelsGroup.mapKeys { it.key.id })
+            labelsGroupsByVertexId = variableVertexToLabelsGroup.mapKeys { it.key.id }
+        )
+
 
         // Inject PSI elements from representative `codeChangeSample` to the `mainGraph`
         val reprPsiBefore = CachingPsiLoader.getInstance(project)
@@ -85,6 +88,7 @@ class Pattern(private val directory: Path, private val project: Project) {
             psiToPsiBasedVertexMapping[psiBasedVertex.origin!!.psi!!] = psiBasedVertex
         }
         injectPsiElementsToMainGraph()
+
 
         // Extract and sort appropriate edit actions subsequence
         val actionsByFragmentId = codeChangeSampleById.mapValues { (_, codeChangeSample) ->
@@ -96,6 +100,7 @@ class Pattern(private val directory: Path, private val project: Project) {
         }
         editActions = reprActions
         sortEditActions(editActions)
+
 
         // Extend `mainGraph` with additional vertices, corresponding to PSI elements involved in edit actions
         val hangerElements: Set<PsiElement> = collectAdditionalElementsFromActions()
@@ -111,10 +116,13 @@ class Pattern(private val directory: Path, private val project: Project) {
                 var isCorrectMapping = true
                 for (mainVertex in mainGraph.vertexSet()) {
                     val psiBasedVertex = mapping.getVertexCorrespondence(mainVertex, false)
+
+                    // Save mapping, because direct injection is prohibited
                     psiBasedVertexToMainGraphVertexMapping[psiBasedVertex] = mainVertex
 
                     if (mainVertex.originalLabel?.toLowerCase() != psiBasedVertex.originalLabel?.toLowerCase()) {
                         isCorrectMapping = false
+                        psiBasedVertexToMainGraphVertexMapping.clear()
                         break
                     }
                 }
@@ -199,7 +207,9 @@ class Pattern(private val directory: Path, private val project: Project) {
         mainGraph.export(directory.resolve("graph.dot").toFile())
         directory.resolve("description.txt").toFile().writeText(description)
         directory.resolve("labels_groups.json").toFile()
-            .writeText(Json.encodeToString(variableVertexToLabelsGroup.values.toList())) // FIXME: dict instead of list
+            .writeText(Json.encodeToString(
+                variableVertexToLabelsGroup.mapKeys { entry -> entry.key.id }
+            ))
     }
 
     private fun getEditActionsJson(): String {

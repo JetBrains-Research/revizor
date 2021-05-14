@@ -23,24 +23,19 @@ fun getLongestCommonEditActionsSubsequence(first: List<Action>, second: List<Act
 fun <T> getLongestCommonSubsequence(first: List<T>, second: List<T>, elementsEquals: (T, T) -> Boolean): List<T> {
     if (first.isEmpty() || second.isEmpty()) return arrayListOf()
 
-    val lcs = Array(first.size) { IntArray(second.size) }
-    val prev = Array(first.size) { Array(second.size) { IntPair(0, 0) } }
+    val lcs = Array(first.size + 1) { IntArray(second.size + 1) }
+    val prev = Array(first.size + 1) { Array(second.size + 1) { IntPair(0, 0) } }
     val result = arrayListOf<T>()
 
-    lcs[0][0] = if (elementsEquals(first[0], second[0])) 1 else 0
-    prev[0][0] = IntPair(-1, -1)
-    for (i in 1 until first.size) {
-        lcs[i][0] = if (elementsEquals(first[i], second[0])) 1 else maxOf(lcs[i - 1][0], 0)
-        prev[i][0] = IntPair(i - 1, 0)
-    }
-    for (j in 1 until second.size) {
-        lcs[0][j] = if (elementsEquals(first[0], second[j])) 1 else maxOf(lcs[0][j - 1], 0)
-        prev[0][j] = IntPair(0, j - 1)
-    }
+    lcs[0][0] = 0
+    for (i in 1..first.size)
+        lcs[i][0] = 0
+    for (j in 1..second.size)
+        lcs[0][j] = 0
 
-    for (i in 1..first.lastIndex) {
-        for (j in 1..second.lastIndex) {
-            if (elementsEquals(first[i], second[j])) {
+    for (i in 1..first.size) {
+        for (j in 1..second.size) {
+            if (elementsEquals(first[i - 1], second[j - 1])) {
                 lcs[i][j] = lcs[i - 1][j - 1] + 1
                 prev[i][j] = IntPair(i - 1, j - 1)
             } else {
@@ -56,10 +51,10 @@ fun <T> getLongestCommonSubsequence(first: List<T>, second: List<T>, elementsEqu
     }
 
     fun collectResultingSubsequence(i: Int, j: Int) {
-        if (i == -1 || j == -1) return
+        if (i == 0 || j == 0) return
         if (prev[i][j] == IntPair(i - 1, j - 1)) {
             collectResultingSubsequence(i - 1, j - 1)
-            result.add(first[i])
+            result.add(first[i - 1])
         } else {
             if (prev[i][j] == IntPair(i - 1, j))
                 collectResultingSubsequence(i - 1, j)
@@ -68,7 +63,7 @@ fun <T> getLongestCommonSubsequence(first: List<T>, second: List<T>, elementsEqu
         }
     }
 
-    collectResultingSubsequence(first.lastIndex, second.lastIndex)
+    collectResultingSubsequence(first.size, second.size)
     return result
 }
 
