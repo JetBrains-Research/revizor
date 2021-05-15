@@ -66,6 +66,7 @@ class Pattern(private val directory: Path, private val project: Project) {
             }
         }
 
+        // Pick representative fragment by number of corresponding edit actions
         val actionsLoader = CachingEditActionsLoader.getInstance(project)
         val actionsByFragmentId = codeChangeSampleById.mapValues { (_, codeChangeSample) ->
             actionsLoader.loadEditActions(codeChangeSample)
@@ -96,8 +97,6 @@ class Pattern(private val directory: Path, private val project: Project) {
         }
         injectPsiElementsToMainGraph()
 
-
-        // Extract and sort appropriate edit actions subsequence
 
         // Extract and sort appropriate edit actions subsequence
         val reprFragmentActions = actionsByFragmentId[reprFragmentId]!!
