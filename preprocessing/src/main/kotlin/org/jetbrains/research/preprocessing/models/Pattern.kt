@@ -7,7 +7,6 @@ import com.github.gumtreediff.actions.model.Update
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyElement
-import com.jetbrains.rd.util.first
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jetbrains.research.common.PatternGraph
@@ -66,8 +65,14 @@ class Pattern(private val directory: Path, private val project: Project) {
                 )
             }
         }
-        reprFragmentId = fragmentById.first().key
-        reprFragment = fragmentById.first().value
+
+        val actionsLoader = CachingEditActionsLoader.getInstance(project)
+        val actionsByFragmentId = codeChangeSampleById.mapValues { (_, codeChangeSample) ->
+            actionsLoader.loadEditActions(codeChangeSample)
+        }
+        reprFragmentId = actionsByFragmentId.minByOrNull { (_, actions) -> actions.size }?.key
+            ?: throw IllegalStateException("There is no fragments in the pattern to extract edit actions")
+        reprFragment = fragmentById[reprFragmentId]!!
 
 
         // Create, initialize and mark `mainGraph`
@@ -93,19 +98,18 @@ class Pattern(private val directory: Path, private val project: Project) {
 
 
         // Extract and sort appropriate edit actions subsequence
-        val actionsByFragmentId = codeChangeSampleById.mapValues { (_, codeChangeSample) ->
-            CachingEditActionsLoader.getInstance(project).loadEditActions(codeChangeSample)
-        }
-        var reprActions = actionsByFragmentId[reprFragmentId]!!
-        actionsByFragmentId.forEach { (_, actions) ->
-            reprActions = getLongestCommonEditActionsSubsequence(reprActions, actions)
-        }
-        editActions = reprActions
+
+        // Extract and sort appropriate edit actions subsequence
+        val reprFragmentActions = actionsByFragmentId[reprFragmentId]!!
+        editActions = actionsByFragmentId.values.fold(
+            initial = reprFragmentActions,
+            operation = ::getLongestCommonEditActionsSubsequence
+        )
         editActions.sort()
 
 
         // Extend `mainGraph` with additional vertices, corresponding to PSI elements involved in edit actions
-        val hangerElements: Set<PsiElement> = collectAdditionalElementsFromActions()
+        val hangerElements: Set<PsiElement> = editActions.collectAdditionalElements()
         extendMainGraphWithHangerElements(hangerElements)
     }
 
@@ -142,10 +146,10 @@ class Pattern(private val directory: Path, private val project: Project) {
     /**
      * Collect PSI elements which are involved in edit actions but are not contained in the pattern's graph
      */
-    private fun collectAdditionalElementsFromActions(): Set<PsiElement> {
+    private fun EditActions.collectAdditionalElements(): Set<PsiElement> {
         val insertedElements = hashSetOf<PyElement>()
         val hangerElements = hashSetOf<PyElement>()
-        for (action in editActions) {
+        for (action in this) {
             val element = (action.node as PyPsiGumTree).rootElement!!
             if (action is Update || action is Delete || action is Move) {
                 if (psiBasedVertexToMainGraphVertexMapping[psiToPsiBasedVertexMapping[element]] == null)

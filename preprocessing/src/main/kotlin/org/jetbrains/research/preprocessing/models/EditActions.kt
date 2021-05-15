@@ -6,6 +6,8 @@ import com.github.gumtreediff.actions.model.Update
 import java.util.*
 
 class EditActions(val actions: List<Action>) : Iterable<Action> {
+    val size get() = actions.size
+
     fun sort() {
         val updates = arrayListOf<Pair<Int, Update>>()
         for ((i, action) in actions.withIndex()) {
