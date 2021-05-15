@@ -1,10 +1,8 @@
 package org.jetbrains.research.preprocessing
 
 import com.github.gumtreediff.actions.model.Action
-import com.github.gumtreediff.actions.model.Move
-import com.github.gumtreediff.actions.model.Update
 import com.intellij.util.IntPair
-import java.util.*
+import org.jetbrains.research.preprocessing.models.EditActions
 
 fun getLongestCommonSuffix(strings: Collection<String?>?): String {
     if (strings == null || strings.isEmpty())
@@ -16,8 +14,14 @@ fun getLongestCommonSuffix(strings: Collection<String?>?): String {
     return lcs ?: ""
 }
 
-fun getLongestCommonEditActionsSubsequence(first: List<Action>, second: List<Action>): List<Action> {
-    return getLongestCommonSubsequence(first, second, elementsEquals = ::actionsHeuristicallyEquals)
+fun getLongestCommonEditActionsSubsequence(first: EditActions, second: EditActions): EditActions {
+    return EditActions(
+        getLongestCommonSubsequence(
+            first = first.actions,
+            second = second.actions,
+            elementsEquals = ::actionsHeuristicallyEquals
+        )
+    )
 }
 
 fun <T> getLongestCommonSubsequence(first: List<T>, second: List<T>, elementsEquals: (T, T) -> Boolean): List<T> {
@@ -70,18 +74,4 @@ fun <T> getLongestCommonSubsequence(first: List<T>, second: List<T>, elementsEqu
 fun actionsHeuristicallyEquals(first: Action, second: Action): Boolean {
     if (first === second) return true
     return first.toString() == second.toString() // FIXME: var names within the actions
-}
-
-fun sortEditActions(actions: List<Action>) {
-    val updates = arrayListOf<Pair<Int, Update>>()
-    for ((i, action) in actions.withIndex()) {
-        if (action is Update) {
-            updates.add(Pair(i, action))
-            continue
-        }
-        if (action is Move) {
-            val item = updates.find { it.second.node.hasSameTypeAndLabel(action.node) } ?: continue
-            Collections.swap(actions, i, item.first)
-        }
-    }
 }

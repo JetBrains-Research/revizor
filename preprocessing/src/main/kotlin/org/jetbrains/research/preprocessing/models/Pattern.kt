@@ -1,6 +1,9 @@
 package org.jetbrains.research.preprocessing.models
 
-import com.github.gumtreediff.actions.model.*
+import com.github.gumtreediff.actions.model.Delete
+import com.github.gumtreediff.actions.model.Insert
+import com.github.gumtreediff.actions.model.Move
+import com.github.gumtreediff.actions.model.Update
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyElement
@@ -19,7 +22,6 @@ import org.jetbrains.research.preprocessing.getLongestCommonEditActionsSubsequen
 import org.jetbrains.research.preprocessing.labelers.HeuristicVerticesMatchingModeLabeler
 import org.jetbrains.research.preprocessing.loaders.CachingEditActionsLoader
 import org.jetbrains.research.preprocessing.loaders.CachingPsiLoader
-import org.jetbrains.research.preprocessing.sortEditActions
 import org.jgrapht.graph.AsSubgraph
 import org.jsoup.Jsoup
 import java.nio.file.Path
@@ -29,7 +31,7 @@ class Pattern(private val directory: Path, private val project: Project) {
     var description: String = "No description provided"
         private set
     val mainGraph: PatternGraph
-    val editActions: List<Action>
+    val editActions: EditActions
 
     val reprFragmentId: Int
     val reprFragment: PatternGraph
@@ -80,7 +82,7 @@ class Pattern(private val directory: Path, private val project: Project) {
         )
 
 
-        // Inject PSI elements from representative `codeChangeSample` to the `mainGraph`
+        // Inject PSI elements from representative fragment to the main graph of the pattern
         val reprPsiBefore = CachingPsiLoader.getInstance(project)
             .loadPsiFromSource(src = codeChangeSampleById[reprFragmentId]!!.codeBefore)
         psiBasedReprFragmentGraph = buildPyFlowGraphForMethod(reprPsiBefore)
@@ -99,7 +101,7 @@ class Pattern(private val directory: Path, private val project: Project) {
             reprActions = getLongestCommonEditActionsSubsequence(reprActions, actions)
         }
         editActions = reprActions
-        sortEditActions(editActions)
+        editActions.sort()
 
 
         // Extend `mainGraph` with additional vertices, corresponding to PSI elements involved in edit actions
@@ -202,8 +204,7 @@ class Pattern(private val directory: Path, private val project: Project) {
     }
 
     fun save(directory: Path) {
-        val serializedActions = getEditActionsJson()
-        directory.resolve("actions.json").toFile().writeText(serializedActions)
+        directory.resolve("actions.json").toFile().writeText(editActions.getJson())
         mainGraph.export(directory.resolve("graph.dot").toFile())
         directory.resolve("description.txt").toFile().writeText(description)
         directory.resolve("labels_groups.json").toFile()
@@ -212,9 +213,9 @@ class Pattern(private val directory: Path, private val project: Project) {
             ))
     }
 
-    private fun getEditActionsJson(): String {
+    private fun EditActions.getJson(): String {
         val actionsWrappers = arrayListOf<ActionWrapper>()
-        for (action in editActions) {
+        for (action in this) {
             val element = (action.node as PyPsiGumTree).rootElement!!
             when (action) {
                 is Update -> {
