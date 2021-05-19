@@ -1,0 +1,22 @@
+[
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 5783,
+      "type": 655,
+      "label": "PyCallExpression: isinstance"
+    },
+    "targetTreeHashCode": 1514819410,
+    "value": "PyCallExpression: callable"
+  },
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": null,
+      "type": 642,
+      "label": "PyReferenceExpression: isinstance"
+    },
+    "targetTreeHashCode": 533171232,
+    "value": "PyReferenceExpression: callable"
+  }
+]

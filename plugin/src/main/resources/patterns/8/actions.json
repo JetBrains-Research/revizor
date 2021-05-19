@@ -1,0 +1,71 @@
+[
+  {
+    "type": "Move",
+    "targetTreeWrapper": {
+      "rootVertexId": 6405,
+      "type": 655,
+      "label": "PyCallExpression: len"
+    },
+    "parentTreeWrapper": {
+      "rootVertexId": 53,
+      "type": 676,
+      "label": "PyForPart"
+    },
+    "targetTreeHashCode": 952462943,
+    "parentTreeHashCode": 1058296749,
+    "position": 1
+  },
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 6405,
+      "type": 655,
+      "label": "PyCallExpression: len"
+    },
+    "targetTreeHashCode": 952462943,
+    "value": "PyCallExpression: enumerate"
+  },
+  {
+    "type": "Insert",
+    "targetTreeWrapper": {
+      "rootVertexId": null,
+      "type": 615,
+      "label": "PyTargetExpression: i"
+    },
+    "parentTreeWrapper": {
+      "rootVertexId": null,
+      "type": 657,
+      "label": "PyTupleExpression"
+    },
+    "targetTreeHashCode": 990785261,
+    "parentTreeHashCode": 1294781238,
+    "position": 0
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 64,
+      "type": 642,
+      "label": "PyReferenceExpression: i"
+    },
+    "targetTreeHashCode": 736392001
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 65,
+      "type": 650,
+      "label": "PySubscriptionExpression"
+    },
+    "targetTreeHashCode": 485617402
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 62,
+      "type": 620,
+      "label": "PyAssignmentStatement"
+    },
+    "targetTreeHashCode": 770999954
+  }
+]

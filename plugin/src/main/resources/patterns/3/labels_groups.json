@@ -1,0 +1,20 @@
+{
+  "5787": {
+    "whatMatters": "NOTHING",
+    "labels": [
+      "types",
+      "collections",
+      "functools"
+    ],
+    "longestCommonSuffix": ""
+  },
+  "5788": {
+    "whatMatters": "VALUABLE_ORIGINAL_LABEL",
+    "labels": [
+      "types.BuiltinFunctionType",
+      "functools.partial",
+      "collections.Callable"
+    ],
+    "longestCommonSuffix": ""
+  }
+}

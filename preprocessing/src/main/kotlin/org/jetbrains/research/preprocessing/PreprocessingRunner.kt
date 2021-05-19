@@ -47,7 +47,6 @@ class PreprocessingRunner : ApplicationStarter {
                 destDir = Paths.get(destination)
                 addDescription = desc
             }
-
             sourceDir.toFile().listFiles()?.forEach { patternDir ->
                 myProject = ProjectUtil.openOrImport(patternDir.toPath(), null, true)
                     ?: throw IllegalStateException("Can not import or create project")
