@@ -112,6 +112,27 @@ class Pattern(private val directory: Path, private val project: Project) {
         extendMainGraphWithHangerElements(hangerElements)
     }
 
+    fun createDescription() {
+        println("Current pattern: $name")
+        println("Graph nodes' labels: ${this.reprFragment.vertexSet().map { it.label }}")
+        var addedDescription = false
+        while (!addedDescription) {
+            print("Description: ")
+            description = readLine()?.also { addedDescription = true } ?: continue
+        }
+    }
+
+    fun save(directory: Path) {
+        directory.toFile().mkdirs()
+        directory.resolve("actions.json").toFile().writeText(editActions.getJson())
+        mainGraph.export(directory.resolve("graph.dot").toFile())
+        directory.resolve("description.txt").toFile().writeText(description)
+        directory.resolve("labels_groups.json").toFile()
+            .writeText(Json.encodeToString(
+                variableVertexToLabelsGroup.mapKeys { entry -> entry.key.id }
+            ))
+    }
+
     private fun injectPsiElementsToMainGraph() {
         val inspector = getWeakSubgraphIsomorphismInspector(psiBasedReprFragmentGraph, mainGraph)
         var foundCorrectMapping = false
@@ -204,16 +225,6 @@ class Pattern(private val directory: Path, private val project: Project) {
                 mainGraph.addEdge(newVertex, patternEdgeTarget, outgoingEdge)
             }
         }
-    }
-
-    fun save(directory: Path) {
-        directory.resolve("actions.json").toFile().writeText(editActions.getJson())
-        mainGraph.export(directory.resolve("graph.dot").toFile())
-        directory.resolve("description.txt").toFile().writeText(description)
-        directory.resolve("labels_groups.json").toFile()
-            .writeText(Json.encodeToString(
-                variableVertexToLabelsGroup.mapKeys { entry -> entry.key.id }
-            ))
     }
 
     private fun EditActions.getJson(): String {

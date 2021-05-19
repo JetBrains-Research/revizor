@@ -16,7 +16,7 @@ import kotlin.system.exitProcess
 class PreprocessingRunner : ApplicationStarter {
     private lateinit var sourceDir: Path
     private lateinit var destDir: Path
-    private var addDescription: Boolean = false // TODO: add description opportunity
+    private var addDescription: Boolean = false
 
     private lateinit var myProject: Project
     private val logger = Logger.getInstance(this::class.java)
@@ -51,8 +51,10 @@ class PreprocessingRunner : ApplicationStarter {
                 myProject = ProjectUtil.openOrImport(patternDir.toPath(), null, true)
                     ?: throw IllegalStateException("Can not import or create project")
                 val pattern = Pattern(directory = patternDir.toPath(), project = myProject)
+                if (addDescription) {
+                    pattern.createDescription()
+                }
                 val targetDirectory = destDir.resolve(pattern.name)
-                targetDirectory.toFile().mkdirs()
                 pattern.save(targetDirectory)
             }
         } catch (ex: SystemExitException) {
