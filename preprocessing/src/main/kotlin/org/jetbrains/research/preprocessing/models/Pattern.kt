@@ -17,6 +17,7 @@ import org.jetbrains.research.common.jgrapht.PatternGraph
 import org.jetbrains.research.common.jgrapht.export
 import org.jetbrains.research.common.jgrapht.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.common.jgrapht.vertices.PatternSpecificVertex
+import org.jetbrains.research.preprocessing.HeuristicActionsComparator
 import org.jetbrains.research.preprocessing.getLongestCommonEditActionsSubsequence
 import org.jetbrains.research.preprocessing.labelers.HeuristicVerticesMatchingModeLabeler
 import org.jetbrains.research.preprocessing.loaders.CachingEditActionsLoader
@@ -40,7 +41,7 @@ class Pattern(private val directory: Path, private val project: Project) {
 
     private val psiToPsiBasedVertexMapping = hashMapOf<PsiElement, PatternSpecificVertex>()
     private val psiBasedVertexToMainGraphVertexMapping = hashMapOf<PatternSpecificVertex, PatternSpecificVertex>()
-    private val variableVertexToLabelsGroup: Map<PatternSpecificVertex, PatternSpecificVertex.LabelsGroup>
+    private val reprVarVertexToLabelsGroup: Map<PatternSpecificVertex, PatternSpecificVertex.LabelsGroup>
 
     init {
         directory.toFile().walk().forEach { file ->
@@ -81,10 +82,10 @@ class Pattern(private val directory: Path, private val project: Project) {
             reprFragment = reprFragment,
             allFragments = fragmentById.values.toList()
         )
-        variableVertexToLabelsGroup = labeler.markVertices()
+        reprVarVertexToLabelsGroup = labeler.markVertices()
         mainGraph = PatternGraph(
             baseDirectedAcyclicGraph = reprFragment,
-            labelsGroupsByVertexId = variableVertexToLabelsGroup.mapKeys { it.key.id }
+            labelsGroupsByVertexId = reprVarVertexToLabelsGroup.mapKeys { it.key.id }
         )
 
 
@@ -100,9 +101,16 @@ class Pattern(private val directory: Path, private val project: Project) {
 
         // Extract and sort appropriate edit actions subsequence
         val reprFragmentActions = actionsByFragmentId[reprFragmentId]!!
+        val actionsComparator = HeuristicActionsComparator(reprVarVertexToLabelsGroup.values.map { it.labels })
         editActions = actionsByFragmentId.values.fold(
             initial = reprFragmentActions,
-            operation = ::getLongestCommonEditActionsSubsequence
+            operation = { a1, a2 ->
+                getLongestCommonEditActionsSubsequence(
+                    a1,
+                    a2,
+                    actionsComparator::actionsHeuristicallyEquals
+                )
+            }
         )
         editActions.sort()
 
@@ -129,7 +137,7 @@ class Pattern(private val directory: Path, private val project: Project) {
         directory.resolve("description.txt").toFile().writeText(description)
         directory.resolve("labels_groups.json").toFile()
             .writeText(Json.encodeToString(
-                variableVertexToLabelsGroup.mapKeys { entry -> entry.key.id }
+                reprVarVertexToLabelsGroup.mapKeys { entry -> entry.key.id }
             ))
     }
 

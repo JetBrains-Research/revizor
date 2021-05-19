@@ -14,12 +14,16 @@ fun getLongestCommonSuffix(strings: Collection<String?>?): String {
     return lcs ?: ""
 }
 
-fun getLongestCommonEditActionsSubsequence(first: EditActions, second: EditActions): EditActions {
+fun getLongestCommonEditActionsSubsequence(
+    first: EditActions,
+    second: EditActions,
+    comparator: (Action, Action) -> Boolean
+): EditActions {
     return EditActions(
         getLongestCommonSubsequence(
             first = first.actions,
             second = second.actions,
-            elementsEquals = ::actionsHeuristicallyEquals
+            elementsEquals = comparator
         )
     )
 }
@@ -69,9 +73,4 @@ fun <T> getLongestCommonSubsequence(first: List<T>, second: List<T>, elementsEqu
 
     collectResultingSubsequence(first.size, second.size)
     return result
-}
-
-fun actionsHeuristicallyEquals(first: Action, second: Action): Boolean {
-    if (first === second) return true
-    return first.toString() == second.toString() // FIXME: var names within the actions
 }
