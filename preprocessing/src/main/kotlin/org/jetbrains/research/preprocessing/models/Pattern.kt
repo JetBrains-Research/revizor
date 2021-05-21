@@ -17,6 +17,7 @@ import org.jetbrains.research.common.jgrapht.PatternGraph
 import org.jetbrains.research.common.jgrapht.export
 import org.jetbrains.research.common.jgrapht.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.common.jgrapht.vertices.PatternSpecificVertex
+import org.jetbrains.research.common.jgrapht.vertices.WeakVertexComparator
 import org.jetbrains.research.preprocessing.HeuristicActionsComparator
 import org.jetbrains.research.preprocessing.getLongestCommonEditActionsSubsequence
 import org.jetbrains.research.preprocessing.labelers.HeuristicVerticesMatchingModeLabeler
@@ -24,10 +25,11 @@ import org.jetbrains.research.preprocessing.loaders.CachingEditActionsLoader
 import org.jetbrains.research.preprocessing.loaders.CachingPsiLoader
 import org.jgrapht.graph.AsSubgraph
 import org.jsoup.Jsoup
+import java.io.File
 import java.nio.file.Path
 
-class Pattern(private val directory: Path, private val project: Project) {
-    val name: String = directory.toFile().name
+class Pattern(directory: File, project: Project) {
+    val name: String = directory.name
     var description: String = "No description provided"
         private set
     val mainGraph: PatternGraph
@@ -44,7 +46,7 @@ class Pattern(private val directory: Path, private val project: Project) {
     private val reprVarVertexToLabelsGroup: Map<PatternSpecificVertex, PatternSpecificVertex.LabelsGroup>
 
     init {
-        directory.toFile().walk().forEach { file ->
+        directory.walk().forEach { file ->
             if (file.isFile && file.name.startsWith("fragment") && file.extension == "dot") {
                 val fragmentId = file.nameWithoutExtension.substringAfterLast('-').toInt()
                 val fullFragmentGraph = PatternGraph(file.inputStream())
@@ -105,11 +107,7 @@ class Pattern(private val directory: Path, private val project: Project) {
         editActions = actionsByFragmentId.values.fold(
             initial = reprFragmentActions,
             operation = { a1, a2 ->
-                getLongestCommonEditActionsSubsequence(
-                    a1,
-                    a2,
-                    actionsComparator::actionsHeuristicallyEquals
-                )
+                getLongestCommonEditActionsSubsequence(a1, a2, actionsComparator::actionsHeuristicallyEquals)
             }
         )
         editActions.sort()
@@ -154,7 +152,7 @@ class Pattern(private val directory: Path, private val project: Project) {
                     // Save mapping, because direct injection is prohibited
                     psiBasedVertexToMainGraphVertexMapping[psiBasedVertex] = mainVertex
 
-                    if (mainVertex.originalLabel?.toLowerCase() != psiBasedVertex.originalLabel?.toLowerCase()) {
+                    if (WeakVertexComparator().compare(psiBasedVertex, mainVertex) != 0) {
                         isCorrectMapping = false
                         psiBasedVertexToMainGraphVertexMapping.clear()
                         break

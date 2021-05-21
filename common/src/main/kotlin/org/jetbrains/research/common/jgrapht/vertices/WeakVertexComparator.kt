@@ -12,7 +12,7 @@ class WeakVertexComparator : Comparator<PatternSpecificVertex> {
 
         // Smart check for the variable names correspondence
         if (fromTarget?.label?.startsWith("var") == true
-                && fromPattern?.label?.startsWith("var") == true
+            && fromPattern?.label?.startsWith("var") == true
         ) {
             // FIXME: Differ <variable-usage> and <variable-decl> nodes in the original miner
             // Now it is temporary solution
@@ -32,14 +32,21 @@ class WeakVertexComparator : Comparator<PatternSpecificVertex> {
 
         // PySubscriptionExpressions always match
         if (fromPattern?.originalLabel?.matches("""^.*?\[.*?\]$""".toRegex()) == true
-                && fromTarget?.originalLabel?.matches("""^.*?\[.*?\]$""".toRegex()) == true
+            && fromTarget?.originalLabel?.matches("""^.*?\[.*?\]$""".toRegex()) == true
         ) {
             return 0
         }
 
+        // Smart check for literals
+        if (fromPattern?.label?.startsWith("lit") == true && fromTarget?.label?.startsWith("lit") == true) {
+            if (fromPattern.originalLabel?.toDoubleOrNull() == fromTarget.originalLabel?.toDoubleOrNull()) {
+                return 0
+            }
+        }
+
         // Otherwise check only labels and original labels
-        if (fromTarget?.originalLabel?.toLowerCase() == fromPattern?.originalLabel?.toLowerCase()
-                && fromTarget?.label?.toLowerCase() == fromPattern?.label?.toLowerCase()
+        if (fromTarget?.originalLabel.equals(fromPattern?.originalLabel, ignoreCase = true)
+            && fromTarget?.label.equals(fromPattern?.label, ignoreCase = true)
         ) {
             return 0
         }

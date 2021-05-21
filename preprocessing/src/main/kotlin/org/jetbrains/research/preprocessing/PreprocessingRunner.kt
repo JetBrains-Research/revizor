@@ -8,6 +8,7 @@ import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.SystemExitException
 import com.xenomachina.argparser.default
 import org.jetbrains.research.preprocessing.models.Pattern
+import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.system.exitProcess
@@ -47,20 +48,27 @@ class PreprocessingRunner : ApplicationStarter {
                 destDir = Paths.get(destination)
                 addDescription = desc
             }
-            sourceDir.toFile().listFiles()?.forEach { patternDir ->
-                myProject = ProjectUtil.openOrImport(patternDir.toPath(), null, true)
-                    ?: throw IllegalStateException("Can not import or create project")
-                val pattern = Pattern(directory = patternDir.toPath(), project = myProject)
-                if (addDescription) {
-                    pattern.createDescription()
+            myProject = ProjectUtil.openOrImport(sourceDir, null, true)
+            sourceDir.toFile().walk().forEach { patternDir ->
+                if (patternDir.isDirectory && File(patternDir, "details.html").exists()) {
+                    try {
+                        val pattern = Pattern(directory = patternDir, project = myProject)
+                        if (addDescription) {
+                            pattern.createDescription()
+                        }
+                        val targetDirectory = destDir.resolve(pattern.name)
+                        pattern.save(targetDirectory)
+                        logger.warn("Successfully loaded pattern from $patternDir")
+                    } catch (exception: Throwable) {
+                        logger.warn("Failed to load pattern from $patternDir")
+                        logger.error(exception)
+                    }
                 }
-                val targetDirectory = destDir.resolve(pattern.name)
-                pattern.save(targetDirectory)
             }
-        } catch (ex: SystemExitException) {
-            logger.error(ex)
-        } catch (ex: Exception) {
-            logger.error(ex)
+        } catch (exception: SystemExitException) {
+            logger.error(exception)
+        } catch (exception: Exception) {
+            logger.error(exception)
         } finally {
             exitProcess(0)
         }
