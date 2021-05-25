@@ -1,0 +1,36 @@
+[
+  {
+    "type": "Move",
+    "targetTreeWrapper": {
+      "rootVertexId": 317,
+      "type": 642,
+      "label": "PyReferenceExpression: _options"
+    },
+    "parentTreeWrapper": {
+      "rootVertexId": 3009,
+      "type": 616,
+      "label": "PyArgumentList"
+    },
+    "targetTreeHashCode": 1129572829,
+    "parentTreeHashCode": 1456952058,
+    "position": 0
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 3004,
+      "type": 642,
+      "label": "PyReferenceExpression: keys"
+    },
+    "targetTreeHashCode": 850568964
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 3003,
+      "type": 616,
+      "label": "PyArgumentList"
+    },
+    "targetTreeHashCode": 1785609875
+  }
+]

@@ -1,0 +1,17 @@
+digraph G {
+  4895 [ metadata="" color="red2" shape="box" kind="func-call" label="log (log) [4895]" ];
+  4894 [ metadata="" color="red2" shape="ellipse" kind="variable-usage" label="var (numpy.log) [4894]" ];
+  4891 [ metadata="" color="red2" shape="ellipse" kind="null" label="log.PyArgumentList (log.PyArgumentList) [4891]" ];
+  4899 [ metadata="" color="red2" shape="ellipse" kind="literal" label="lit (1) [4899]" ];
+  4900 [ metadata="" color="red2" shape="box" kind="binary" label="add (add) [4900]" ];
+  4890 [ metadata="" color="red2" shape="ellipse" kind="null" label="abs.PyArgumentList (abs.PyArgumentList) [4890]" ];
+  4894 -> 4895 [ from_closure="null" xlabel="recv" ];
+  4891 -> 4895 [ from_closure="null" xlabel="para" ];
+  4899 -> 4891 [ from_closure="null" xlabel="para" ];
+  4899 -> 4900 [ from_closure="null" xlabel="para" ];
+  4900 -> 4895 [ from_closure="null" xlabel="para" ];
+  4900 -> 4891 [ from_closure="null" xlabel="para" ];
+  4890 -> 4895 [ from_closure="null" xlabel="para" ];
+  4890 -> 4891 [ from_closure="null" xlabel="para" ];
+  4890 -> 4900 [ from_closure="null" xlabel="para" ];
+}

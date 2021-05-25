@@ -1,0 +1,33 @@
+digraph G {
+  1233 [ metadata="" color="red2" shape="box" kind="func-call" label="add (add) [1233]" ];
+  1239 [ metadata="" color="red2" shape="diamond" kind="null" label="for (for) [1239]" ];
+  1202 [ metadata="" color="red2" shape="ellipse" kind="variable-decl" label="var (package) [1202]" ];
+  1210 [ metadata="" color="red2" shape="ellipse" kind="variable-usage" label="var (failed_imports.add) [1210]" ];
+  1226 [ metadata="" color="red2" shape="ellipse" kind="null" label="PyExpressionStatement (PyExpressionStatement) [1226]" ];
+  1213 [ metadata="" color="red2" shape="ellipse" kind="null" label="set.PyArgumentList (set.PyArgumentList) [1213]" ];
+  377 [ metadata="hanger" color="null" shape="null" kind="null" label="= (=) [377]" ];
+  396 [ metadata="hanger" color="null" shape="null" kind="null" label="var (package) [396]" ];
+  405 [ metadata="hanger" color="null" shape="null" kind="null" label="var (package) [405]" ];
+  397 [ metadata="hanger" color="null" shape="null" kind="null" label="import_module.PyArgumentList (import_module.PyArgumentList) [397]" ];
+  1233 -> 1226 [ from_closure="null" xlabel="para" ];
+  1239 -> 1233 [ from_closure="null" xlabel="control" ];
+  1239 -> 1226 [ from_closure="null" xlabel="control" ];
+  1202 -> 1239 [ from_closure="null" xlabel="cond" ];
+  1210 -> 1233 [ from_closure="null" xlabel="recv" ];
+  1213 -> 1233 [ from_closure="null" xlabel="recv" ];
+  1213 -> 1210 [ from_closure="null" xlabel="qual" ];
+  1213 -> 1226 [ from_closure="null" xlabel="para" ];
+  377 -> 1226 [ from_closure="true" xlabel="para" ];
+  377 -> 1226 [ from_closure="true" xlabel="control" ];
+  377 -> 1233 [ from_closure="true" xlabel="para" ];
+  377 -> 1233 [ from_closure="true" xlabel="control" ];
+  377 -> 1202 [ from_closure="true" xlabel="def" ];
+  377 -> 397 [ from_closure="true" xlabel="para" ];
+  377 -> 397 [ from_closure="true" xlabel="control" ];
+  377 -> 1239 [ from_closure="true" xlabel="cond" ];
+  1202 -> 396 [ from_closure="false" xlabel="ref" ];
+  396 -> 397 [ from_closure="false" xlabel="para" ];
+  1202 -> 405 [ from_closure="false" xlabel="ref" ];
+  1239 -> 397 [ from_closure="true" xlabel="control" ];
+  1202 -> 397 [ from_closure="true" xlabel="para" ];
+}

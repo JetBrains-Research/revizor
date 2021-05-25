@@ -1,0 +1,10 @@
+{
+  "4910": {
+    "whatMatters": "LONGEST_COMMON_SUFFIX",
+    "labels": [
+      "numpy.array",
+      "np.array"
+    ],
+    "longestCommonSuffix": ".array"
+  }
+}

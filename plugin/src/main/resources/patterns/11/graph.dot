@@ -1,0 +1,7 @@
+digraph G {
+  3528 [ metadata="" color="red2" shape="box" kind="func-call" label="exists (exists) [3528]" ];
+  3532 [ metadata="" color="red2" shape="ellipse" kind="null" label="exists.PyArgumentList (exists.PyArgumentList) [3532]" ];
+  3534 [ metadata="" color="red2" shape="ellipse" kind="variable-usage" label="var (os.path.exists) [3534]" ];
+  3532 -> 3528 [ from_closure="null" xlabel="para" ];
+  3534 -> 3528 [ from_closure="null" xlabel="recv" ];
+}

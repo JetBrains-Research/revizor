@@ -1,0 +1,12 @@
+digraph G {
+  6382 [ metadata="" color="red2" shape="box" kind="func-call" label="log (log) [6382]" ];
+  6396 [ metadata="" color="red2" shape="box" kind="func-call" label="exp (exp) [6396]" ];
+  6397 [ metadata="" color="red2" shape="ellipse" kind="variable-usage" label="var (tf.log) [6397]" ];
+  6379 [ metadata="" color="red2" shape="box" kind="binary" label="add (add) [6379]" ];
+  6389 [ metadata="" color="red2" shape="ellipse" kind="literal" label="lit (1.0) [6389]" ];
+  6396 -> 6382 [ from_closure="null" xlabel="para" ];
+  6396 -> 6379 [ from_closure="null" xlabel="para" ];
+  6397 -> 6382 [ from_closure="null" xlabel="recv" ];
+  6379 -> 6382 [ from_closure="null" xlabel="para" ];
+  6389 -> 6379 [ from_closure="null" xlabel="para" ];
+}

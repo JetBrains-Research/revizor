@@ -1,0 +1,40 @@
+[
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 5783,
+      "type": 655,
+      "label": "PyCallExpression: isinstance"
+    },
+    "targetTreeHashCode": 1512151900,
+    "value": "PyCallExpression: callable"
+  },
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": null,
+      "type": 642,
+      "label": "PyReferenceExpression: isinstance"
+    },
+    "targetTreeHashCode": 1139904051,
+    "value": "PyReferenceExpression: callable"
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 5787,
+      "type": 642,
+      "label": "PyReferenceExpression: collections"
+    },
+    "targetTreeHashCode": 919826067
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 5788,
+      "type": 642,
+      "label": "PyReferenceExpression: Callable"
+    },
+    "targetTreeHashCode": 953493832
+  }
+]

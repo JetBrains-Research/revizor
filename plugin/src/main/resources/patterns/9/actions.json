@@ -1,0 +1,39 @@
+[
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 4910,
+      "type": 642,
+      "label": "PyReferenceExpression: array"
+    },
+    "targetTreeHashCode": 24308579,
+    "value": "PyReferenceExpression: arange"
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": null,
+      "type": 642,
+      "label": "PyReferenceExpression: range"
+    },
+    "targetTreeHashCode": 119790641
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 4909,
+      "type": 655,
+      "label": "PyCallExpression: range"
+    },
+    "targetTreeHashCode": 1183927598
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 4912,
+      "type": 616,
+      "label": "PyArgumentList"
+    },
+    "targetTreeHashCode": 1332420576
+  }
+]

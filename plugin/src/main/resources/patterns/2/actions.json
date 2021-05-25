@@ -1,0 +1,134 @@
+[
+  {
+    "type": "Move",
+    "targetTreeWrapper": {
+      "rootVertexId": 377,
+      "type": 620,
+      "label": "PyAssignmentStatement"
+    },
+    "parentTreeWrapper": {
+      "rootVertexId": null,
+      "type": 638,
+      "label": "PyStatementList"
+    },
+    "targetTreeHashCode": 517771336,
+    "parentTreeHashCode": 814642489,
+    "position": 0
+  },
+  {
+    "type": "Move",
+    "targetTreeWrapper": {
+      "rootVertexId": 1226,
+      "type": 619,
+      "label": "PyExpressionStatement"
+    },
+    "parentTreeWrapper": {
+      "rootVertexId": null,
+      "type": 638,
+      "label": "PyStatementList"
+    },
+    "targetTreeHashCode": 460260521,
+    "parentTreeHashCode": 814642489,
+    "position": 1
+  },
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 1210,
+      "type": 642,
+      "label": "PyReferenceExpression: add"
+    },
+    "targetTreeHashCode": 1154009689,
+    "value": "PyReferenceExpression: update"
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 405,
+      "type": 642,
+      "label": "PyReferenceExpression: package"
+    },
+    "targetTreeHashCode": 1370078691
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 1202,
+      "type": 615,
+      "label": "PyTargetExpression: package"
+    },
+    "targetTreeHashCode": 1071758797
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 396,
+      "type": 642,
+      "label": "PyReferenceExpression: package"
+    },
+    "targetTreeHashCode": 1310899419
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 397,
+      "type": 616,
+      "label": "PyArgumentList"
+    },
+    "targetTreeHashCode": 397563378
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": null,
+      "type": 638,
+      "label": "PyStatementList"
+    },
+    "targetTreeHashCode": 1734567114
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": null,
+      "type": 638,
+      "label": "PyStatementList"
+    },
+    "targetTreeHashCode": 740964316
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": null,
+      "type": 638,
+      "label": "PyStatementList"
+    },
+    "targetTreeHashCode": 1125501622
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 1239,
+      "type": 676,
+      "label": "PyForPart"
+    },
+    "targetTreeHashCode": 601138935
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": null,
+      "type": 627,
+      "label": "PyForStatement"
+    },
+    "targetTreeHashCode": 1316587585
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": null,
+      "type": 638,
+      "label": "PyStatementList"
+    },
+    "targetTreeHashCode": 1640661238
+  }
+]

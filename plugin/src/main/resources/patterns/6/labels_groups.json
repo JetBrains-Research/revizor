@@ -1,0 +1,9 @@
+{
+  "3507": {
+    "whatMatters": "LONGEST_COMMON_SUFFIX",
+    "labels": [
+      "os.path.exists"
+    ],
+    "longestCommonSuffix": "os.path.exists"
+  }
+}

@@ -1,0 +1,14 @@
+digraph G {
+  4914 [ metadata="" color="red2" shape="box" kind="func-call" label="array (array) [4914]" ];
+  4909 [ metadata="" color="red2" shape="box" kind="func-call" label="range (range) [4909]" ];
+  4910 [ metadata="" color="red2" shape="ellipse" kind="variable-usage" label="var (np.array) [4910]" ];
+  4912 [ metadata="" color="red2" shape="ellipse" kind="null" label="array.PyArgumentList (array.PyArgumentList) [4912]" ];
+  4916 [ metadata="" color="red2" shape="ellipse" kind="null" label="range.PyArgumentList (range.PyArgumentList) [4916]" ];
+  4909 -> 4914 [ from_closure="null" xlabel="para" ];
+  4909 -> 4912 [ from_closure="null" xlabel="para" ];
+  4910 -> 4914 [ from_closure="null" xlabel="recv" ];
+  4912 -> 4914 [ from_closure="null" xlabel="para" ];
+  4916 -> 4914 [ from_closure="null" xlabel="para" ];
+  4916 -> 4909 [ from_closure="null" xlabel="para" ];
+  4916 -> 4912 [ from_closure="null" xlabel="para" ];
+}

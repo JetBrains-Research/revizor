@@ -1,0 +1,9 @@
+{
+  "6397": {
+    "whatMatters": "LONGEST_COMMON_SUFFIX",
+    "labels": [
+      "tf.log"
+    ],
+    "longestCommonSuffix": "tf.log"
+  }
+}

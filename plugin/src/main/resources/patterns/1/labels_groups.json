@@ -1,0 +1,10 @@
+{
+  "4894": {
+    "whatMatters": "LONGEST_COMMON_SUFFIX",
+    "labels": [
+      "numpy.log",
+      "tf.log"
+    ],
+    "longestCommonSuffix": ".log"
+  }
+}

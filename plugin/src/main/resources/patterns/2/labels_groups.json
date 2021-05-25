@@ -1,0 +1,19 @@
+{
+  "1202": {
+    "whatMatters": "NOTHING",
+    "labels": [
+      "fname",
+      "package",
+      "f"
+    ],
+    "longestCommonSuffix": ""
+  },
+  "1210": {
+    "whatMatters": "LONGEST_COMMON_SUFFIX",
+    "labels": [
+      "fontfiles.add",
+      "failed_imports.add"
+    ],
+    "longestCommonSuffix": "s.add"
+  }
+}
