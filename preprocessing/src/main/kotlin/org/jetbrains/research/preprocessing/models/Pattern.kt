@@ -4,6 +4,7 @@ import com.github.gumtreediff.actions.model.Delete
 import com.github.gumtreediff.actions.model.Insert
 import com.github.gumtreediff.actions.model.Move
 import com.github.gumtreediff.actions.model.Update
+import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.codeStyle.CodeStyleManager
@@ -44,10 +45,8 @@ class Pattern(directory: File, private val project: Project) {
     val codeChangeSampleById: MutableMap<Int, CodeChangeSample> = hashMapOf()
 
     private val psiToPsiBasedVertexMapping = hashMapOf<PsiElement, PatternSpecificVertex>()
-    private val psiBasedVertexToMainGraphVertexMapping = hashMapOf<PatternSpecificVertex, PatternSpecificVertex>()
     private val reprVarVertexToLabelsGroup: Map<PatternSpecificVertex, PatternSpecificVertex.LabelsGroup>
-
-    private lateinit var mappings: PsiToMainMappings
+    private val mappings: PsiToMainMappings
 
     init {
         directory.walk().forEach { file ->
@@ -103,7 +102,15 @@ class Pattern(directory: File, private val project: Project) {
         for (psiBasedVertex in psiBasedReprFragmentGraph.vertexSet()) {
             psiToPsiBasedVertexMapping[psiBasedVertex.origin!!.psi!!] = psiBasedVertex
         }
-        injectPsiElementsToMainGraph()
+
+
+        // Prepare mappings from `psiBasedReprFragmentGraph` to `mainGraph`
+        val inspector = getWeakSubgraphIsomorphismInspector(psiBasedReprFragmentGraph, mainGraph)
+        if (inspector.isomorphismExists()) {
+            mappings = PsiToMainMappings(inspector.mappings.asSequence())
+        } else {
+            throw IllegalStateException("PsiBasedReprFragmentGraph and MainGraph are not isomorphic")
+        }
 
 
         // Extract and sort appropriate edit actions subsequence
@@ -175,13 +182,6 @@ class Pattern(directory: File, private val project: Project) {
 
         fun getRepresentative(): MutableMap<PatternSpecificVertex, PatternSpecificVertex> {
             return correctMappings.first()
-        }
-    }
-
-    private fun injectPsiElementsToMainGraph() {
-        val inspector = getWeakSubgraphIsomorphismInspector(psiBasedReprFragmentGraph, mainGraph)
-        if (inspector.isomorphismExists()) {
-            mappings = PsiToMainMappings(inspector.mappings.asSequence())
         }
     }
 
@@ -298,6 +298,8 @@ class Pattern(directory: File, private val project: Project) {
     private fun reformatCode(code: String): String {
         val psiLoader = CachingPsiLoader.getInstance(project)
         val formatter = CodeStyleManager.getInstance(project)
-        return formatter.reformat(psiLoader.loadPsiFromSource(code)).text
+        return WriteCommandAction.runWriteCommandAction<PsiElement>(project) {
+            formatter.reformat(psiLoader.loadPsiFromSource(code))
+        }.text
     }
 }
