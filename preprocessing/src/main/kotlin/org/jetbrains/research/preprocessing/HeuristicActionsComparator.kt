@@ -13,7 +13,7 @@ class HeuristicActionsComparator(originalLabelsGroups: List<Set<String>>) {
     private val labelsGroups: MutableList<MutableSet<String>>
 
     init {
-        // The following code is needed to correctly match parts of the fully qualified names,
+        // The following code is needed to correctly match the parts of the fully qualified names,
         // e. g. `collections` and `types` in case of `isinstance -> callable` pattern,
         // because we only have `collections.Callable` and `types.FunctionType` among the labels.
 
@@ -22,6 +22,7 @@ class HeuristicActionsComparator(originalLabelsGroups: List<Set<String>>) {
             val extendedGroup = hashSetOf("") // to match elements without labels, e. g. `PyTupleExpression`
             for (label in group) {
                 extendedGroup.addAll(label.split("."))
+                extendedGroup.add(label)
             }
             labelsGroups.add(extendedGroup)
         }
@@ -33,30 +34,34 @@ class HeuristicActionsComparator(originalLabelsGroups: List<Set<String>>) {
         if (first.toString() == second.toString()) return true
         if (first.name != second.name) return false
 
-        val (firstPsiTypeBefore, firstLabelBefore) =
+        val (firstSourcePsiType, firstSourceElementLabel) =
             first.node.label.splitWithDefault(PSI_ELEMENT_DESC_DELIMITER)
-        val (secondPsiTypeBefore, secondLabelBefore) =
+        val (secondSourcePsiType, secondSourceElementLabel) =
             second.node.label.splitWithDefault(PSI_ELEMENT_DESC_DELIMITER)
 
         when {
             first is Update && second is Update -> {
-                val (firstPsiTypeAfter, firstLabelAfter) = first.value.splitWithDefault(PSI_ELEMENT_DESC_DELIMITER)
-                val (secondPsiTypeAfter, secondLabelAfter) = second.value.splitWithDefault(PSI_ELEMENT_DESC_DELIMITER)
-                if (firstPsiTypeBefore != secondPsiTypeBefore || firstPsiTypeAfter != secondPsiTypeAfter) {
+                val (firstTargetPsiType, firstTargetElementLabel) = first.value.splitWithDefault(
+                    PSI_ELEMENT_DESC_DELIMITER
+                )
+                val (secondTargetPsiType, secondTargetElementLabel) = second.value.splitWithDefault(
+                    PSI_ELEMENT_DESC_DELIMITER
+                )
+                if (firstSourcePsiType != secondSourcePsiType || firstTargetPsiType != secondTargetPsiType) {
                     return false
                 }
                 return compareByLabels(
-                    Pair(firstLabelBefore, firstLabelAfter),
-                    Pair(secondLabelBefore, secondLabelAfter)
+                    Pair(firstSourceElementLabel, firstTargetElementLabel),
+                    Pair(secondSourceElementLabel, secondTargetElementLabel)
                 )
             }
             first is Delete && second is Delete -> {
-                if (firstPsiTypeBefore != secondPsiTypeBefore) {
+                if (firstSourcePsiType != secondSourcePsiType) {
                     return false
                 }
                 var labelsBeforeMatched = false
                 for (labels in labelsGroups) {
-                    if (labels.contains(firstLabelBefore) && labels.contains(secondLabelBefore)) {
+                    if (labels.contains(firstSourceElementLabel) && labels.contains(secondSourceElementLabel)) {
                         labelsBeforeMatched = true
                     }
                 }
@@ -64,16 +69,16 @@ class HeuristicActionsComparator(originalLabelsGroups: List<Set<String>>) {
             }
             first is Addition && second is Addition -> {
                 if (first.position != second.position) return false
-                val (firstParentPsiType, firstParentLabel) =
+                val (firstParentPsiType, firstParentElementLabel) =
                     first.parent.label.splitWithDefault(PSI_ELEMENT_DESC_DELIMITER)
-                val (secondParentPsiType, secondParentLabel) =
+                val (secondParentPsiType, secondParentElementLabel) =
                     second.parent.label.splitWithDefault(PSI_ELEMENT_DESC_DELIMITER)
-                if (firstPsiTypeBefore != secondPsiTypeBefore || firstParentPsiType != secondParentPsiType) {
+                if (firstSourcePsiType != secondSourcePsiType || firstParentPsiType != secondParentPsiType) {
                     return false
                 }
                 return compareByLabels(
-                    Pair(firstLabelBefore, firstParentLabel),
-                    Pair(secondLabelBefore, secondParentLabel)
+                    Pair(firstSourceElementLabel, firstParentElementLabel),
+                    Pair(secondSourceElementLabel, secondParentElementLabel)
                 )
             }
             else -> return false

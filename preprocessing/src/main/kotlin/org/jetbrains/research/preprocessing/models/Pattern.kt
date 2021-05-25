@@ -45,7 +45,7 @@ class Pattern(directory: File, private val project: Project) {
     val codeChangeSampleById: MutableMap<Int, CodeChangeSample> = hashMapOf()
 
     private val psiToPsiBasedVertexMapping = hashMapOf<PsiElement, PatternSpecificVertex>()
-    private val reprVarVertexToLabelsGroup: Map<PatternSpecificVertex, PatternSpecificVertex.LabelsGroup>
+    private val reprVarVertexToLabelsGroup: MutableMap<PatternSpecificVertex, PatternSpecificVertex.LabelsGroup>
     private val mappings: PsiToMainMappings
 
     init {
@@ -88,7 +88,7 @@ class Pattern(directory: File, private val project: Project) {
             reprFragment = reprFragment,
             allFragments = fragmentById.values.toList()
         )
-        reprVarVertexToLabelsGroup = labeler.markVertices()
+        reprVarVertexToLabelsGroup = labeler.markVertices().toMutableMap()
         mainGraph = PatternGraph(
             baseDirectedAcyclicGraph = reprFragment,
             labelsGroupsByVertexId = reprVarVertexToLabelsGroup.mapKeys { it.key.id }
@@ -157,7 +157,6 @@ class Pattern(directory: File, private val project: Project) {
         private val psiBasedVertexToMainGraphVertexMappings: List<Map<PatternSpecificVertex, PatternSpecificVertex>>
         private var correctMappings: Set<MutableMap<PatternSpecificVertex, PatternSpecificVertex>>
 
-
         init {
             psiBasedVertexToMainGraphVertexMappings = graphMappings.toList().map { jgraphtMapping ->
                 val myMapping = hashMapOf<PatternSpecificVertex, PatternSpecificVertex>()
@@ -180,9 +179,7 @@ class Pattern(directory: File, private val project: Project) {
             correctMappings = correctMappings.intersect(currentCorrectMappings)
         }
 
-        fun getRepresentative(): MutableMap<PatternSpecificVertex, PatternSpecificVertex> {
-            return correctMappings.first()
-        }
+        fun getRepresentative(): MutableMap<PatternSpecificVertex, PatternSpecificVertex> = correctMappings.first()
     }
 
     /**
@@ -234,11 +231,8 @@ class Pattern(directory: File, private val project: Project) {
             val psiBasedVertex = psiToPsiBasedVertexMapping[element] ?: continue
             val newVertex = psiBasedVertex.copy()
             if (newVertex.label?.startsWith("var") == true) {
-                newVertex.dataNodeInfo = PatternSpecificVertex.LabelsGroup(
-                    whatMatters = PatternSpecificVertex.MatchingMode.NOTHING,
-                    labels = hashSetOf(),
-                    longestCommonSuffix = ""
-                )
+                newVertex.dataNodeInfo = PatternSpecificVertex.LabelsGroup.getUniversal()
+                reprVarVertexToLabelsGroup[newVertex] = newVertex.dataNodeInfo!!
             }
             newVertex.metadata = "hanger"
             mainGraph.addVertex(newVertex)

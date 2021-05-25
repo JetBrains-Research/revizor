@@ -23,7 +23,7 @@ class HeuristicVerticesMatchingModeLabeler(
                         reprVertexToLabelsGroup[reprVertex] = PatternSpecificVertex.LabelsGroup(
                             whatMatters = PatternSpecificVertex.MatchingMode.LONGEST_COMMON_SUFFIX,
                             labels = labels as HashSet<String>,
-                            longestCommonSuffix = lcs
+                            longestCommonSuffix = ".${lcs.substringAfter('.')}"
                         )
                     }
                     labels.all { it.contains('.') } -> {
