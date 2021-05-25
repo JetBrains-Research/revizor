@@ -6,7 +6,7 @@
       "type": 642,
       "label": "PyReferenceExpression: log"
     },
-    "targetTreeHashCode": 930155990,
+    "targetTreeHashCode": 190491923,
     "value": "PyReferenceExpression: log1p"
   },
   {
@@ -16,7 +16,7 @@
       "type": 643,
       "label": "PyNumericLiteralExpression"
     },
-    "targetTreeHashCode": 1058390386
+    "targetTreeHashCode": 1836717571
   },
   {
     "type": "Delete",
@@ -25,6 +25,6 @@
       "type": 653,
       "label": "PyBinaryExpression"
     },
-    "targetTreeHashCode": 1415065180
+    "targetTreeHashCode": 1040257179
   }
 ]

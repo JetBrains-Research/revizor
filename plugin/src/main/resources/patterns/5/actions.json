@@ -6,7 +6,7 @@
       "type": 655,
       "label": "PyCallExpression: self.assertIs"
     },
-    "targetTreeHashCode": 1430126770,
+    "targetTreeHashCode": 1417100395,
     "value": "PyCallExpression: self.assertTrue"
   },
   {
@@ -16,7 +16,7 @@
       "type": 642,
       "label": "PyReferenceExpression: assertIs"
     },
-    "targetTreeHashCode": 113321100,
+    "targetTreeHashCode": 897051494,
     "value": "PyReferenceExpression: assertTrue"
   },
   {
@@ -26,6 +26,6 @@
       "type": 648,
       "label": "PyBoolLiteralExpression"
     },
-    "targetTreeHashCode": 102074833
+    "targetTreeHashCode": 603928872
   }
 ]

@@ -1,0 +1,42 @@
+[
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 1745,
+      "type": 655,
+      "label": "PyCallExpression: range"
+    },
+    "targetTreeHashCode": 2147315744,
+    "value": "PyCallExpression: xrange"
+  },
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": null,
+      "type": 642,
+      "label": "PyReferenceExpression: range"
+    },
+    "targetTreeHashCode": 815293113,
+    "value": "PyReferenceExpression: xrange"
+  },
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 1748,
+      "type": 655,
+      "label": "PyCallExpression: range"
+    },
+    "targetTreeHashCode": 1703528454,
+    "value": "PyCallExpression: xrange"
+  },
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": null,
+      "type": 642,
+      "label": "PyReferenceExpression: range"
+    },
+    "targetTreeHashCode": 128849652,
+    "value": "PyReferenceExpression: xrange"
+  }
+]

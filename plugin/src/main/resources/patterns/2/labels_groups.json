@@ -1,4 +1,12 @@
 {
+  "1210": {
+    "whatMatters": "LONGEST_COMMON_SUFFIX",
+    "labels": [
+      "fontfiles.add",
+      "failed_imports.add"
+    ],
+    "longestCommonSuffix": ".add"
+  },
   "1202": {
     "whatMatters": "NOTHING",
     "labels": [
@@ -8,12 +16,14 @@
     ],
     "longestCommonSuffix": ""
   },
-  "1210": {
-    "whatMatters": "LONGEST_COMMON_SUFFIX",
-    "labels": [
-      "fontfiles.add",
-      "failed_imports.add"
-    ],
-    "longestCommonSuffix": "s.add"
+  "405": {
+    "whatMatters": "NOTHING",
+    "labels": [],
+    "longestCommonSuffix": ""
+  },
+  "396": {
+    "whatMatters": "NOTHING",
+    "labels": [],
+    "longestCommonSuffix": ""
   }
 }

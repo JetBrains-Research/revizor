@@ -4,6 +4,6 @@
     "labels": [
       "os.path.exists"
     ],
-    "longestCommonSuffix": "os.path.exists"
+    "longestCommonSuffix": ".path.exists"
   }
 }

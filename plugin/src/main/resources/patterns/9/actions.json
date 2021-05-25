@@ -6,8 +6,24 @@
       "type": 642,
       "label": "PyReferenceExpression: array"
     },
-    "targetTreeHashCode": 24308579,
+    "targetTreeHashCode": 31320243,
     "value": "PyReferenceExpression: arange"
+  },
+  {
+    "type": "Move",
+    "targetTreeWrapper": {
+      "rootVertexId": 4916,
+      "type": 616,
+      "label": "PyArgumentList"
+    },
+    "parentTreeWrapper": {
+      "rootVertexId": 4914,
+      "type": 655,
+      "label": "PyCallExpression: np.array"
+    },
+    "targetTreeHashCode": 665170187,
+    "parentTreeHashCode": 653030394,
+    "position": 1
   },
   {
     "type": "Delete",
@@ -16,7 +32,7 @@
       "type": 642,
       "label": "PyReferenceExpression: range"
     },
-    "targetTreeHashCode": 119790641
+    "targetTreeHashCode": 676485759
   },
   {
     "type": "Delete",
@@ -25,7 +41,7 @@
       "type": 655,
       "label": "PyCallExpression: range"
     },
-    "targetTreeHashCode": 1183927598
+    "targetTreeHashCode": 1162968670
   },
   {
     "type": "Delete",
@@ -34,6 +50,6 @@
       "type": 616,
       "label": "PyArgumentList"
     },
-    "targetTreeHashCode": 1332420576
+    "targetTreeHashCode": 110592193
   }
 ]

@@ -1,9 +1,9 @@
 {
-  "3559": {
+  "3645": {
     "whatMatters": "LONGEST_COMMON_SUFFIX",
     "labels": [
-      "self.assertIs"
+      "np.array"
     ],
-    "longestCommonSuffix": ".assertIs"
+    "longestCommonSuffix": ".array"
   }
 }

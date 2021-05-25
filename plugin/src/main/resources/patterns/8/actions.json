@@ -7,12 +7,12 @@
       "label": "PyTupleExpression"
     },
     "parentTreeWrapper": {
-      "rootVertexId": 13,
+      "rootVertexId": 1238,
       "type": 676,
       "label": "PyForPart"
     },
-    "targetTreeHashCode": 361453513,
-    "parentTreeHashCode": 163948083,
+    "targetTreeHashCode": 1922909219,
+    "parentTreeHashCode": 896049054,
     "position": 0
   },
   {
@@ -23,12 +23,12 @@
       "label": "PyCallExpression: len"
     },
     "parentTreeWrapper": {
-      "rootVertexId": 13,
+      "rootVertexId": 1238,
       "type": 676,
       "label": "PyForPart"
     },
-    "targetTreeHashCode": 405828322,
-    "parentTreeHashCode": 163948083,
+    "targetTreeHashCode": 1392133360,
+    "parentTreeHashCode": 896049054,
     "position": 1
   },
   {
@@ -38,7 +38,7 @@
       "type": 655,
       "label": "PyCallExpression: len"
     },
-    "targetTreeHashCode": 405828322,
+    "targetTreeHashCode": 1392133360,
     "value": "PyCallExpression: enumerate"
   },
   {
@@ -53,8 +53,8 @@
       "type": 657,
       "label": "PyTupleExpression"
     },
-    "targetTreeHashCode": 718304511,
-    "parentTreeHashCode": 361453513,
+    "targetTreeHashCode": 432928649,
+    "parentTreeHashCode": 1922909219,
     "position": 0
   },
   {
@@ -69,8 +69,8 @@
       "type": 657,
       "label": "PyTupleExpression"
     },
-    "targetTreeHashCode": 798599924,
-    "parentTreeHashCode": 361453513,
+    "targetTreeHashCode": 668585197,
+    "parentTreeHashCode": 1922909219,
     "position": 1
   },
   {
@@ -80,26 +80,26 @@
       "type": 642,
       "label": "PyReferenceExpression: len"
     },
-    "targetTreeHashCode": 1489146567,
+    "targetTreeHashCode": 1540987831,
     "value": "PyReferenceExpression: enumerate"
   },
   {
     "type": "Delete",
     "targetTreeWrapper": {
-      "rootVertexId": 24,
+      "rootVertexId": 1249,
       "type": 642,
       "label": "PyReferenceExpression: i"
     },
-    "targetTreeHashCode": 1435596477
+    "targetTreeHashCode": 761447469
   },
   {
     "type": "Delete",
     "targetTreeWrapper": {
-      "rootVertexId": 25,
+      "rootVertexId": 1250,
       "type": 650,
       "label": "PySubscriptionExpression"
     },
-    "targetTreeHashCode": 1630809653
+    "targetTreeHashCode": 911725355
   },
   {
     "type": "Delete",
@@ -108,6 +108,6 @@
       "type": 620,
       "label": "PyAssignmentStatement"
     },
-    "targetTreeHashCode": 1661963448
+    "targetTreeHashCode": 1783252035
   }
 ]

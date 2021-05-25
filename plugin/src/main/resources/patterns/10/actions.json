@@ -11,8 +11,8 @@
       "type": 616,
       "label": "PyArgumentList"
     },
-    "targetTreeHashCode": 1129572829,
-    "parentTreeHashCode": 1456952058,
+    "targetTreeHashCode": 1512857274,
+    "parentTreeHashCode": 1974818826,
     "position": 0
   },
   {
@@ -22,7 +22,7 @@
       "type": 642,
       "label": "PyReferenceExpression: keys"
     },
-    "targetTreeHashCode": 850568964
+    "targetTreeHashCode": 1909156632
   },
   {
     "type": "Delete",
@@ -31,6 +31,15 @@
       "type": 616,
       "label": "PyArgumentList"
     },
-    "targetTreeHashCode": 1785609875
+    "targetTreeHashCode": 1101472247
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 3014,
+      "type": 655,
+      "label": "PyCallExpression: self.cml._options.keys"
+    },
+    "targetTreeHashCode": 738427271
   }
 ]
