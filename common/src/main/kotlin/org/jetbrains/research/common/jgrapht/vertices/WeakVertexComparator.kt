@@ -14,11 +14,13 @@ class WeakVertexComparator : Comparator<PatternSpecificVertex> {
         if (fromTarget?.label?.startsWith("var") == true
             && fromPattern?.label?.startsWith("var") == true
         ) {
-            // FIXME: Differ <variable-usage> and <variable-decl> nodes in the original miner
-            // Now it is temporary solution
             val patternVarRoleLabel = fromPattern.kind
             val targetVarRoleLabel = (fromTarget.origin as? DataNode?)?.kind
-            if (patternVarRoleLabel != null && targetVarRoleLabel != null && patternVarRoleLabel != targetVarRoleLabel) {
+            if (patternVarRoleLabel != null && patternVarRoleLabel != "null"
+                && targetVarRoleLabel != null && targetVarRoleLabel != "null"
+                && patternVarRoleLabel != targetVarRoleLabel
+            ) {
+                // FIXME: why is it "null" instead of `null` sometimes?
                 return 1
             }
             return when (fromPattern.dataNodeInfo?.whatMatters) {

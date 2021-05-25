@@ -6,6 +6,7 @@ import com.github.gumtreediff.actions.model.Move
 import com.github.gumtreediff.actions.model.Update
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import com.intellij.psi.codeStyle.CodeStyleManager
 import com.jetbrains.python.psi.PyElement
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -14,21 +15,22 @@ import org.jetbrains.research.common.buildPyFlowGraphForMethod
 import org.jetbrains.research.common.gumtree.PyPsiGumTree
 import org.jetbrains.research.common.gumtree.wrappers.ActionWrapper
 import org.jetbrains.research.common.jgrapht.PatternGraph
+import org.jetbrains.research.common.jgrapht.edges.PatternSpecificMultipleEdge
 import org.jetbrains.research.common.jgrapht.export
 import org.jetbrains.research.common.jgrapht.getWeakSubgraphIsomorphismInspector
 import org.jetbrains.research.common.jgrapht.vertices.PatternSpecificVertex
-import org.jetbrains.research.common.jgrapht.vertices.WeakVertexComparator
 import org.jetbrains.research.preprocessing.HeuristicActionsComparator
 import org.jetbrains.research.preprocessing.getLongestCommonEditActionsSubsequence
 import org.jetbrains.research.preprocessing.labelers.HeuristicVerticesMatchingModeLabeler
 import org.jetbrains.research.preprocessing.loaders.CachingEditActionsLoader
 import org.jetbrains.research.preprocessing.loaders.CachingPsiLoader
+import org.jgrapht.GraphMapping
 import org.jgrapht.graph.AsSubgraph
 import org.jsoup.Jsoup
 import java.io.File
 import java.nio.file.Path
 
-class Pattern(directory: File, project: Project) {
+class Pattern(directory: File, private val project: Project) {
     val name: String = directory.name
     var description: String = "No description provided"
         private set
@@ -44,6 +46,8 @@ class Pattern(directory: File, project: Project) {
     private val psiToPsiBasedVertexMapping = hashMapOf<PsiElement, PatternSpecificVertex>()
     private val psiBasedVertexToMainGraphVertexMapping = hashMapOf<PatternSpecificVertex, PatternSpecificVertex>()
     private val reprVarVertexToLabelsGroup: Map<PatternSpecificVertex, PatternSpecificVertex.LabelsGroup>
+
+    private lateinit var mappings: PsiToMainMappings
 
     init {
         directory.walk().forEach { file ->
@@ -62,9 +66,10 @@ class Pattern(directory: File, project: Project) {
                 val fragmentId = file.nameWithoutExtension.substringAfterLast('-').toInt()
                 val document = Jsoup.parse(file.readText())
                 val codeElements = document.getElementsByClass("code language-python")
+                val (codeBefore, codeAfter) = Pair(codeElements[0].text(), codeElements[1].text())
                 codeChangeSampleById[fragmentId] = CodeChangeSample(
-                    codeBefore = codeElements[0].text(),
-                    codeAfter = codeElements[1].text(),
+                    codeBefore = reformatCode(codeBefore),
+                    codeAfter = reformatCode(codeAfter),
                 )
             }
         }
@@ -139,33 +144,44 @@ class Pattern(directory: File, project: Project) {
             ))
     }
 
+    private inner class PsiToMainMappings(
+        graphMappings: Sequence<GraphMapping<PatternSpecificVertex, PatternSpecificMultipleEdge>>
+    ) {
+        private val psiBasedVertexToMainGraphVertexMappings: List<Map<PatternSpecificVertex, PatternSpecificVertex>>
+        private var correctMappings: Set<MutableMap<PatternSpecificVertex, PatternSpecificVertex>>
+
+
+        init {
+            psiBasedVertexToMainGraphVertexMappings = graphMappings.toList().map { jgraphtMapping ->
+                val myMapping = hashMapOf<PatternSpecificVertex, PatternSpecificVertex>()
+                mainGraph.vertexSet().forEach { mainVertex ->
+                    val psiBasedVertex = jgraphtMapping.getVertexCorrespondence(mainVertex, false)
+                    myMapping[psiBasedVertex] = mainVertex
+                }
+                myMapping
+            }
+            correctMappings = psiBasedVertexToMainGraphVertexMappings.toSet() // initially
+        }
+
+        fun filterHasVertex(psiBasedVertex: PatternSpecificVertex?): List<MutableMap<PatternSpecificVertex, PatternSpecificVertex>> {
+            return psiBasedVertexToMainGraphVertexMappings
+                .filter { it.containsKey(psiBasedVertex) }
+                .map { it.toMutableMap() }
+        }
+
+        fun updateCorrectMappings(currentCorrectMappings: List<MutableMap<PatternSpecificVertex, PatternSpecificVertex>>) {
+            correctMappings = correctMappings.intersect(currentCorrectMappings)
+        }
+
+        fun getRepresentative(): MutableMap<PatternSpecificVertex, PatternSpecificVertex> {
+            return correctMappings.first()
+        }
+    }
+
     private fun injectPsiElementsToMainGraph() {
         val inspector = getWeakSubgraphIsomorphismInspector(psiBasedReprFragmentGraph, mainGraph)
-        var foundCorrectMapping = false
-
         if (inspector.isomorphismExists()) {
-            for (mapping in inspector.mappings.asSequence()) {
-                var isCorrectMapping = true
-                for (mainVertex in mainGraph.vertexSet()) {
-                    val psiBasedVertex = mapping.getVertexCorrespondence(mainVertex, false)
-
-                    // Save mapping, because direct injection is prohibited
-                    psiBasedVertexToMainGraphVertexMapping[psiBasedVertex] = mainVertex
-
-                    if (WeakVertexComparator().compare(psiBasedVertex, mainVertex) != 0) {
-                        isCorrectMapping = false
-                        psiBasedVertexToMainGraphVertexMapping.clear()
-                        break
-                    }
-                }
-                if (isCorrectMapping) {
-                    foundCorrectMapping = true
-                    break
-                }
-            }
-        }
-        if (!foundCorrectMapping) {
-            throw IllegalStateException("Correct mapping was not found")
+            mappings = PsiToMainMappings(inspector.mappings.asSequence())
         }
     }
 
@@ -178,8 +194,13 @@ class Pattern(directory: File, project: Project) {
         for (action in this) {
             val element = (action.node as PyPsiGumTree).rootElement!!
             if (action is Update || action is Delete || action is Move) {
-                if (psiBasedVertexToMainGraphVertexMapping[psiToPsiBasedVertexMapping[element]] == null)
+                val psiBasedVertex = psiToPsiBasedVertexMapping[element]
+                val mappingsHavingVertex = mappings.filterHasVertex(psiBasedVertex)
+                if (mappingsHavingVertex.isEmpty()) {
                     hangerElements.add(element)
+                } else {
+                    mappings.updateCorrectMappings(mappingsHavingVertex)
+                }
             }
             if (action is Insert) {
                 val newElement = (action.node as PyPsiGumTree).rootElement ?: continue
@@ -190,9 +211,14 @@ class Pattern(directory: File, project: Project) {
                 val parentElement = (parent as PyPsiGumTree).rootElement!!
                 if (insertedElements.contains(parentElement))
                     continue
-                hangerElements.add(parentElement)
-                if (psiBasedVertexToMainGraphVertexMapping[psiToPsiBasedVertexMapping[parentElement]] == null)
+
+                val parentPsiBasedVertex = psiToPsiBasedVertexMapping[parentElement]
+                val mappingsHavingParentVertex = mappings.filterHasVertex(parentPsiBasedVertex)
+                if (mappingsHavingParentVertex.isEmpty()) {
                     hangerElements.add(parentElement)
+                } else {
+                    mappings.updateCorrectMappings(mappingsHavingParentVertex)
+                }
             }
         }
         return hangerElements
@@ -203,6 +229,7 @@ class Pattern(directory: File, project: Project) {
      * because `VF2SubgraphIsomorphismMatcher` will match only among induced subgraphs
      */
     private fun extendMainGraphWithHangerElements(hangerElements: Set<PsiElement>) {
+        val mapping = mappings.getRepresentative()
         for (element in hangerElements) {
             val psiBasedVertex = psiToPsiBasedVertexMapping[element] ?: continue
             val newVertex = psiBasedVertex.copy()
@@ -215,19 +242,19 @@ class Pattern(directory: File, project: Project) {
             }
             newVertex.metadata = "hanger"
             mainGraph.addVertex(newVertex)
-            psiBasedVertexToMainGraphVertexMapping[psiBasedVertex] = newVertex
+            mapping[psiBasedVertex] = newVertex
         }
         for (element in hangerElements) {
             val psiBasedVertex = psiToPsiBasedVertexMapping[element] ?: continue
-            val newVertex = psiBasedVertexToMainGraphVertexMapping[psiBasedVertex]!!
+            val newVertex = mapping[psiBasedVertex]!!
             for (incomingEdge in psiBasedReprFragmentGraph.incomingEdgesOf(psiBasedVertex)) {
                 val fragmentEdgeSource = psiBasedReprFragmentGraph.getEdgeSource(incomingEdge)
-                val patternEdgeSource = psiBasedVertexToMainGraphVertexMapping[fragmentEdgeSource] ?: continue
+                val patternEdgeSource = mapping[fragmentEdgeSource] ?: continue
                 mainGraph.addEdge(patternEdgeSource, newVertex, incomingEdge)
             }
             for (outgoingEdge in psiBasedReprFragmentGraph.outgoingEdgesOf(psiBasedVertex)) {
                 val fragmentEdgeTarget = psiBasedReprFragmentGraph.getEdgeTarget(outgoingEdge)
-                val patternEdgeTarget = psiBasedVertexToMainGraphVertexMapping[fragmentEdgeTarget] ?: continue
+                val patternEdgeTarget = mapping[fragmentEdgeTarget] ?: continue
                 mainGraph.addEdge(newVertex, patternEdgeTarget, outgoingEdge)
             }
         }
@@ -235,35 +262,42 @@ class Pattern(directory: File, project: Project) {
 
     private fun EditActions.getJson(): String {
         val actionsWrappers = arrayListOf<ActionWrapper>()
+        val mapping = mappings.getRepresentative()
         for (action in this) {
             val element = (action.node as PyPsiGumTree).rootElement!!
             when (action) {
                 is Update -> {
                     (action.node as PyPsiGumTree).rootVertex =
-                        psiBasedVertexToMainGraphVertexMapping[psiToPsiBasedVertexMapping[element]]
+                        mapping[psiToPsiBasedVertexMapping[element]]
                     actionsWrappers.add(ActionWrapper.UpdateActionWrapper(action))
                 }
                 is Delete -> {
                     (action.node as PyPsiGumTree).rootVertex =
-                        psiBasedVertexToMainGraphVertexMapping[psiToPsiBasedVertexMapping[element]]
+                        mapping[psiToPsiBasedVertexMapping[element]]
                     actionsWrappers.add(ActionWrapper.DeleteActionWrapper(action))
                 }
                 is Insert -> {
                     val parentElement = (action.parent as PyPsiGumTree).rootElement!!
                     (action.parent as PyPsiGumTree).rootVertex =
-                        psiBasedVertexToMainGraphVertexMapping[psiToPsiBasedVertexMapping[parentElement]]
+                        mapping[psiToPsiBasedVertexMapping[parentElement]]
                     actionsWrappers.add(ActionWrapper.InsertActionWrapper(action))
                 }
                 is Move -> {
                     val parentElement = (action.parent as PyPsiGumTree).rootElement!!
                     (action.parent as PyPsiGumTree).rootVertex =
-                        psiBasedVertexToMainGraphVertexMapping[psiToPsiBasedVertexMapping[parentElement]]
+                        mapping[psiToPsiBasedVertexMapping[parentElement]]
                     (action.node as PyPsiGumTree).rootVertex =
-                        psiBasedVertexToMainGraphVertexMapping[psiToPsiBasedVertexMapping[element]]
+                        mapping[psiToPsiBasedVertexMapping[element]]
                     actionsWrappers.add(ActionWrapper.MoveActionWrapper(action))
                 }
             }
         }
         return Json.encodeToString(actionsWrappers)
+    }
+
+    private fun reformatCode(code: String): String {
+        val psiLoader = CachingPsiLoader.getInstance(project)
+        val formatter = CodeStyleManager.getInstance(project)
+        return formatter.reformat(psiLoader.loadPsiFromSource(code)).text
     }
 }
