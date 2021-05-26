@@ -1,0 +1,22 @@
+[
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 3528,
+      "type": 655,
+      "label": "PyCallExpression: os.path.exists"
+    },
+    "targetTreeHashCode": 1679743364,
+    "value": "PyCallExpression: os.path.isdir"
+  },
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 3534,
+      "type": 642,
+      "label": "PyReferenceExpression: exists"
+    },
+    "targetTreeHashCode": 15746874,
+    "value": "PyReferenceExpression: isdir"
+  }
+]

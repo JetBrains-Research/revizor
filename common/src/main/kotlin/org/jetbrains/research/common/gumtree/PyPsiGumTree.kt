@@ -25,6 +25,7 @@ class PyPsiGumTree : Tree {
     override fun deepCopy(): PyPsiGumTree {
         val copy = PyPsiGumTree(rootElement)
         copy.rootVertex = rootVertex
+        copy.setId(id)
         for (child in getChildren()) {
             copy.addChild((child as PyPsiGumTree).deepCopy())
         }

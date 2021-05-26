@@ -1,16 +1,12 @@
 digraph G {
-  1347 [ metadata="" color="red2" shape="box" label="keys (keys) [1347]" ];
-  1353 [ metadata="" color="red2" shape="ellipse" label="var (d.keys) [1353]" kind="variable-usage" ];
-  1349 [ metadata="" color="red2" shape="box" label="len (len) [1349]" ];
-  82 [ metadata="hanger" color="null" shape="null" label="keys.PyArgumentList (keys.PyArgumentList) [82]" ];
-  81 [ metadata="hanger" color="null" shape="null" label="var (d) [81]" kind="variable-usage" ];
-  84 [ metadata="hanger" color="null" shape="null" label="len.PyArgumentList (len.PyArgumentList) [84]" ];
-  1347 -> 1349 [ from_closure="false" xlabel="para" ];
-  1353 -> 1347 [ from_closure="false" xlabel="recv" ];
-  82 -> 1347 [ from_closure="false" xlabel="para" ];
-  82 -> 1349 [ from_closure="true" xlabel="para" ];
-  81 -> 1353 [ from_closure="false" xlabel="qual" ];
-  82 -> 84 [ from_closure="true" xlabel="para" ];
-  1347 -> 84 [ from_closure="false" xlabel="para" ];
-  84 -> 1349 [ from_closure="false" xlabel="para" ];
+  5783 [ metadata="" color="red2" shape="box" kind="func-call" label="isinstance (isinstance) [5783]" ];
+  5782 [ metadata="" color="red2" shape="ellipse" kind="null" label="isinstance.PyArgumentList (isinstance.PyArgumentList) [5782]" ];
+  5788 [ metadata="" color="red2" shape="ellipse" kind="variable-usage" label="var (collections.Callable) [5788]" ];
+  5787 [ metadata="" color="red2" shape="ellipse" kind="variable-usage" label="var (collections) [5787]" ];
+  5786 [ metadata="" color="red2" shape="ellipse" kind="null" label="getattr.PyArgumentList (getattr.PyArgumentList) [5786]" ];
+  5782 -> 5783 [ from_closure="null" xlabel="para" ];
+  5788 -> 5782 [ from_closure="null" xlabel="para" ];
+  5787 -> 5788 [ from_closure="null" xlabel="qual" ];
+  5786 -> 5783 [ from_closure="null" xlabel="para" ];
+  5786 -> 5782 [ from_closure="null" xlabel="para" ];
 }

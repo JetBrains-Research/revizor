@@ -1,0 +1,12 @@
+digraph G {
+  3563 [ metadata="" color="red2" shape="box" kind="func-call" label="assertIs (assertIs) [3563]" ];
+  3559 [ metadata="" color="red2" shape="ellipse" kind="variable-usage" label="var (self.assertIs) [3559]" ];
+  3556 [ metadata="" color="red2" shape="ellipse" kind="null" label="assertIs.PyArgumentList (assertIs.PyArgumentList) [3556]" ];
+  3555 [ metadata="" color="red2" shape="ellipse" kind="null" label="PyExpressionStatement (PyExpressionStatement) [3555]" ];
+  3560 [ metadata="" color="red2" shape="ellipse" kind="literal" label="lit (True) [3560]" ];
+  3563 -> 3555 [ from_closure="null" xlabel="para" ];
+  3559 -> 3563 [ from_closure="null" xlabel="recv" ];
+  3556 -> 3563 [ from_closure="null" xlabel="para" ];
+  3556 -> 3555 [ from_closure="null" xlabel="para" ];
+  3560 -> 3556 [ from_closure="null" xlabel="para" ];
+}

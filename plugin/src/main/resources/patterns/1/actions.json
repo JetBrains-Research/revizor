@@ -1,0 +1,40 @@
+[
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 4895,
+      "type": 655,
+      "label": "PyCallExpression: numpy.log"
+    },
+    "targetTreeHashCode": 1995355824,
+    "value": "PyCallExpression: numpy.log1p"
+  },
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 4894,
+      "type": 642,
+      "label": "PyReferenceExpression: log"
+    },
+    "targetTreeHashCode": 1135548420,
+    "value": "PyReferenceExpression: log1p"
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 4899,
+      "type": 643,
+      "label": "PyNumericLiteralExpression"
+    },
+    "targetTreeHashCode": 1118006677
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 4900,
+      "type": 653,
+      "label": "PyBinaryExpression"
+    },
+    "targetTreeHashCode": 249424007
+  }
+]

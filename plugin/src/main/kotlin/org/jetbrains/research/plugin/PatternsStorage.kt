@@ -16,9 +16,7 @@ import org.jgrapht.GraphMapping
 import java.io.File
 import java.net.URL
 import java.nio.file.Paths
-import java.util.*
 import java.util.jar.JarFile
-import kotlin.collections.HashMap
 
 /**
  * A singleton class for storing graph patterns.
@@ -56,7 +54,8 @@ object PatternsStorage {
                 }
             }
         } catch (ex: Exception) {
-            logger.warn("Failed to load patterns resources from JAR file")
+            logger.error("Failed to load patterns resources from JAR file")
+            logger.error(ex)
         } finally {
             jar?.close()
         }

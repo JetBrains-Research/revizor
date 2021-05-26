@@ -1,8 +1,7 @@
 {
-  "4910": {
+  "3645": {
     "whatMatters": "LONGEST_COMMON_SUFFIX",
     "labels": [
-      "numpy.array",
       "np.array"
     ],
     "longestCommonSuffix": ".array"

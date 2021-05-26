@@ -1,0 +1,45 @@
+[
+  {
+    "type": "Move",
+    "targetTreeWrapper": {
+      "rootVertexId": 317,
+      "type": 642,
+      "label": "PyReferenceExpression: _options"
+    },
+    "parentTreeWrapper": {
+      "rootVertexId": 3009,
+      "type": 616,
+      "label": "PyArgumentList"
+    },
+    "targetTreeHashCode": 316247431,
+    "parentTreeHashCode": 717424917,
+    "position": 0
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 3004,
+      "type": 642,
+      "label": "PyReferenceExpression: keys"
+    },
+    "targetTreeHashCode": 11280372
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 3003,
+      "type": 616,
+      "label": "PyArgumentList"
+    },
+    "targetTreeHashCode": 1072446014
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 3014,
+      "type": 655,
+      "label": "PyCallExpression: self.cml._options.keys"
+    },
+    "targetTreeHashCode": 1291400458
+  }
+]

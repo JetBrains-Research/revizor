@@ -1,167 +1,65 @@
 [
   {
-    "type": "Insert",
+    "type": "Update",
     "targetTreeWrapper": {
-      "rootVertexId": null,
-      "type": 463,
-      "label": "PyTupleExpression"
+      "rootVertexId": 4914,
+      "type": 655,
+      "label": "PyCallExpression: np.array"
     },
-    "parentTreeWrapper": {
-      "rootVertexId": 116,
-      "type": 482,
-      "label": "PyForPart"
+    "targetTreeHashCode": 1682435387,
+    "value": "PyCallExpression: np.arange"
+  },
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 4910,
+      "type": 642,
+      "label": "PyReferenceExpression: array"
     },
-    "targetTreeHashCode": 954001719,
-    "parentTreeHashCode": 905878540,
-    "position": 0
+    "targetTreeHashCode": 1215281977,
+    "value": "PyReferenceExpression: arange"
   },
   {
     "type": "Move",
     "targetTreeWrapper": {
-      "rootVertexId": 1461,
-      "type": 461,
-      "label": "PyCallExpression: len"
-    },
-    "parentTreeWrapper": {
-      "rootVertexId": 116,
-      "type": 482,
-      "label": "PyForPart"
-    },
-    "targetTreeHashCode": 1177057116,
-    "parentTreeHashCode": 905878540,
-    "position": 1
-  },
-  {
-    "type": "Update",
-    "targetTreeWrapper": {
-      "rootVertexId": 1461,
-      "type": 461,
-      "label": "PyCallExpression: len"
-    },
-    "targetTreeHashCode": 1177057116,
-    "value": "PyCallExpression: enumerate"
-  },
-  {
-    "type": "Insert",
-    "targetTreeWrapper": {
-      "rootVertexId": null,
-      "type": 421,
-      "label": "PyTargetExpression: i"
-    },
-    "parentTreeWrapper": {
-      "rootVertexId": null,
-      "type": 463,
-      "label": "PyTupleExpression"
-    },
-    "targetTreeHashCode": 912769239,
-    "parentTreeHashCode": 954001719,
-    "position": 0
-  },
-  {
-    "type": "Insert",
-    "targetTreeWrapper": {
-      "rootVertexId": null,
-      "type": 421,
-      "label": "PyTargetExpression: dim"
-    },
-    "parentTreeWrapper": {
-      "rootVertexId": null,
-      "type": 463,
-      "label": "PyTupleExpression"
-    },
-    "targetTreeHashCode": 1471004815,
-    "parentTreeHashCode": 954001719,
-    "position": 1
-  },
-  {
-    "type": "Update",
-    "targetTreeWrapper": {
-      "rootVertexId": null,
-      "type": 448,
-      "label": "PyReferenceExpression: len"
-    },
-    "targetTreeHashCode": 249673132,
-    "value": "PyReferenceExpression: enumerate"
-  },
-  {
-    "type": "Delete",
-    "targetTreeWrapper": {
-      "rootVertexId": 122,
-      "type": 421,
-      "label": "PyTargetExpression: i"
-    },
-    "targetTreeHashCode": 1268483825
-  },
-  {
-    "type": "Delete",
-    "targetTreeWrapper": {
-      "rootVertexId": null,
-      "type": 448,
-      "label": "PyReferenceExpression: range"
-    },
-    "targetTreeHashCode": 142663025
-  },
-  {
-    "type": "Delete",
-    "targetTreeWrapper": {
-      "rootVertexId": 120,
-      "type": 422,
+      "rootVertexId": 4916,
+      "type": 616,
       "label": "PyArgumentList"
     },
-    "targetTreeHashCode": 958404247
+    "parentTreeWrapper": {
+      "rootVertexId": 4914,
+      "type": 655,
+      "label": "PyCallExpression: np.array"
+    },
+    "targetTreeHashCode": 247032935,
+    "parentTreeHashCode": 1682435387,
+    "position": 1
   },
   {
     "type": "Delete",
     "targetTreeWrapper": {
-      "rootVertexId": 1457,
-      "type": 461,
+      "rootVertexId": null,
+      "type": 642,
+      "label": "PyReferenceExpression: range"
+    },
+    "targetTreeHashCode": 1558664685
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 4909,
+      "type": 655,
       "label": "PyCallExpression: range"
     },
-    "targetTreeHashCode": 1031744630
+    "targetTreeHashCode": 1380479974
   },
   {
     "type": "Delete",
     "targetTreeWrapper": {
-      "rootVertexId": 1460,
-      "type": 421,
-      "label": "PyTargetExpression: dim"
+      "rootVertexId": 4912,
+      "type": 616,
+      "label": "PyArgumentList"
     },
-    "targetTreeHashCode": 1478379131
-  },
-  {
-    "type": "Delete",
-    "targetTreeWrapper": {
-      "rootVertexId": 129,
-      "type": 448,
-      "label": "PyReferenceExpression: static"
-    },
-    "targetTreeHashCode": 1549869127
-  },
-  {
-    "type": "Delete",
-    "targetTreeWrapper": {
-      "rootVertexId": 130,
-      "type": 448,
-      "label": "PyReferenceExpression: i"
-    },
-    "targetTreeHashCode": 313207409
-  },
-  {
-    "type": "Delete",
-    "targetTreeWrapper": {
-      "rootVertexId": 1459,
-      "type": 456,
-      "label": "PySubscriptionExpression"
-    },
-    "targetTreeHashCode": 236530174
-  },
-  {
-    "type": "Delete",
-    "targetTreeWrapper": {
-      "rootVertexId": 1465,
-      "type": 426,
-      "label": "PyAssignmentStatement"
-    },
-    "targetTreeHashCode": 90795439
+    "targetTreeHashCode": 407672514
   }
 ]

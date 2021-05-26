@@ -1,0 +1,31 @@
+[
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 3651,
+      "type": 655,
+      "label": "PyCallExpression: np.array"
+    },
+    "targetTreeHashCode": 854433296,
+    "value": "PyCallExpression: np.zeros"
+  },
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 3645,
+      "type": 642,
+      "label": "PyReferenceExpression: array"
+    },
+    "targetTreeHashCode": 2104121194,
+    "value": "PyReferenceExpression: zeros"
+  },
+  {
+    "type": "Delete",
+    "targetTreeWrapper": {
+      "rootVertexId": 3652,
+      "type": 656,
+      "label": "PyListLiteralExpression"
+    },
+    "targetTreeHashCode": 1881818112
+  }
+]

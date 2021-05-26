@@ -1,54 +1,40 @@
 [
   {
-    "type": "Insert",
+    "type": "Update",
+    "targetTreeWrapper": {
+      "rootVertexId": 5783,
+      "type": 655,
+      "label": "PyCallExpression: isinstance"
+    },
+    "targetTreeHashCode": 1479172432,
+    "value": "PyCallExpression: callable"
+  },
+  {
+    "type": "Update",
     "targetTreeWrapper": {
       "rootVertexId": null,
-      "type": 448,
-      "label": "PyReferenceExpression: d"
+      "type": 642,
+      "label": "PyReferenceExpression: isinstance"
     },
-    "parentTreeWrapper": {
-      "rootVertexId": 84,
-      "type": 422,
-      "label": "PyArgumentList"
-    },
-    "targetTreeHashCode": 360769185,
-    "parentTreeHashCode": 694363733,
-    "position": 0
+    "targetTreeHashCode": 1206116212,
+    "value": "PyReferenceExpression: callable"
   },
   {
     "type": "Delete",
     "targetTreeWrapper": {
-      "rootVertexId": 81,
-      "type": 448,
-      "label": "PyReferenceExpression: d"
+      "rootVertexId": 5787,
+      "type": 642,
+      "label": "PyReferenceExpression: collections"
     },
-    "targetTreeHashCode": 1892607846
+    "targetTreeHashCode": 547051411
   },
   {
     "type": "Delete",
     "targetTreeWrapper": {
-      "rootVertexId": 1353,
-      "type": 448,
-      "label": "PyReferenceExpression: keys"
+      "rootVertexId": 5788,
+      "type": 642,
+      "label": "PyReferenceExpression: Callable"
     },
-    "targetTreeHashCode": 2093383878
-  },
-  {
-    "type": "Delete",
-    "targetTreeWrapper": {
-      "rootVertexId": 82,
-      "type": 422,
-      "label": "PyArgumentList"
-    },
-    "targetTreeHashCode": 1634682099
-  },
-  {
-    "type": "Delete",
-    "targetTreeWrapper": {
-      "rootVertexId": 1347,
-      "type": 461,
-      "label": "PyCallExpression: d.keys"
-    },
-    "targetTreeHashCode": 1712940156
+    "targetTreeHashCode": 767181391
   }
 ]

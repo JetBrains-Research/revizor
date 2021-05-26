@@ -1,0 +1,16 @@
+digraph G {
+  3014 [ metadata="" color="red2" shape="box" kind="func-call" label="keys (keys) [3014]" ];
+  3010 [ metadata="" color="red2" shape="box" kind="func-call" label="sorted (sorted) [3010]" ];
+  3003 [ metadata="" color="red2" shape="ellipse" kind="null" label="keys.PyArgumentList (keys.PyArgumentList) [3003]" ];
+  3004 [ metadata="" color="red2" shape="ellipse" kind="variable-usage" label="var (self.cml._options.keys) [3004]" ];
+  3009 [ metadata="" color="red2" shape="ellipse" kind="null" label="sorted.PyArgumentList (sorted.PyArgumentList) [3009]" ];
+  317 [ metadata="hanger" color="null" shape="null" kind="null" label="var (self.cml._options) [317]" ];
+  3014 -> 3010 [ from_closure="null" xlabel="para" ];
+  3014 -> 3009 [ from_closure="null" xlabel="para" ];
+  3003 -> 3014 [ from_closure="null" xlabel="para" ];
+  3003 -> 3010 [ from_closure="null" xlabel="para" ];
+  3003 -> 3009 [ from_closure="null" xlabel="para" ];
+  3004 -> 3014 [ from_closure="null" xlabel="recv" ];
+  3009 -> 3010 [ from_closure="null" xlabel="para" ];
+  317 -> 3004 [ from_closure="false" xlabel="qual" ];
+}

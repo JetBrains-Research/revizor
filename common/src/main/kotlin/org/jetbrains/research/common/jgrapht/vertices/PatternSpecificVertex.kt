@@ -36,6 +36,8 @@ data class PatternSpecificVertex(
     ) {
         companion object {
             fun getEmpty() = LabelsGroup(MatchingMode.UNKNOWN, hashSetOf(), "")
+
+            fun getUniversal() = LabelsGroup(MatchingMode.NOTHING, hashSetOf(), "")
         }
     }
 

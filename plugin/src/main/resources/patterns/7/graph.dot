@@ -1,0 +1,9 @@
+digraph G {
+  3651 [ metadata="" color="red2" shape="box" kind="func-call" label="array (array) [3651]" ];
+  3645 [ metadata="" color="red2" shape="ellipse" kind="variable-usage" label="var (np.array) [3645]" ];
+  3652 [ metadata="" color="red2" shape="box" kind="collection" label="List (List) [3652]" ];
+  3654 [ metadata="" color="red2" shape="ellipse" kind="literal" label="lit (0) [3654]" ];
+  3645 -> 3651 [ from_closure="null" xlabel="recv" ];
+  3652 -> 3651 [ from_closure="null" xlabel="para" ];
+  3654 -> 3652 [ from_closure="null" xlabel="para" ];
+}
