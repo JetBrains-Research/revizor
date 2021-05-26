@@ -42,6 +42,7 @@ class Pattern(directory: File, private val project: Project) {
     val reprFragment: PatternGraph
     val psiBasedReprFragmentGraph: PatternGraph
     val fragmentById: MutableMap<Int, PatternGraph> = hashMapOf()
+    val fullFragmentById: MutableMap<Int, PatternGraph> = hashMapOf()
     val codeChangeSampleById: MutableMap<Int, CodeChangeSample> = hashMapOf()
 
     private val psiToPsiBasedVertexMapping = hashMapOf<PsiElement, PatternSpecificVertex>()
@@ -60,6 +61,7 @@ class Pattern(directory: File, private val project: Project) {
                         .toSet()
                 )
                 fragmentById[fragmentId] = fragmentSubgraphBeforeChange
+                fullFragmentById[fragmentId] = fullFragmentGraph
             }
             if (file.isFile && file.name.startsWith("sample") && file.extension == "html") {
                 val fragmentId = file.nameWithoutExtension.substringAfterLast('-').toInt()
@@ -113,9 +115,17 @@ class Pattern(directory: File, private val project: Project) {
         }
 
 
+        // Prepare labels groups from `after`-part of full fragments graphs
+        val fullFragmentsLabeler = HeuristicVerticesMatchingModeLabeler(
+            reprFragment = fullFragmentById.values.first(),
+            allFragments = fullFragmentById.values.toList()
+        )
+
         // Extract and sort appropriate edit actions subsequence
         val reprFragmentActions = actionsByFragmentId[reprFragmentId]!!
-        val actionsComparator = HeuristicActionsComparator(reprVarVertexToLabelsGroup.values.map { it.labels })
+        val actionsComparator = HeuristicActionsComparator(
+            fullFragmentsLabeler.markVertices().values.map { it.labels }
+        )
         editActions = actionsByFragmentId.values.fold(
             initial = reprFragmentActions,
             operation = { a1, a2 ->

@@ -6,7 +6,7 @@
       "type": 655,
       "label": "PyCallExpression: os.path.exists"
     },
-    "targetTreeHashCode": 904523280,
+    "targetTreeHashCode": 1679743364,
     "value": "PyCallExpression: os.path.isdir"
   },
   {
@@ -16,7 +16,7 @@
       "type": 642,
       "label": "PyReferenceExpression: exists"
     },
-    "targetTreeHashCode": 2041813497,
+    "targetTreeHashCode": 15746874,
     "value": "PyReferenceExpression: isdir"
   }
 ]

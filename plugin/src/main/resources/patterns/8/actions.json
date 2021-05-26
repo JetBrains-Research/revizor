@@ -11,8 +11,8 @@
       "type": 676,
       "label": "PyForPart"
     },
-    "targetTreeHashCode": 1922909219,
-    "parentTreeHashCode": 896049054,
+    "targetTreeHashCode": 473500560,
+    "parentTreeHashCode": 646470126,
     "position": 0
   },
   {
@@ -27,8 +27,8 @@
       "type": 676,
       "label": "PyForPart"
     },
-    "targetTreeHashCode": 1392133360,
-    "parentTreeHashCode": 896049054,
+    "targetTreeHashCode": 334728827,
+    "parentTreeHashCode": 646470126,
     "position": 1
   },
   {
@@ -38,7 +38,7 @@
       "type": 655,
       "label": "PyCallExpression: len"
     },
-    "targetTreeHashCode": 1392133360,
+    "targetTreeHashCode": 334728827,
     "value": "PyCallExpression: enumerate"
   },
   {
@@ -53,8 +53,8 @@
       "type": 657,
       "label": "PyTupleExpression"
     },
-    "targetTreeHashCode": 432928649,
-    "parentTreeHashCode": 1922909219,
+    "targetTreeHashCode": 1833467889,
+    "parentTreeHashCode": 473500560,
     "position": 0
   },
   {
@@ -69,8 +69,8 @@
       "type": 657,
       "label": "PyTupleExpression"
     },
-    "targetTreeHashCode": 668585197,
-    "parentTreeHashCode": 1922909219,
+    "targetTreeHashCode": 1270931294,
+    "parentTreeHashCode": 473500560,
     "position": 1
   },
   {
@@ -80,7 +80,7 @@
       "type": 642,
       "label": "PyReferenceExpression: len"
     },
-    "targetTreeHashCode": 1540987831,
+    "targetTreeHashCode": 1705754094,
     "value": "PyReferenceExpression: enumerate"
   },
   {
@@ -90,7 +90,7 @@
       "type": 642,
       "label": "PyReferenceExpression: i"
     },
-    "targetTreeHashCode": 761447469
+    "targetTreeHashCode": 1454381627
   },
   {
     "type": "Delete",
@@ -99,7 +99,7 @@
       "type": 650,
       "label": "PySubscriptionExpression"
     },
-    "targetTreeHashCode": 911725355
+    "targetTreeHashCode": 337514539
   },
   {
     "type": "Delete",
@@ -108,6 +108,6 @@
       "type": 620,
       "label": "PyAssignmentStatement"
     },
-    "targetTreeHashCode": 1783252035
+    "targetTreeHashCode": 1129967984
   }
 ]

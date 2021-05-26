@@ -2,11 +2,21 @@
   {
     "type": "Update",
     "targetTreeWrapper": {
+      "rootVertexId": 4914,
+      "type": 655,
+      "label": "PyCallExpression: np.array"
+    },
+    "targetTreeHashCode": 1682435387,
+    "value": "PyCallExpression: np.arange"
+  },
+  {
+    "type": "Update",
+    "targetTreeWrapper": {
       "rootVertexId": 4910,
       "type": 642,
       "label": "PyReferenceExpression: array"
     },
-    "targetTreeHashCode": 31320243,
+    "targetTreeHashCode": 1215281977,
     "value": "PyReferenceExpression: arange"
   },
   {
@@ -21,8 +31,8 @@
       "type": 655,
       "label": "PyCallExpression: np.array"
     },
-    "targetTreeHashCode": 665170187,
-    "parentTreeHashCode": 653030394,
+    "targetTreeHashCode": 247032935,
+    "parentTreeHashCode": 1682435387,
     "position": 1
   },
   {
@@ -32,7 +42,7 @@
       "type": 642,
       "label": "PyReferenceExpression: range"
     },
-    "targetTreeHashCode": 676485759
+    "targetTreeHashCode": 1558664685
   },
   {
     "type": "Delete",
@@ -41,7 +51,7 @@
       "type": 655,
       "label": "PyCallExpression: range"
     },
-    "targetTreeHashCode": 1162968670
+    "targetTreeHashCode": 1380479974
   },
   {
     "type": "Delete",
@@ -50,6 +60,6 @@
       "type": 616,
       "label": "PyArgumentList"
     },
-    "targetTreeHashCode": 110592193
+    "targetTreeHashCode": 407672514
   }
 ]

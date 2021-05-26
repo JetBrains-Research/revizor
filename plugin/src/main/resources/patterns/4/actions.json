@@ -6,7 +6,7 @@
       "type": 655,
       "label": "PyCallExpression: range"
     },
-    "targetTreeHashCode": 2147315744,
+    "targetTreeHashCode": 473936615,
     "value": "PyCallExpression: xrange"
   },
   {
@@ -16,7 +16,7 @@
       "type": 642,
       "label": "PyReferenceExpression: range"
     },
-    "targetTreeHashCode": 815293113,
+    "targetTreeHashCode": 1012410576,
     "value": "PyReferenceExpression: xrange"
   },
   {
@@ -26,7 +26,7 @@
       "type": 655,
       "label": "PyCallExpression: range"
     },
-    "targetTreeHashCode": 1703528454,
+    "targetTreeHashCode": 90659474,
     "value": "PyCallExpression: xrange"
   },
   {
@@ -36,7 +36,7 @@
       "type": 642,
       "label": "PyReferenceExpression: range"
     },
-    "targetTreeHashCode": 128849652,
+    "targetTreeHashCode": 1003776026,
     "value": "PyReferenceExpression: xrange"
   }
 ]

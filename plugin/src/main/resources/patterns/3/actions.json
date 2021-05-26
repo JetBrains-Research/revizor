@@ -6,7 +6,7 @@
       "type": 655,
       "label": "PyCallExpression: isinstance"
     },
-    "targetTreeHashCode": 96476253,
+    "targetTreeHashCode": 1479172432,
     "value": "PyCallExpression: callable"
   },
   {
@@ -16,7 +16,7 @@
       "type": 642,
       "label": "PyReferenceExpression: isinstance"
     },
-    "targetTreeHashCode": 1740095399,
+    "targetTreeHashCode": 1206116212,
     "value": "PyReferenceExpression: callable"
   },
   {
@@ -26,7 +26,7 @@
       "type": 642,
       "label": "PyReferenceExpression: collections"
     },
-    "targetTreeHashCode": 419673866
+    "targetTreeHashCode": 547051411
   },
   {
     "type": "Delete",
@@ -35,6 +35,6 @@
       "type": 642,
       "label": "PyReferenceExpression: Callable"
     },
-    "targetTreeHashCode": 1088915003
+    "targetTreeHashCode": 767181391
   }
 ]
