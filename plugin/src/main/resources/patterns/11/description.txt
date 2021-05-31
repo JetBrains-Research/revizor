@@ -1,1 +1,1 @@
-No description provided
+Maybe use os.path.isdir() instead?
