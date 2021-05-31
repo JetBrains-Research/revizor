@@ -34,18 +34,13 @@ repair the highlighted code fragment.
 
  - Let's say you've already mined patterns using 
  [code-change-miner](https://github.com/JetBrains-Research/code-change-miner)
- - Select the ones you need and put them in a separate folder.
- Make sure each pattern is represented by a directory
- with a unique name and contains necessary `fragment-*.dot` files.
- - Add files `before.py` and `after.py` with minimal change pattern reproduction code snippet
- manually to each pattern's folder. The files should contain only one function with statements corresponding to pattern.
- The plugin need it to produce GumTree edit actions over the PSI. You can find examples in \
- `./plugin/src/main/resources/patterns`
+ - Select the ones you need and put them in a separate folder. Make sure each pattern is represented by a directory with
+   a unique name and contains all the necessary `fragment-*.dot` files.
  - Run `./gradlew :preprocessing:cli -Psrc=path/to/pattern/dir/ -Pdst=path/to/destination/dir/ -PaddDescription`
- - Follow the instructions in the command line to mark variable labels groups and provide descriptions.
- - Gradle task arguments: 
-   - `-Psrc`: Path to input directory with patterns mined by code-change-miner (always required)
-   - `-Pdst`: Path to output directory for processed patterns (always required)
-   - `-PaddDescription`: Add description manually for each pattern (optional)
+ - Follow the instructions in the command line to provide descriptions for the patterns.
+ - Gradle task arguments:
+     - `-Psrc`: Path to input directory with patterns mined by code-change-miner (always required)
+     - `-Pdst`: Path to output directory for processed patterns (always required)
+     - `-PaddDescription`: Add description manually for each pattern (optional)
  - When you are finished, copy processed patterns from the
   destination directory to `./plugin/src/main/resources/patterns` and re-build the plugin
