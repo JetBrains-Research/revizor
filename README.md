@@ -46,9 +46,9 @@ At first, clone this repository and open the root folder.
 - Finally, each preprocessed pattern's folder should contain 4 files:
     - `graph.dot`: an actual graph of the pattern
     - `actions.json`: edit actions stored by GumTree when it processes corresponding commits of a change pattern
-    - `labels_groups.json`: matching modes and groups of labels for all the variables in the graph, used for
-      localization later
-    - `description.txt`: textual description you provide when the pattern was processed; they can explain the reason why
+    - `labels_groups.json`: matched nodes and groups of labels for all the variables in the graph, to be used for
+      localization in the IDE
+    - `description.txt`: textual description you provided when the pattern was processed; they can explain the reason why
       a developer may be interested in this type of code change
 - When you are finished, just copy preprocessed patterns from the destination directory to
   `./plugin/src/main/resources/patterns` and re-build the plugin.
