@@ -9,7 +9,7 @@ Behind the scenes, the plugin runs an inspection which builds isomorphic mapping
 Dependence Graphs of the mined patterns and a similar graph of your code, and then suggests you a relevant quick-fix to
 apply for the highlighted code fragment.
 
-<img src="https://i.ibb.co/ySN4dcy/presentation.gif" alt="Plugin demo">
+<img src="https://i.ibb.co/qDMZTDS/Peek-2021-06-09-12-57.gif" alt="Plugin Demo">
 
 ## Installation
 

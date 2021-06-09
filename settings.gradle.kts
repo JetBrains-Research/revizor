@@ -1,2 +1,2 @@
-rootProject.name = "bug-finder"
+rootProject.name = "revizor"
 include(":plugin", ":preprocessing", ":common")

@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.StartupActivity
 import org.jetbrains.research.plugin.PatternsStorage
 
-class BugFinderStartupActivity : StartupActivity {
+class RevizorStartupActivity : StartupActivity {
     private val logger = Logger.getInstance(this::class.java)
 
     override fun runActivity(project: Project) {

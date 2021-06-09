@@ -22,12 +22,12 @@ import org.jgrapht.GraphMapping
 
 class PatternBasedAutoFix(
     private val problematicVertex: PatternSpecificVertex,
-    private val mappingsHolder: BugFinderInspection.PyMethodsAnalyzer.DetectedVertexMappingsHolder
+    private val mappingsHolder: RevizorInspection.PyMethodsAnalyzer.DetectedVertexMappingsHolder
 ) : LocalQuickFix {
 
     private val logger = Logger.getInstance(this::class.java)
 
-    override fun getFamilyName(): String = "BugFinder: autofix using pattern"
+    override fun getFamilyName(): String = "Revizor: autofix using pattern"
 
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         try {

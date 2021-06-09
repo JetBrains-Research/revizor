@@ -14,7 +14,7 @@ typealias PatternGraph = Graph<PatternSpecificVertex, PatternSpecificMultipleEdg
 /**
  * A singleton class for storing configuration settings.
  *
- * This class parses information from the `bug-finder/plugin/src/main/resources/config.json`.
+ * This class parses information from the `revizor/plugin/src/main/resources/config.json`.
  */
 object Config {
     val CODE_CHANGE_MINER_PATH: Path

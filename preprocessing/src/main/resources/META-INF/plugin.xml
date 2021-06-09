@@ -1,6 +1,6 @@
 <idea-plugin>
-    <id>org.jetbrains.research.bug-finder</id>
-    <name>Preprocessing</name>
+    <id>org.jetbrains.research.revizor</id>
+    <name>RevizorPreprocessing</name>
     <vendor>JetBrains Research</vendor>
 
     <description>Edit actions preprocessing and serialization</description>

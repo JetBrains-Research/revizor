@@ -1,4 +1,4 @@
-group = "org.jetbrains.research.bug-finder"
+group = "org.jetbrains.research.revizor"
 version = "1.0-SNAPSHOT"
 
 

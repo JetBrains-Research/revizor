@@ -23,5 +23,5 @@ class PatternsDescriptionsHolder(private val patternsDescriptions: HashSet<Strin
             ?.let { suggestionsPopup.showInBestPositionFor(it) }
     }
 
-    override fun getFamilyName(): String = "BugFinder: show relevant patterns"
+    override fun getFamilyName(): String = "Revizor: show relevant patterns"
 }

@@ -21,7 +21,7 @@ import org.jgrapht.GraphMapping
  * This class includes PsiElementVisitor which tries to find isomorphic patterns
  * for each PyFunction element in the code.
  */
-class BugFinderInspection : PyInspection() {
+class RevizorInspection : PyInspection() {
 
     private val logger = Logger.getInstance(this::class.java)
 
