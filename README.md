@@ -25,6 +25,7 @@ At first, clone this repository and open the root folder.
  
  - Run `./gradlew :plugin:runIde`
  - Open any Python file with functions, possibly containing mined code patterns 
+   - You can find a test project for evaluation [here](https://github.com/SmirnovOleg/revizor-test)
  - Wait until the code analysis is complete
  - Check out `WARNING` messages
 
