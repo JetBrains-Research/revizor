@@ -19,7 +19,7 @@ At first, clone this repository and open the root folder.
 
  - Run `./gradlew :plugin:buildPlugin`
  - Check out `./plugin/build/distributions/plugin-*.zip`
- - Install the plugin in your PyCharm via `File - Settings - Plugins - Install Plugin from Disk...`
+ - Install the plugin in your **PyCharm 2020.3.3** via `File` - `Settings` - `Plugins` - `Install Plugin from Disk...`
 
 **Quick IDE launch for evaluation:**
  
